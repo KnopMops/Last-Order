@@ -43,6 +43,13 @@ private:
     void TriggerScreamer(engine::core::Engine& eng, const std::string& screamerId);
     ui::MirrorWorldState BuildMirrorState(const engine::core::Engine& eng) const;
 
+    void UpdatePlayerMovement(engine::core::Engine& eng, float dt);
+    void SpawnInitial3DAnomalies(int nightNumber);
+    void Spawn3DShooterWave(engine::core::Engine& eng, int count);
+    void Update3DVisorShooter(engine::core::Engine& eng, float dt);
+    void Fire3DVisorWeapon(engine::core::Engine& eng);
+    void SetVisor3DActive(engine::core::Engine& eng, bool active);
+
     void UpdatePauseMenu(engine::core::Engine& eng);
     void RenderPauseMenu(engine::core::Engine& eng) const;
     void RenderDebugOverlay(engine::core::Engine& eng) const;
@@ -71,10 +78,21 @@ private:
     bool m_toggledVisorThisFrame = false;
 
     bool m_visor3DActive = false;
-    float m_visorYaw = -1.57f;
+    float m_visorYaw = 1.57f;
     float m_visorPitch = 0.0f;
-    float m_visorBattery = 100.0f;
+    float m_gunRecoilTimer = 0.0f;
+    float m_gunCooldown = 0.0f;
+    float m_hitMarkerTimer = 0.0f;
+    int m_anomaliesKilled = 0;
+    int m_shooterScore = 0;
+    int m_nextAnomalyId = 1;
+    float m_anomalySpawnTimer = 10.0f;
+    std::string m_scannerTargetText;
+    float m_scannerTargetDist = 0.0f;
+    std::string m_visorKillBanner;
+    float m_visorKillBannerTimer = 0.0f;
 
+    std::vector<world::VisorAnomaly3D> m_anomalies3D;
     std::optional<engine::physics::TriggerVolume> m_nearestTrigger;
     std::vector<world::GuestNpc> m_guests;
 

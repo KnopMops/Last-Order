@@ -15,35 +15,35 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
     auto& phys = eng.Physics();
     phys.Clear();
 
-    phys.AddStaticCollider("wall_top",         {0.0f,   0.0f,   640.0f, 36.0f});
+    phys.AddStaticCollider("wall_top",         {0.0f,   0.0f,   640.0f, 34.0f});
     phys.AddStaticCollider("wall_bottom",      {0.0f,   344.0f, 640.0f, 16.0f});
     phys.AddStaticCollider("wall_left",        {0.0f,   0.0f,   20.0f,  360.0f});
     phys.AddStaticCollider("wall_right",       {620.0f, 0.0f,   20.0f,  360.0f});
 
-    phys.AddStaticCollider("wall_corr_top",    {124.0f, 36.0f,  12.0f,  90.0f});
-    phys.AddStaticCollider("wall_corr_bot",    {124.0f, 184.0f, 12.0f,  96.0f});
+    phys.AddStaticCollider("wall_corr_top",    {124.0f, 34.0f,  12.0f,  86.0f});
+    phys.AddStaticCollider("wall_corr_bot",    {124.0f, 188.0f, 12.0f,  92.0f});
 
-    phys.AddStaticCollider("wall_kitch_top",   {444.0f, 36.0f,  12.0f,  64.0f});
-    phys.AddStaticCollider("wall_kitch_bot",   {444.0f, 164.0f, 12.0f,  116.0f});
+    phys.AddStaticCollider("wall_kitch_top",   {444.0f, 34.0f,  12.0f,  60.0f});
+    phys.AddStaticCollider("wall_kitch_bot",   {444.0f, 168.0f, 12.0f,  112.0f});
 
-    phys.AddStaticCollider("wall_porch_left",  {20.0f,  280.0f, 230.0f, 12.0f});
-    phys.AddStaticCollider("wall_porch_right", {320.0f, 280.0f, 300.0f, 12.0f});
+    phys.AddStaticCollider("wall_porch_left",  {20.0f,  280.0f, 225.0f, 12.0f});
+    phys.AddStaticCollider("wall_porch_right", {325.0f, 280.0f, 295.0f, 12.0f});
 
-    phys.AddStaticCollider("bar_counter",      {220.0f, 74.0f,  176.0f, 20.0f});
-    phys.AddStaticCollider("prop_jukebox",     {146.0f, 38.0f,  18.0f,  28.0f});
+    phys.AddStaticCollider("bar_counter",      {220.0f, 74.0f,  176.0f, 18.0f});
+    phys.AddStaticCollider("prop_jukebox",     {146.0f, 38.0f,  18.0f,  24.0f});
 
-    phys.AddStaticCollider("booth_1",          {156.0f, 134.0f, 32.0f,  24.0f});
-    phys.AddStaticCollider("booth_2",          {156.0f, 214.0f, 32.0f,  24.0f});
-    phys.AddStaticCollider("booth_3",          {268.0f, 134.0f, 32.0f,  24.0f});
-    phys.AddStaticCollider("booth_4",          {268.0f, 214.0f, 32.0f,  24.0f});
-    phys.AddStaticCollider("booth_5",          {376.0f, 134.0f, 32.0f,  24.0f});
-    phys.AddStaticCollider("booth_table6",     {376.0f, 214.0f, 32.0f,  24.0f});
+    phys.AddStaticCollider("booth_1",          {158.0f, 138.0f, 28.0f,  18.0f});
+    phys.AddStaticCollider("booth_2",          {158.0f, 218.0f, 28.0f,  18.0f});
+    phys.AddStaticCollider("booth_3",          {270.0f, 138.0f, 28.0f,  18.0f});
+    phys.AddStaticCollider("booth_4",          {270.0f, 218.0f, 28.0f,  18.0f});
+    phys.AddStaticCollider("booth_5",          {378.0f, 138.0f, 28.0f,  18.0f});
+    phys.AddStaticCollider("booth_table6",     {378.0f, 218.0f, 28.0f,  18.0f});
 
-    phys.AddStaticCollider("kitchen_oven",     {476.0f, 40.0f,  56.0f,  24.0f});
-    phys.AddStaticCollider("kitchen_fridge",   {560.0f, 38.0f,  44.0f,  28.0f});
-    phys.AddStaticCollider("kitchen_prep",     {510.0f, 150.0f, 64.0f,  24.0f});
-    phys.AddStaticCollider("corr_generator",   {28.0f,  92.0f,  28.0f,  28.0f});
-    phys.AddStaticCollider("porch_dumpster",   {150.0f, 306.0f, 36.0f,  24.0f});
+    phys.AddStaticCollider("kitchen_oven",     {476.0f, 40.0f,  56.0f,  22.0f});
+    phys.AddStaticCollider("kitchen_fridge",   {560.0f, 38.0f,  44.0f,  26.0f});
+    phys.AddStaticCollider("kitchen_prep",     {510.0f, 150.0f, 64.0f,  20.0f});
+    phys.AddStaticCollider("corr_generator",   {28.0f,  92.0f,  26.0f,  26.0f});
+    phys.AddStaticCollider("porch_dumpster",   {150.0f, 306.0f, 34.0f,  22.0f});
 
     std::string noteDlg =
         (nightNumber == 1) ? "note_mikhail_intro" :
@@ -157,128 +157,109 @@ void CafeWorld::Render(engine::core::Engine& eng,
         }
     }
 
-    DrawRectangle(0,   0,   640, 36,  Color{42, 23, 21, 255});
-    DrawRectangle(0,   32,  640, 4,   Color{196, 122, 59, 255});
+    DrawRectangle(0,   0,   640, 34,  Color{42, 23, 21, 255});
+    DrawRectangle(0,   344, 640, 16,  Color{24, 16, 20, 255});
     DrawRectangle(0,   0,   20,  360, Color{42, 23, 21, 255});
     DrawRectangle(620, 0,   20,  360, Color{42, 23, 21, 255});
-    DrawRectangle(0,   344, 640, 16,  Color{18, 22, 34, 255});
 
-    DrawRectangle(124, 36,  12,  90,  Color{68, 34, 26, 255});
-    DrawRectangle(124, 184, 12,  96,  Color{68, 34, 26, 255});
-    DrawRectangleLines(124, 36, 12, 90, Color{196, 122, 59, 255});
-    DrawRectangleLines(124, 184, 12, 96, Color{196, 122, 59, 255});
+    DrawRectangle(124, 34,  12,  86,  Color{72, 36, 26, 255});
+    DrawRectangle(124, 188, 12,  92,  Color{72, 36, 26, 255});
+    DrawRectangle(444, 34,  12,  60,  Color{72, 36, 26, 255});
+    DrawRectangle(444, 168, 12,  112, Color{72, 36, 26, 255});
+    DrawRectangle(20,  280, 225, 12,  Color{58, 30, 24, 255});
+    DrawRectangle(325, 280, 295, 12,  Color{58, 30, 24, 255});
 
-    DrawRectangle(444, 36,  12,  64,  Color{68, 34, 26, 255});
-    DrawRectangle(444, 164, 12,  116, Color{68, 34, 26, 255});
-    DrawRectangleLines(444, 36, 12, 64, Color{196, 122, 59, 255});
-    DrawRectangleLines(444, 164, 12, 116, Color{196, 122, 59, 255});
+    Texture2D texMirror = assets.GetTexture("sprites/props/prop_mirror_wall.png");
+    Texture2D texGen    = assets.GetTexture("sprites/props/prop_generator.png");
+    Texture2D texJuke   = assets.GetTexture("sprites/props/prop_jukebox.png");
+    Texture2D texCoffee = assets.GetTexture("sprites/props/prop_coffee_machine.png");
+    Texture2D texBooth  = assets.GetTexture("sprites/props/prop_table_booth.png");
+    Texture2D texTable6 = assets.GetTexture("sprites/props/prop_table_06.png");
+    Texture2D texCat    = assets.GetTexture("sprites/characters/spr_cat_ugolyok.png");
 
-    DrawRectangle(20,  280, 230, 12,  Color{42, 23, 21, 255});
-    DrawRectangle(320, 280, 300, 12,  Color{42, 23, 21, 255});
-    DrawRectangle(170, 282, 68,  8,   Color{143, 169, 196, 190});
-    DrawRectangle(345, 282, 68,  8,   Color{143, 169, 196, 190});
-    DrawRectangle(250, 282, 70,  6,   Color{196, 122, 59, 180});
+    DrawTexture(texMirror, 56, 16, WHITE);
+    DrawTexture(texGen,    28, 92, WHITE);
+    DrawRectangle(52, 216, 30, 30, Color{32, 20, 18, 255});
+    DrawRectangleLines(52, 216, 30, 30, Color{196, 122, 59, 255});
 
-    DrawRectangle(220, 74, 176, 20, Color{107, 51, 34, 255});
-    DrawRectangle(220, 74, 176, 5,  Color{196, 122, 59, 255});
-    DrawRectangleLines(220, 74, 176, 20, Color{42, 23, 21, 255});
+    DrawTexture(texJuke, 146, 36, WHITE);
+    DrawRectangle(176, 18, 18, 16, Color{232, 227, 217, 255});
+    DrawRectangleLines(176, 18, 18, 16, Color{107, 51, 34, 255});
 
-    Texture2D booth  = assets.GetTexture("sprites/props/prop_table_booth.png");
-    Texture2D booth6 = assets.GetTexture("sprites/props/prop_table_06.png");
-    Texture2D jb     = assets.GetTexture("sprites/props/prop_jukebox.png");
-    Texture2D cm     = assets.GetTexture("sprites/props/prop_coffee_machine.png");
-    Texture2D mir    = assets.GetTexture("sprites/props/prop_mirror_wall.png");
-    Texture2D gen    = assets.GetTexture("sprites/props/prop_generator.png");
+    DrawRectangle(204, 18, 16, 16, Color{180, 42, 42, 255});
+    DrawRectangleLines(204, 18, 16, 16, Color{244, 184, 96, 255});
 
-    DrawTexture(jb,  146, 38, WHITE);
-    DrawTexture(mir, 64,  4,  WHITE);
-    DrawTexture(gen, 28,  92, WHITE);
+    DrawRectangle(220, 74, 176, 18, Color{107, 51, 34, 255});
+    DrawRectangle(220, 72, 176, 4,  Color{196, 122, 59, 255});
+    DrawRectangle(228, 70, 18,  14, Color{216, 194, 162, 255});
 
-    DrawRectangle(230, 72, 16, 12, Color{216, 194, 162, 255});
-    DrawRectangle(270, 73, 14, 10, Color{59,  88,  130, 255});
-    DrawCircle(277, 78, 3.0f, Color{214, 69, 69, 255});
-    DrawTexture(cm,  312, 70, WHITE);
-    DrawRectangle(362, 74, 16, 10, Color{42,  23,  21,  255});
+    DrawRectangle(268, 72, 14,  10, Color{40, 180, 130, 255});
+    DrawRectangleLines(268, 72, 14, 10, Color{244, 184, 96, 255});
 
-    DrawRectangle(180, 16, 14, 16, Color{232, 227, 217, 255});
-    DrawRectangle(206, 16, 12, 16, Color{168, 36,  36,  255});
-    DrawRectangle(209, 19, 6,  10, Color{25,  25,  30,  255});
+    DrawTexture(texCoffee, 304, 64, WHITE);
+    DrawRectangle(358, 72, 20, 12, Color{52, 34, 28, 255});
+    DrawRectangleLines(358, 72, 20, 12, Color{214, 69, 69, 255});
 
-    DrawTexture(booth,  156, 130, WHITE);
-    DrawTexture(booth,  156, 210, WHITE);
-    DrawTexture(booth,  268, 130, WHITE);
-    DrawTexture(booth,  268, 210, WHITE);
-    DrawTexture(booth,  376, 130, WHITE);
-    DrawTexture(booth6, 376, 210, WHITE);
+    int catFrame = (lightsFlickering || blackoutMode || nightNumber >= 3) ? 1 : 0;
+    DrawTextureRec(texCat, Rectangle{static_cast<float>(catFrame * 16), 0.0f, 16.0f, 16.0f}, Vector2{404.0f, 74.0f}, WHITE);
 
-    DrawRectangle(476, 40, 56, 24, Color{175, 188, 200, 255});
-    DrawRectangleLines(476, 40, 56, 24, Color{59, 88, 130, 255});
-    DrawRectangle(484, 46, 18, 12, Color{244, 184, 96, 220});
+    DrawRectangle(476, 40, 56, 22, Color{80, 86, 98, 255});
+    DrawRectangleLines(476, 40, 56, 22, Color{196, 122, 59, 255});
+    DrawRectangle(560, 38, 44, 26, Color{143, 169, 196, 255});
+    DrawRectangleLines(560, 38, 44, 26, Color{42, 23, 21, 255});
+    DrawRectangle(510, 150, 64, 20, Color{120, 130, 142, 255});
 
-    DrawRectangle(560, 38, 44, 28, Color{143, 169, 196, 255});
-    DrawRectangleLines(560, 38, 44, 28, Color{27, 40, 69, 255});
-    DrawRectangle(566, 48, 5,  8,  Color{42, 23, 21, 255});
+    DrawRectangle(150, 306, 34, 22, Color{46, 68, 52, 255});
+    DrawRectangleLines(150, 306, 34, 22, Color{143, 169, 196, 255});
+    DrawRectangle(204, 276, 36, 6,  Color{143, 169, 196, 220});
 
-    DrawRectangle(510, 150, 64, 24, Color{130, 140, 150, 255});
-    DrawRectangleLines(510, 150, 64, 24, Color{42, 23, 21, 255});
-
-    DrawRectangle(54, 218, 26, 24, Color{72, 36, 26, 255});
-    DrawRectangleLines(54, 218, 26, 24, Color{244, 184, 96, 200});
-    DrawLine(54, 230, 80, 230, Color{42, 23, 21, 255});
-
-    DrawRectangle(150, 306, 36, 24, Color{45, 72, 54, 255});
-    DrawRectangleLines(150, 306, 36, 24, Color{20, 35, 25, 255});
-
-    float rt = static_cast<float>(GetTime());
-    if (nightNumber >= 2) {
-        for (int i = 0; i < 36; ++i) {
-            int rx = (i * 37 + static_cast<int>(rt * 65.0f)) % 620;
-            int ry = 294 + ((i * 19 + static_cast<int>(rt * 180.0f)) % 46);
-            DrawLine(rx + 2, ry, rx, ry + 6, Color{143, 169, 196, 145});
-        }
-    }
-
-    if (!eng.Dialogue().IsActive() && nearestTrigger.has_value()) {
-        DrawRectangleLinesEx(nearestTrigger->bounds, 1.0f, Color{244, 184, 96, 175});
-    }
-
-    Texture2D leraTex = assets.GetTexture("sprites/characters/spr_lera.png");
-    if (playerBody.position.x > 36.0f && playerBody.position.x < 104.0f && playerBody.position.y < 78.0f) {
-        bool eyelessAnomaly = eng.State().HasFlag("event_0300_triggered") || blackoutMode || eng.State().GetSanity() < 45;
-        Rectangle reflSrc = {eyelessAnomaly ? 64.0f : 0.0f, eyelessAnomaly ? 96.0f : 0.0f, 32.0f, 32.0f};
-        DrawTextureRec(leraTex, reflSrc, Vector2{56.0f, 4.0f}, Color{143, 169, 196, 185});
-    }
-
-    Texture2D catTex = assets.GetTexture("sprites/characters/spr_cat_ugolyok.png");
-    int catRow = (lightsFlickering || eng.State().HasFlag("radio_0214_ringing") || blackoutMode) ? 2 : 0;
-    Rectangle catSrc = {0.0f, static_cast<float>(catRow * 16), 16.0f, 16.0f};
-    DrawTextureRec(catTex, catSrc, Vector2{406.0f, 76.0f}, WHITE);
+    DrawTexture(texBooth,  156, 134, WHITE);
+    DrawTexture(texBooth,  156, 214, WHITE);
+    DrawTexture(texBooth,  268, 134, WHITE);
+    DrawTexture(texBooth,  268, 214, WHITE);
+    DrawTexture(texBooth,  376, 134, WHITE);
+    DrawTexture(texTable6, 376, 214, WHITE);
 
     for (const auto& g : guests) {
         if (!g.spawned) continue;
         Texture2D gTex = assets.GetTexture(g.spritePath);
-        float srcX = static_cast<float>((g.spriteFrame % 6) * 32);
-        if (srcX + 32.0f > static_cast<float>(gTex.width)) srcX = 0.0f;
-        Rectangle gSrc = {srcX, 0.0f, 32.0f, 32.0f};
-        DrawTextureRec(gTex, gSrc, g.pos.SnapToPixel(), WHITE);
+        float shadowOffsetX = g.anomalous ? -5.0f : 3.0f;
+        DrawEllipse(static_cast<int>(g.pos.x + 16.0f + shadowOffsetX),
+                    static_cast<int>(g.pos.y + 28.0f), 9.0f, 4.0f, Color{10, 13, 26, 165});
+
+        Rectangle src = {static_cast<float>((g.spriteFrame % 6) * 32), 0.0f, 32.0f, 32.0f};
+        if (src.x + 32.0f > static_cast<float>(gTex.width)) src.x = 0.0f;
+        DrawTextureRec(gTex, src, Vector2{std::round(g.pos.x), std::round(g.pos.y)}, WHITE);
     }
 
-    bool carrying = !eng.State().GetHeldItem().empty();
-    int animStep = isMoving ? (static_cast<int>(walkAnimTimer) % 4) : 0;
-    int leraRow = carrying ? 2 : (isMoving ? 1 : 0);
-    int leraCol = isMoving ? animStep : playerFacing;
-    Rectangle leraSrc = {static_cast<float>(leraCol * 32), static_cast<float>(leraRow * 32), 32.0f, 32.0f};
-    DrawTextureRec(leraTex, leraSrc, playerBody.position.SnapToPixel(), WHITE);
+    Texture2D texLera = assets.GetTexture("sprites/characters/spr_lera.png");
+    int animCol = isMoving ? (static_cast<int>(walkAnimTimer) % 4) : 0;
+    int animRow = std::clamp(playerFacing, 0, 3);
+    DrawEllipse(static_cast<int>(playerBody.Center().x), static_cast<int>(playerBody.Center().y + 4.0f),
+                7.0f, 3.5f, Color{10, 13, 26, 150});
+    DrawTextureRec(texLera,
+                   Rectangle{static_cast<float>(animCol * 32), static_cast<float>(animRow * 32), 32.0f, 32.0f},
+                   Vector2{std::round(playerBody.position.x), std::round(playerBody.position.y)},
+                   WHITE);
+
+    if (nearestTrigger.has_value()) {
+        const auto& tr = nearestTrigger.value();
+        DrawRectangleLinesEx(Rectangle{tr.bounds.x, tr.bounds.y, tr.bounds.w, tr.bounds.h},
+                             1.0f, Color{244, 184, 96, 190});
+    }
 
     if (showDebugPhysics) {
         for (const auto& c : eng.Physics().GetColliders()) {
-            DrawRectangleLinesEx(c.bounds, 1.0f, Color{60, 230, 90, 230});
+            DrawRectangleLinesEx(Rectangle{c.bounds.x, c.bounds.y, c.bounds.w, c.bounds.h},
+                                 1.0f, Color{0, 255, 90, 220});
         }
         for (const auto& t : eng.Physics().GetTriggers()) {
-            Color tc = t.enabled ? Color{244, 184, 96, 230} : Color{140, 140, 140, 120};
-            DrawRectangleLinesEx(t.bounds, 1.0f, tc);
+            Color tc = t.enabled ? Color{0, 200, 255, 220} : Color{140, 140, 140, 140};
+            DrawRectangleLinesEx(Rectangle{t.bounds.x, t.bounds.y, t.bounds.w, t.bounds.h},
+                                 1.0f, tc);
         }
-        DrawRectangleLinesEx(playerBody.WorldBounds(), 1.0f, SKYBLUE);
+        auto pb = playerBody.WorldBounds();
+        DrawRectangleLinesEx(Rectangle{pb.x, pb.y, pb.w, pb.h}, 1.0f, Color{255, 60, 60, 255});
     }
 
     EndMode2D();
@@ -289,9 +270,13 @@ void CafeWorld::Render3DVisor(engine::core::Engine& eng,
                               engine::math::Vec2 playerCenter,
                               float visorYawRad,
                               float visorPitchRad,
-                              const std::vector<GuestNpc>& guests) const {
+                              const std::vector<GuestNpc>& guests,
+                              const std::vector<VisorAnomaly3D>& anomalies,
+                              float walkBobTimer,
+                              float gunRecoilTimer) const {
     constexpr float S = 0.05f;
-    Vector3 camPos = {playerCenter.x * S, 1.15f, playerCenter.y * S};
+    float bobY = std::sin(walkBobTimer * 2.2f) * 0.045f;
+    Vector3 camPos = {playerCenter.x * S, 1.15f + bobY, playerCenter.y * S};
     Vector3 forward = {
         std::cos(visorYawRad) * std::cos(visorPitchRad),
         std::sin(visorPitchRad),
@@ -305,11 +290,19 @@ void CafeWorld::Render3DVisor(engine::core::Engine& eng,
     cam.fovy = 65.0f;
     cam.projection = CAMERA_PERSPECTIVE;
 
-    ClearBackground(Color{8, 10, 18, 255});
+    ClearBackground(Color{10, 12, 22, 255});
     BeginMode3D(cam);
 
-    DrawPlane(Vector3{16.0f, 0.0f, 9.0f}, Vector2{32.0f, 18.0f}, Color{36, 20, 18, 255});
-    DrawCube(Vector3{16.0f, 2.5f, 9.0f}, 32.0f, 0.1f, 18.0f, Color{18, 14, 22, 255});
+    DrawPlane(Vector3{16.0f, 0.0f, 9.0f}, Vector2{32.0f, 18.0f}, Color{42, 24, 22, 255});
+    for (int gx = 0; gx <= 32; gx += 2) {
+        DrawLine3D(Vector3{static_cast<float>(gx), 0.01f, 0.0f},
+                   Vector3{static_cast<float>(gx), 0.01f, 18.0f}, Color{68, 38, 34, 180});
+    }
+    for (int gz = 0; gz <= 18; gz += 2) {
+        DrawLine3D(Vector3{0.0f, 0.01f, static_cast<float>(gz)},
+                   Vector3{32.0f, 0.01f, static_cast<float>(gz)}, Color{68, 38, 34, 180});
+    }
+    DrawCube(Vector3{16.0f, 2.55f, 9.0f}, 32.0f, 0.1f, 18.0f, Color{18, 14, 24, 255});
 
     for (const auto& c : eng.Physics().GetColliders()) {
         float cx = (c.bounds.x + c.bounds.w * 0.5f) * S;
@@ -318,13 +311,13 @@ void CafeWorld::Render3DVisor(engine::core::Engine& eng,
         float cd = c.bounds.h * S;
 
         bool isWall = (c.id.rfind("wall_", 0) == 0);
-        float ch = isWall ? 2.4f : 0.95f;
-        Color col = isWall ? Color{78, 38, 28, 255} : Color{140, 78, 42, 255};
-        if (c.id == "booth_table6") col = Color{130, 22, 28, 255};
+        float ch = isWall ? 2.5f : 0.95f;
+        Color col = isWall ? Color{86, 42, 32, 255} : Color{148, 82, 46, 255};
+        if (c.id == "booth_table6") col = Color{145, 24, 30, 255};
         if (c.id == "kitchen_fridge") col = Color{110, 145, 175, 255};
 
         DrawCube(Vector3{cx, ch * 0.5f, cz}, cw, ch, cd, col);
-        DrawCubeWires(Vector3{cx, ch * 0.5f, cz}, cw, ch, cd, Color{24, 12, 14, 255});
+        DrawCubeWires(Vector3{cx, ch * 0.5f, cz}, cw, ch, cd, Color{28, 14, 16, 255});
     }
 
     float t = static_cast<float>(GetTime());
@@ -335,26 +328,80 @@ void CafeWorld::Render3DVisor(engine::core::Engine& eng,
         Rectangle src = {static_cast<float>((g.spriteFrame % 6) * 32), 0.0f, 32.0f, 32.0f};
         if (src.x + 32.0f > static_cast<float>(gTex.width)) src.x = 0.0f;
 
-        Color tint = g.anomalous ? Color{255, 65, 65, 255} : Color{210, 240, 220, 255};
+        Color tint = g.anomalous ? Color{255, 70, 70, 255} : Color{210, 245, 225, 255};
         DrawBillboardRec(cam, gTex, src, gPos, Vector2{1.5f, 1.8f}, tint);
 
         if (g.anomalous) {
-            float pulse = 0.35f + 0.15f * std::sin(t * 10.0f);
-            DrawSphereWires(Vector3{gPos.x, gPos.y + 0.6f, gPos.z}, pulse, 6, 6, Color{214, 40, 40, 230});
-            DrawCube(Vector3{gPos.x, 1.95f, gPos.z}, 0.25f, 0.25f, 0.25f, Color{255, 30, 30, 255});
+            float pulse = 0.42f + 0.14f * std::sin(t * 10.0f);
+            DrawSphereWires(Vector3{gPos.x, gPos.y + 0.45f, gPos.z}, pulse, 8, 8, Color{255, 45, 45, 245});
+            DrawCubeWires(Vector3{gPos.x, 1.0f, gPos.z}, 1.2f, 2.0f, 1.2f, Color{255, 30, 30, 255});
         }
     }
 
-    DrawSphereWires(Vector3{18.8f, 1.1f, 10.8f}, 0.45f + 0.1f * std::sin(t * 6.0f), 8, 8, Color{214, 45, 45, 200});
+    Texture2D reaperTex = eng.Assets().GetTexture("sprites/screamers/sc_night9_shadow_reaper.png");
+    Texture2D skullTex  = eng.Assets().GetTexture("sprites/screamers/sc_night14_skull_glitch.png");
+
+    for (const auto& a : anomalies) {
+        if (!a.active) continue;
+        Vector3 aPos = {a.pos.x * S, a.heightY + std::sin(t * 4.5f + static_cast<float>(a.id)) * 0.12f, a.pos.y * S};
+        Color flashCol = (a.hitFlash > 0.0f) ? Color{255, 255, 255, 255} : Color{255, 45, 55, 255};
+
+        if (a.type == 0) {
+            float r = 0.42f + 0.08f * std::sin(t * 8.0f);
+            DrawSphere(aPos, r * 0.55f, flashCol);
+            DrawSphereWires(aPos, r, 8, 8, Color{255, 180, 90, 240});
+            DrawCubeWires(aPos, r * 1.6f, r * 1.6f, r * 1.6f, flashCol);
+        } else if (a.type == 1) {
+            DrawBillboard(cam, reaperTex, Vector3{aPos.x, 1.05f, aPos.z}, 1.75f, flashCol);
+            DrawCubeWires(Vector3{aPos.x, 1.05f, aPos.z}, 1.1f, 2.0f, 1.1f, Color{255, 40, 40, 220});
+        } else {
+            DrawBillboard(cam, skullTex, aPos, 1.35f, flashCol);
+            DrawSphereWires(aPos, 0.55f, 6, 6, Color{244, 184, 96, 240});
+        }
+    }
+
+    if (gunRecoilTimer > 0.08f) {
+        Vector3 right = {-forward.z, 0.0f, forward.x};
+        Vector3 muzzle = {
+            camPos.x + forward.x * 0.6f + right.x * 0.22f,
+            camPos.y - 0.18f + forward.y * 0.6f,
+            camPos.z + forward.z * 0.6f + right.z * 0.22f
+        };
+        Vector3 beamEnd = {
+            camPos.x + forward.x * 16.0f,
+            camPos.y + forward.y * 16.0f,
+            camPos.z + forward.z * 16.0f
+        };
+        DrawLine3D(muzzle, beamEnd, Color{110, 255, 235, 255});
+        DrawSphere(beamEnd, 0.15f, Color{244, 184, 96, 255});
+    }
+
     if (nightNumber >= 2) {
         DrawCube(Vector3{3.6f, 1.3f, 1.9f}, 0.8f, 0.8f, 0.08f, Color{180, 25, 30, 220});
     }
 
     EndMode3D();
 
-    DrawRectangleLinesEx(Rectangle{8, 8, 304, 164}, 2.0f, Color{90, 220, 140, 180});
-    DrawLine(152, 90, 168, 90, Color{90, 220, 140, 200});
-    DrawLine(160, 82, 160, 98, Color{90, 220, 140, 200});
+    int bobX = static_cast<int>(std::cos(walkBobTimer * 1.1f) * 5.0f);
+    int bobY2D = static_cast<int>(std::abs(std::sin(walkBobTimer * 2.2f)) * 6.0f);
+    int recoilOff = static_cast<int>(gunRecoilTimer * 75.0f);
+
+    int gx = 218 + bobX + recoilOff / 2;
+    int gy = 128 + bobY2D + recoilOff;
+
+    if (gunRecoilTimer > 0.08f) {
+        DrawCircle(gx + 10, gy - 6, 16.0f, Color{120, 255, 240, 210});
+        DrawCircle(gx + 10, gy - 6, 9.0f, Color{255, 245, 190, 255});
+    }
+
+    DrawRectangle(gx, gy, 32, 56, Color{38, 44, 56, 255});
+    DrawRectangleLines(gx, gy, 32, 56, Color{110, 235, 215, 255});
+    DrawRectangle(gx + 6, gy - 12, 16, 16, Color{65, 76, 96, 255});
+    DrawRectangle(gx + 9, gy - 10, 10, 28, Color{90, 245, 215, 255});
+
+    DrawRectangleLinesEx(Rectangle{6, 6, 308, 168}, 2.0f, Color{90, 220, 160, 180});
+    DrawLine(152, 90, 168, 90, Color{90, 255, 180, 230});
+    DrawLine(160, 82, 160, 98, Color{90, 255, 180, 230});
 }
 
 }

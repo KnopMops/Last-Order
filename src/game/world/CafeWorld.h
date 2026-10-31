@@ -22,6 +22,18 @@ struct GuestNpc {
     int spriteFrame = 0;
 };
 
+struct VisorAnomaly3D {
+    int id = 0;
+    int type = 0;
+    std::string label;
+    engine::math::Vec2 pos;
+    float heightY = 1.0f;
+    int hp = 2;
+    int maxHp = 2;
+    float hitFlash = 0.0f;
+    bool active = true;
+};
+
 class CafeWorld {
 public:
     static constexpr float WORLD_W = 640.0f;
@@ -49,7 +61,10 @@ public:
                        engine::math::Vec2 playerCenter,
                        float visorYawRad,
                        float visorPitchRad,
-                       const std::vector<GuestNpc>& guests) const;
+                       const std::vector<GuestNpc>& guests,
+                       const std::vector<VisorAnomaly3D>& anomalies,
+                       float walkBobTimer,
+                       float gunRecoilTimer) const;
 };
 
 }

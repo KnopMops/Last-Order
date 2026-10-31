@@ -51,6 +51,28 @@ bool PhysicsWorld::OverlapsSolid(const math::Rect& rect) const {
 }
 
 void PhysicsWorld::MoveAndSlide(KinematicBody& body, float dt) const {
+    for (int iter = 0; iter < 4; ++iter) {
+        math::Rect r = body.WorldBounds();
+        bool pushed = false;
+        for (const auto& c : m_colliders) {
+            if (!c.blocksMovement || !c.bounds.Intersects(r)) continue;
+            float overlapLeft   = r.Right() - c.bounds.Left();
+            float overlapRight  = c.bounds.Right() - r.Left();
+            float overlapTop    = r.Bottom() - c.bounds.Top();
+            float overlapBottom = c.bounds.Bottom() - r.Top();
+            float minX = std::min(overlapLeft, overlapRight);
+            float minY = std::min(overlapTop, overlapBottom);
+            if (minX < minY) {
+                body.position.x += (overlapLeft < overlapRight) ? -(overlapLeft + 0.5f) : (overlapRight + 0.5f);
+            } else {
+                body.position.y += (overlapTop < overlapBottom) ? -(overlapTop + 0.5f) : (overlapBottom + 0.5f);
+            }
+            pushed = true;
+            break;
+        }
+        if (!pushed) break;
+    }
+
     math::Vec2 delta = body.velocity * dt + body.subpixelRemainder;
     int moveX = static_cast<int>(std::round(delta.x));
     int moveY = static_cast<int>(std::round(delta.y));

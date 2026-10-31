@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 
 namespace game {
 
@@ -23,22 +24,82 @@ void LastOrderGame::OnInit(engine::core::Engine& eng) {
     m_screen = GameScreen::MainMenu;
 }
 
+void LastOrderGame::SetVisor3DActive(engine::core::Engine& eng, bool active) {
+    if (m_visor3DActive == active) return;
+    m_visor3DActive = active;
+    eng.Renderer().SetSkip2DLightmap(active);
+    if (active) {
+        const float facingRad[4] = {1.5708f, -1.5708f, 3.14159f, 0.0f};
+        m_visorYaw = facingRad[std::clamp(m_playerFacing, 0, 3)];
+        m_visorPitch = 0.0f;
+        DisableCursor();
+        eng.Audio().PlaySfx("audio/sfx/sfx_visor_toggle.wav", 0.85f);
+    } else {
+        EnableCursor();
+        eng.Audio().PlaySfx("audio/sfx/sfx_visor_toggle.wav", 0.70f);
+    }
+}
+
+void LastOrderGame::SpawnInitial3DAnomalies(int nightNumber) {
+    m_anomalies3D.clear();
+    m_nextAnomalyId = 1;
+    m_anomalySpawnTimer = 9.0f;
+    m_scannerTargetText.clear();
+
+    m_anomalies3D.push_back({m_nextAnomalyId++, 0, "Аномальный Разлом (Коридор)", {75.0f, 145.0f}, 1.15f, 2, 2, 0.0f, true});
+    m_anomalies3D.push_back({m_nextAnomalyId++, 1, "Теневой Сталкер (Кухня)",     {520.0f, 110.0f}, 1.05f, 3, 3, 0.0f, true});
+    m_anomalies3D.push_back({m_nextAnomalyId++, 2, "Череп-Фантом (Южный выход)",  {280.0f, 310.0f}, 1.25f, 2, 2, 0.0f, true});
+    m_anomalies3D.push_back({m_nextAnomalyId++, 0, "Узел Искажения (Стол №6)",    {405.0f, 240.0f}, 1.20f, 2 + nightNumber / 2, 2 + nightNumber / 2, 0.0f, true});
+}
+
+void LastOrderGame::Spawn3DShooterWave(engine::core::Engine& eng, int count) {
+    static const engine::math::Vec2 spawnSpots[8] = {
+        {72.0f,  75.0f},
+        {72.0f,  230.0f},
+        {215.0f, 175.0f},
+        {340.0f, 175.0f},
+        {505.0f, 95.0f},
+        {555.0f, 210.0f},
+        {285.0f, 315.0f},
+        {410.0f, 115.0f}
+    };
+
+    for (int i = 0; i < count; ++i) {
+        const auto& sp = spawnSpots[(std::rand() + i) % 8];
+        int type = (i % 3 == 0) ? 1 : ((i % 3 == 1) ? 2 : 0);
+        const char* name = (type == 1) ? "Теневой Сталкер" : ((type == 2) ? "Череп-Фантом" : "Кровавый Разлом");
+        int hp = (type == 1) ? 3 : 2;
+        m_anomalies3D.push_back({
+            m_nextAnomalyId++,
+            type,
+            name,
+            {sp.x + static_cast<float>((std::rand() % 21) - 10), sp.y + static_cast<float>((std::rand() % 21) - 10)},
+            (type == 1) ? 1.05f : 1.20f,
+            hp,
+            hp,
+            0.0f,
+            true
+        });
+    }
+    m_visorKillBanner = "ВОЛНА ТЕНЕЙ ОБНАРУЖЕНА! ОГОНЬ [ЛКМ / SPACE]!";
+    m_visorKillBannerTimer = 3.0f;
+    eng.Audio().PlaySfx("audio/sfx/sfx_phantom_steps.wav", 0.85f);
+}
+
 void LastOrderGame::StartEndlessShift(engine::core::Engine& eng) {
     m_currentNight = 0;
     eng.Dialogue().CloseDialogue();
     eng.State().Reset();
     eng.Time().Reset(23, 0, 1.80f);
 
-    m_playerBody.position = {280.0f, 112.0f};
+    m_playerBody.position = {228.0f, 96.0f};
     m_playerBody.colliderOffset = {9.0f, 18.0f};
     m_playerBody.colliderSize = {14.0f, 11.0f};
     m_playerBody.velocity = {0.0f, 0.0f};
     m_playerFacing = 0;
     m_blackoutMode = false;
     m_lightsFlickering = false;
-    m_visor3DActive = false;
-    m_visorBattery = 100.0f;
-    eng.Renderer().SetSkip2DLightmap(false);
+    SetVisor3DActive(eng, false);
 
     m_cooking.Reset();
     m_sanity.ResetForShift(m_playerBody.position);
@@ -47,6 +108,7 @@ void LastOrderGame::StartEndlessShift(engine::core::Engine& eng) {
 
     m_world.BuildCollidersAndTriggers(eng, 2);
     m_world.BuildLighting(eng, 2);
+    SpawnInitial3DAnomalies(3);
 
     eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.85f);
     m_guests.clear();
@@ -57,7 +119,7 @@ void LastOrderGame::StartEndlessShift(engine::core::Engine& eng) {
 
 void LastOrderGame::StartMinigame(engine::core::Engine& eng, systems::MinigameType type) {
     eng.Dialogue().CloseDialogue();
-    m_visor3DActive = false;
+    SetVisor3DActive(eng, false);
     m_chaseMinigame.Start(type);
     bool is3D = (type != systems::MinigameType::Night1_RadioTuner2D);
     eng.Renderer().SetSkip2DLightmap(is3D);
@@ -101,16 +163,14 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
 
     eng.Time().Reset(22, 0, 1.80f);
 
-    m_playerBody.position = {280.0f, 112.0f};
+    m_playerBody.position = {228.0f, 96.0f};
     m_playerBody.colliderOffset = {9.0f, 18.0f};
     m_playerBody.colliderSize = {14.0f, 11.0f};
     m_playerBody.velocity = {0.0f, 0.0f};
     m_playerFacing = 0;
     m_blackoutMode = false;
     m_lightsFlickering = false;
-    m_visor3DActive = false;
-    m_visorBattery = 100.0f;
-    eng.Renderer().SetSkip2DLightmap(false);
+    SetVisor3DActive(eng, false);
 
     m_cooking.Reset();
     m_sanity.ResetForShift(m_playerBody.position);
@@ -118,54 +178,256 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
 
     m_world.BuildCollidersAndTriggers(eng, nightNumber);
     m_world.BuildLighting(eng, nightNumber);
+    SpawnInitial3DAnomalies(nightNumber);
 
     if (nightNumber == 1) {
         eng.Audio().PlayAmbient("audio/bgm/amb_cafe_calm_lp.ogg", 0.70f);
         m_guests = {
-            {"kurt",   "Дядя Курт",       "sprites/characters/spr_kurt.png",  "trig_booth1", "kurt_talk",   {156.0f, 118.0f}, 15,  false, false, true},
-            {"katya",  "Студентка Катя",  "sprites/characters/spr_vera.png",  "trig_booth3", "katya_talk",  {268.0f, 118.0f}, 60,  false, false, true},
-            {"valya",  "Тётя Валя",       "sprites/characters/spr_valya.png", "trig_booth2", "valya_talk",  {156.0f, 198.0f}, 115, false, false, true},
-            {"hatman", "Человек в шляпе", "sprites/characters/spr_guest.png", "trig_booth5", "hatman_talk", {376.0f, 118.0f}, 180, false, true,  false}
+            {"kurt",   "Дядя Курт",       "sprites/characters/spr_kurt.png",  "trig_booth1", "kurt_talk",   {156.0f, 118.0f}, 10,  false, false, true},
+            {"katya",  "Студентка Катя",  "sprites/characters/spr_vera.png",  "trig_booth3", "katya_talk",  {268.0f, 118.0f}, 50,  false, false, true},
+            {"valya",  "Тётя Валя",       "sprites/characters/spr_valya.png", "trig_booth2", "valya_talk",  {156.0f, 198.0f}, 100, false, false, true},
+            {"hatman", "Человек в шляпе", "sprites/characters/spr_guest.png", "trig_booth5", "hatman_talk", {376.0f, 118.0f}, 160, false, true,  false}
         };
     } else if (nightNumber == 2) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.75f);
         m_guests = {
-            {"arkhip",    "Механик Архип",       "sprites/characters/spr_kurt.png",  "trig_booth3", "arkhip_talk",         {268.0f, 118.0f}, 20,  false, false, true},
-            {"valya_n2",  "Тётя Валя",           "sprites/characters/spr_valya.png", "trig_booth2", "n2_valya_talk",       {156.0f, 198.0f}, 75,  false, false, true},
-            {"fake_kurt", "Дядя Курт (?)",       "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {156.0f, 118.0f}, 160, false, true,  false},
-            {"guest_t6",  "Фигура за Столом №6", "sprites/characters/spr_guest.png", "trig_table6", "n2_guest_table6_talk",{376.0f, 198.0f}, 270, false, true,  false}
+            {"arkhip",    "Механик Архип",       "sprites/characters/spr_kurt.png",  "trig_booth3", "arkhip_talk",         {268.0f, 118.0f}, 15,  false, false, true},
+            {"valya_n2",  "Тётя Валя",           "sprites/characters/spr_valya.png", "trig_booth2", "n2_valya_talk",       {156.0f, 198.0f}, 65,  false, false, true},
+            {"fake_kurt", "Дядя Курт (?)",       "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {156.0f, 118.0f}, 140, false, true,  false},
+            {"guest_t6",  "Фигура за Столом №6", "sprites/characters/spr_guest.png", "trig_table6", "n2_guest_table6_talk",{376.0f, 198.0f}, 240, false, true,  false}
         };
     } else if (nightNumber == 3) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.85f);
         m_guests = {
-            {"gleb",     "Следователь Глеб",  "sprites/characters/spr_kurt.png",  "trig_booth4", "gleb_talk",            {268.0f, 198.0f}, 20,  false, false, true},
-            {"katya_n3", "Попутчица (?)",     "sprites/characters/spr_vera.png",  "trig_booth5", "katya_mimic_talk",     {376.0f, 118.0f}, 110, false, true,  false},
-            {"boss_n3",  "Сущность Стола №6", "sprites/characters/spr_guest.png", "trig_table6", "n3_guest_table6_talk", {376.0f, 198.0f}, 260, false, true,  false}
+            {"gleb",     "Следователь Глеб",  "sprites/characters/spr_kurt.png",  "trig_booth4", "gleb_talk",            {268.0f, 198.0f}, 15,  false, false, true},
+            {"katya_n3", "Попутчица (?)",     "sprites/characters/spr_vera.png",  "trig_booth5", "katya_mimic_talk",     {376.0f, 118.0f}, 95,  false, true,  false},
+            {"boss_n3",  "Сущность Стола №6", "sprites/characters/spr_guest.png", "trig_table6", "n3_guest_table6_talk", {376.0f, 198.0f}, 230, false, true,  false}
         };
     } else if (nightNumber == 4) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.90f);
         m_guests = {
-            {"officer_n4",   "Офицер Борис",   "sprites/characters/spr_guest.png", "trig_booth3", "n4_officer_boris_talk",{268.0f, 118.0f}, 25,  false, false, true},
-            {"arkhip_mimic", "Архип (?)",      "sprites/characters/spr_kurt.png",  "trig_booth2", "katya_mimic_talk",     {156.0f, 198.0f}, 115, false, true,  false},
-            {"fake_kurt4",   "Двойник Курта",  "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {156.0f, 118.0f}, 190, false, true,  false}
+            {"officer_n4",   "Офицер Борис",   "sprites/characters/spr_guest.png", "trig_booth3", "n4_officer_boris_talk",{268.0f, 118.0f}, 15,  false, false, true},
+            {"arkhip_mimic", "Архип (?)",      "sprites/characters/spr_kurt.png",  "trig_booth2", "katya_mimic_talk",     {156.0f, 198.0f}, 95,  false, true,  false},
+            {"fake_kurt4",   "Двойник Курта",  "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {156.0f, 118.0f}, 170, false, true,  false}
         };
     } else {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.95f);
         m_guests = {
-            {"vera_spirit", "Силуэт Веры",        "sprites/characters/spr_vera.png",  "trig_booth4", "vera_spirit_talk",   {268.0f, 198.0f}, 15,  false, false, true},
-            {"gleb_n5",     "Следователь Глеб",   "sprites/characters/spr_kurt.png",  "trig_booth1", "gleb_talk",          {156.0f, 118.0f}, 85,  false, false, true},
-            {"boss_n5",     "Хозяин Перекрёстка", "sprites/characters/spr_guest.png", "trig_table6", "n5_boss_table6_talk",{376.0f, 198.0f}, 210, false, true,  false}
+            {"vera_spirit", "Силуэт Веры",        "sprites/characters/spr_vera.png",  "trig_booth4", "vera_spirit_talk",   {268.0f, 198.0f}, 10,  false, false, true},
+            {"gleb_n5",     "Следователь Глеб",   "sprites/characters/spr_kurt.png",  "trig_booth1", "gleb_talk",          {156.0f, 118.0f}, 75,  false, false, true},
+            {"boss_n5",     "Хозяин Перекрёстка", "sprites/characters/spr_guest.png", "trig_table6", "n5_boss_table6_talk",{376.0f, 198.0f}, 190, false, true,  false}
         };
     }
 
     m_tutorial.Reset(nightNumber, withTutorial);
     m_screen = GameScreen::PlayingShift;
+}
 
-    if (nightNumber == 1)      eng.Dialogue().StartDialogue("intro_briefing_night1");
-    else if (nightNumber == 2) eng.Dialogue().StartDialogue("n2_intro_diary");
-    else if (nightNumber == 3) eng.Dialogue().StartDialogue("n3_intro_diary");
-    else if (nightNumber == 4) eng.Dialogue().StartDialogue("n4_intro_diary");
-    else                       eng.Dialogue().StartDialogue("n5_intro_diary");
+void LastOrderGame::UpdatePlayerMovement(engine::core::Engine& eng, float dt) {
+    engine::math::Vec2 moveDir = {0.0f, 0.0f};
+    if (m_visor3DActive) {
+        float rotSpeed = 2.6f;
+        if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_Q))  m_visorYaw -= rotSpeed * dt;
+        if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_E)) m_visorYaw += rotSpeed * dt;
+        Vector2 md = GetMouseDelta();
+        m_visorYaw += md.x * 0.0038f;
+        m_visorPitch = std::clamp(m_visorPitch - md.y * 0.0032f, -0.50f, 0.50f);
+
+        float fwdX = std::cos(m_visorYaw);
+        float fwdY = std::sin(m_visorYaw);
+        float rightX = -fwdY;
+        float rightY = fwdX;
+
+        if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))   { moveDir.x += fwdX; moveDir.y += fwdY; }
+        if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) { moveDir.x -= fwdX; moveDir.y -= fwdY; }
+        if (IsKeyDown(KEY_D)) { moveDir.x += rightX; moveDir.y += rightY; }
+        if (IsKeyDown(KEY_A)) { moveDir.x -= rightX; moveDir.y -= rightY; }
+    } else {
+        if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) { moveDir.x += 1.0f; m_playerFacing = 3; }
+        if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  { moveDir.x -= 1.0f; m_playerFacing = 2; }
+        if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  { moveDir.y += 1.0f; m_playerFacing = 0; }
+        if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))    { moveDir.y -= 1.0f; m_playerFacing = 1; }
+    }
+
+    m_isMoving = (moveDir.LengthSq() > 0.01f);
+    float speed = m_visor3DActive ? 92.0f : 84.0f;
+    m_playerBody.velocity = moveDir.Normalized() * speed;
+
+    engine::math::Vec2 prevPos = m_playerBody.position;
+    if (m_debugNoclip) {
+        m_playerBody.position += m_playerBody.velocity * dt;
+    } else {
+        eng.Physics().MoveAndSlide(m_playerBody, dt);
+    }
+    m_distMovedThisFrame += (m_playerBody.position - prevPos).Length();
+
+    auto& fl = eng.Lighting().GetFlashlight();
+    fl.position = m_playerBody.Center();
+    if (m_visor3DActive) {
+        fl.directionDeg = m_visorYaw * (180.0f / 3.14159265f);
+    } else {
+        const float dirAngles[4] = {90.0f, 270.0f, 180.0f, 0.0f};
+        fl.directionDeg = dirAngles[m_playerFacing];
+    }
+
+    m_nearestTrigger = eng.Physics().FindNearestTrigger(m_playerBody.Center(), 28.0f);
+}
+
+void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
+    if (m_gunCooldown > 0.0f) return;
+    m_gunCooldown = 0.22f;
+    m_gunRecoilTimer = 0.16f;
+    eng.Audio().PlaySfx("audio/sfx/sfx_chase_flash_burn.wav", 0.85f);
+    eng.Renderer().TriggerShake(1.8f, 0.12f);
+
+    engine::math::Vec2 pCenter = m_playerBody.Center();
+    engine::math::Vec2 lookDir = {std::cos(m_visorYaw), std::sin(m_visorYaw)};
+
+    int bestAnomalyIdx = -1;
+    float bestDist = 420.0f;
+
+    for (int i = 0; i < static_cast<int>(m_anomalies3D.size()); ++i) {
+        auto& a = m_anomalies3D[i];
+        if (!a.active) continue;
+        engine::math::Vec2 toA = a.pos - pCenter;
+        float dist = toA.Length();
+        if (dist < 8.0f || dist > bestDist) continue;
+        engine::math::Vec2 dir = toA / dist;
+        float dot = dir.x * lookDir.x + dir.y * lookDir.y;
+        float hitCos = (dist < 55.0f) ? 0.82f : 0.92f;
+        if (dot >= hitCos) {
+            bestDist = dist;
+            bestAnomalyIdx = i;
+        }
+    }
+
+    if (bestAnomalyIdx >= 0) {
+        auto& hitA = m_anomalies3D[bestAnomalyIdx];
+        hitA.hp -= 1;
+        hitA.hitFlash = 0.18f;
+        m_hitMarkerTimer = 0.22f;
+        if (hitA.hp <= 0) {
+            hitA.active = false;
+            m_anomaliesKilled++;
+            m_shooterScore += 150;
+            eng.State().AddSanity(10);
+            m_endlessDirector.OnSanityRestored(15);
+            eng.Audio().PlaySfx("audio/sfx/sfx_chase_relic_pickup.wav", 0.85f);
+            m_visorKillBanner = "АНОМАЛИЯ УНИЧТОЖЕНА: " + hitA.label + " (+10% РАССУДКА)";
+            m_visorKillBannerTimer = 2.8f;
+        }
+        return;
+    }
+
+    for (auto& g : m_guests) {
+        if (!g.spawned || !g.anomalous) continue;
+        engine::math::Vec2 gCenter = {g.pos.x + 16.0f, g.pos.y + 16.0f};
+        engine::math::Vec2 toG = gCenter - pCenter;
+        float dist = toG.Length();
+        if (dist > 320.0f || dist < 4.0f) continue;
+        engine::math::Vec2 dir = toG / dist;
+        float dot = dir.x * lookDir.x + dir.y * lookDir.y;
+        if (dot >= 0.91f) {
+            g.spawned = false;
+            eng.Physics().SetTriggerEnabled(g.triggerId, false);
+            m_hitMarkerTimer = 0.30f;
+            m_anomaliesKilled++;
+            m_shooterScore += 300;
+            eng.State().AddSanity(15);
+            if (g.id == "fake_kurt" || g.id == "fake_kurt4") eng.State().SetFlag("n2_fake_kurt_resolved");
+            if (g.id == "hatman") eng.State().SetFlag("hatman_served_safe");
+            if (g.id == "katya_n3" || g.id == "arkhip_mimic") eng.State().SetFlag("n3_mimic_banished");
+            eng.Renderer().TriggerFlash(Color{244, 184, 96, 180}, 0.30f);
+            eng.Audio().PlaySfx("audio/sfx/sfx_window_bang.wav", 0.85f);
+            m_visorKillBanner = "ДВОЙНИК ИЗГНАН ИЗ ЗАЛА: " + g.name + " (+300 ОЧКОВ)";
+            m_visorKillBannerTimer = 3.2f;
+            return;
+        }
+    }
+}
+
+void LastOrderGame::Update3DVisorShooter(engine::core::Engine& eng, float dt) {
+    if (m_gunCooldown > 0.0f)    m_gunCooldown = std::max(0.0f, m_gunCooldown - dt);
+    if (m_gunRecoilTimer > 0.0f) m_gunRecoilTimer = std::max(0.0f, m_gunRecoilTimer - dt);
+    if (m_hitMarkerTimer > 0.0f) m_hitMarkerTimer = std::max(0.0f, m_hitMarkerTimer - dt);
+    if (m_visorKillBannerTimer > 0.0f) m_visorKillBannerTimer = std::max(0.0f, m_visorKillBannerTimer - dt);
+
+    engine::math::Vec2 pCenter = m_playerBody.Center();
+    engine::math::Vec2 lookDir = {std::cos(m_visorYaw), std::sin(m_visorYaw)};
+
+    m_scannerTargetText.clear();
+    float bestScanDist = 420.0f;
+
+    int activeCount = 0;
+    for (auto& a : m_anomalies3D) {
+        if (!a.active) continue;
+        activeCount++;
+        if (a.hitFlash > 0.0f) a.hitFlash = std::max(0.0f, a.hitFlash - dt);
+
+        engine::math::Vec2 toPlayer = pCenter - a.pos;
+        float dist = toPlayer.Length();
+        if (a.type == 1 || a.type == 2) {
+            float moveSpd = (a.type == 2) ? 34.0f : 22.0f;
+            if (m_visor3DActive && dist > 16.0f) {
+                a.pos += (toPlayer / dist) * moveSpd * dt;
+            }
+            if (m_visor3DActive && dist <= 18.0f) {
+                a.active = false;
+                eng.State().AddSanity(-12);
+                eng.Renderer().TriggerFlash(Color{214, 40, 40, 200}, 0.35f);
+                eng.Renderer().TriggerShake(3.8f, 0.35f);
+                eng.Audio().PlaySfx("audio/sfx/sfx_heavy_knock.wav", 0.90f);
+                m_visorKillBanner = "ТЕНЬ АТАКОВАЛА ВАС! (-12% РАССУДКА)";
+                m_visorKillBannerTimer = 2.5f;
+                continue;
+            }
+        }
+
+        if (m_visor3DActive && dist > 4.0f && dist < bestScanDist) {
+            engine::math::Vec2 dirToA = (a.pos - pCenter) / dist;
+            float dot = dirToA.x * lookDir.x + dirToA.y * lookDir.y;
+            if (dot >= 0.92f) {
+                bestScanDist = dist;
+                m_scannerTargetText = a.label + " [HP: " + std::to_string(a.hp) + "/" + std::to_string(a.maxHp) + "]";
+                m_scannerTargetDist = dist * 0.05f;
+            }
+        }
+    }
+
+    if (m_visor3DActive && m_scannerTargetText.empty()) {
+        for (const auto& g : m_guests) {
+            if (!g.spawned) continue;
+            engine::math::Vec2 gCenter = {g.pos.x + 16.0f, g.pos.y + 16.0f};
+            float dist = (gCenter - pCenter).Length();
+            if (dist > 4.0f && dist < 350.0f) {
+                engine::math::Vec2 dirToG = (gCenter - pCenter) / dist;
+                float dot = dirToG.x * lookDir.x + dirToG.y * lookDir.y;
+                if (dot >= 0.92f) {
+                    m_scannerTargetText = g.anomalous
+                        ? ("ОБНАРУЖЕН ДВОЙНИК: " + g.name + " [СТРЕЛЯЙТЕ ЛКМ!]")
+                        : ("ЧЕЛОВЕК (НОРМА): " + g.name);
+                    m_scannerTargetDist = dist * 0.05f;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (m_visor3DActive) {
+        m_anomalySpawnTimer -= dt;
+        if (m_anomalySpawnTimer <= 0.0f || activeCount == 0) {
+            m_anomalySpawnTimer = 8.5f;
+            Spawn3DShooterWave(eng, (activeCount == 0) ? 3 : 2);
+        }
+
+        if (IsKeyPressed(KEY_X)) {
+            Spawn3DShooterWave(eng, 5);
+        }
+
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_F)) {
+            Fire3DVisorWeapon(eng);
+        }
+    }
 }
 
 void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
@@ -181,60 +443,9 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
         return;
     }
 
-    auto movePlayer = [&](float dt) {
-        engine::math::Vec2 moveDir = {0.0f, 0.0f};
-        if (m_visor3DActive) {
-            float rotSpeed = 2.4f;
-            if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_Q))  m_visorYaw -= rotSpeed * dt;
-            if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_E)) m_visorYaw += rotSpeed * dt;
-            Vector2 md = GetMouseDelta();
-            m_visorYaw += md.x * 0.004f;
-            m_visorPitch = std::clamp(m_visorPitch - md.y * 0.003f, -0.45f, 0.45f);
-
-            float fwdX = std::cos(m_visorYaw);
-            float fwdY = std::sin(m_visorYaw);
-            float rightX = -fwdY;
-            float rightY = fwdX;
-
-            if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))   { moveDir.x += fwdX; moveDir.y += fwdY; }
-            if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) { moveDir.x -= fwdX; moveDir.y -= fwdY; }
-            if (IsKeyDown(KEY_D)) { moveDir.x += rightX; moveDir.y += rightY; }
-            if (IsKeyDown(KEY_A)) { moveDir.x -= rightX; moveDir.y -= rightY; }
-        } else {
-            if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) { moveDir.x += 1.0f; m_playerFacing = 3; }
-            if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  { moveDir.x -= 1.0f; m_playerFacing = 2; }
-            if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  { moveDir.y += 1.0f; m_playerFacing = 0; }
-            if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))    { moveDir.y -= 1.0f; m_playerFacing = 1; }
-        }
-
-        m_isMoving = (moveDir.LengthSq() > 0.01f);
-        constexpr float MOVE_SPEED = 78.0f;
-        m_playerBody.velocity = moveDir.Normalized() * MOVE_SPEED;
-
-        engine::math::Vec2 prevPos = m_playerBody.position;
-        if (m_debugNoclip) {
-            m_playerBody.position += m_playerBody.velocity * dt;
-        } else {
-            eng.Physics().MoveAndSlide(m_playerBody, dt);
-        }
-        m_distMovedThisFrame += (m_playerBody.position - prevPos).Length();
-
-        auto& fl = eng.Lighting().GetFlashlight();
-        fl.position = m_playerBody.Center();
-        if (m_visor3DActive) {
-            fl.directionDeg = m_visorYaw * (180.0f / 3.14159265f);
-        } else {
-            const float dirAngles[4] = {90.0f, 270.0f, 180.0f, 0.0f};
-            fl.directionDeg = dirAngles[m_playerFacing];
-        }
-
-        m_nearestTrigger = eng.Physics().FindNearestTrigger(m_playerBody.Center(), 28.0f);
-    };
-
     if (m_screen == GameScreen::EndlessMode) {
         eng.Time().SetPaused(false);
         eng.Time().Tick(fixedDt);
-        movePlayer(fixedDt);
         m_endlessDirector.SyncGuestNpcs(m_guests);
         return;
     }
@@ -244,12 +455,8 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
     eng.Time().Tick(fixedDt);
 
     if (eng.Dialogue().IsActive() || m_inspectionUI.IsAnyModalOpen()) {
-        m_playerBody.velocity = {0.0f, 0.0f};
-        m_isMoving = false;
         return;
     }
-
-    movePlayer(fixedDt);
 
     float elapsedMins = eng.Time().GetShiftElapsedMinutes();
 
@@ -264,7 +471,7 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
     }
 
     if (m_currentNight == 1) {
-        if (elapsedMins >= 170.0f && !eng.State().HasFlag("radio_0214_ringing")) {
+        if (elapsedMins >= 150.0f && !eng.State().HasFlag("radio_0214_ringing")) {
             eng.State().SetFlag("radio_0214_ringing");
             eng.Audio().PlaySfx("audio/sfx/sfx_radio_static.wav", 0.75f);
         }
@@ -275,7 +482,9 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
             eng.Lighting().SetAmbientColor(Color{26, 30, 52, 255});
             eng.Lighting().SetAllPointLightsFlicker(28.0f, 0.85f);
             eng.Audio().PlaySfx("audio/sfx/sfx_cat_hiss.wav", 0.85f);
-            eng.Dialogue().StartDialogue("event_light_flicker_0300");
+            if (!m_visor3DActive) {
+                eng.Dialogue().StartDialogue("event_light_flicker_0300");
+            }
         }
 
         bool allN1Done = eng.State().HasFlag("kurt_served") &&
@@ -288,7 +497,7 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
             eng.Audio().PlaySfx("audio/sfx/sfx_pie_microwave_bell.wav", 0.85f);
         }
     } else if (m_currentNight == 2) {
-        if (elapsedMins >= 140.0f && !eng.State().HasFlag("n2_blackout_active") && !eng.State().HasFlag("n2_power_restored")) {
+        if (elapsedMins >= 130.0f && !eng.State().HasFlag("n2_blackout_active") && !eng.State().HasFlag("n2_power_restored")) {
             eng.State().SetFlag("n2_blackout_active");
             m_blackoutMode = true;
             m_lightsFlickering = true;
@@ -364,19 +573,21 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         if (IsKeyPressed(KEY_THREE)) StartNewShift(eng, 3, false);
         if (IsKeyPressed(KEY_FOUR))  StartNewShift(eng, 4, false);
         if (IsKeyPressed(KEY_FIVE))  StartNewShift(eng, 5, false);
-        if (IsKeyPressed(KEY_F5)) StartMinigame(eng, systems::MinigameType::Night1_RadioTuner2D);
-        if (IsKeyPressed(KEY_F6)) StartMinigame(eng, systems::MinigameType::Night2_BasementFuse3D);
-        if (IsKeyPressed(KEY_F7)) StartMinigame(eng, systems::MinigameType::Night3_FreezerMaze3D);
-        if (IsKeyPressed(KEY_F9)) StartMinigame(eng, systems::MinigameType::Night4_MirrorHunt3D);
+        if (IsKeyPressed(KEY_F5))  StartMinigame(eng, systems::MinigameType::Night1_RadioTuner2D);
+        if (IsKeyPressed(KEY_F6))  StartMinigame(eng, systems::MinigameType::Night2_BasementFuse3D);
+        if (IsKeyPressed(KEY_F7))  StartMinigame(eng, systems::MinigameType::Night3_FreezerMaze3D);
+        if (IsKeyPressed(KEY_F9))  StartMinigame(eng, systems::MinigameType::Night4_MirrorHunt3D);
         if (IsKeyPressed(KEY_F10)) StartMinigame(eng, systems::MinigameType::Night5_HighwayChase3D);
     }
 
     if (m_settingsUI.IsOpen()) {
+        EnableCursor();
         m_settingsUI.Update(eng);
         return;
     }
 
     if (m_screen == GameScreen::MainMenu) {
+        EnableCursor();
         eng.Renderer().SetSanityStress(0.0f);
         eng.Renderer().SetSkip2DLightmap(false);
         ui::MenuCommand cmd = m_mainMenu.Update(eng, dt);
@@ -415,6 +626,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
     }
 
     if (m_screen == GameScreen::NightmareChase) {
+        EnableCursor();
         if (m_chaseMinigame.GetState() == systems::ChaseState::Victory) {
             if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_E)) {
                 CompleteActiveMinigame(eng);
@@ -428,37 +640,35 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         return;
     }
 
-    if (IsKeyPressed(KEY_V) && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen()) {
-        if (!m_visor3DActive && m_visorBattery > 5.0f) {
-            m_visor3DActive = true;
-            m_toggledVisorThisFrame = true;
-            const float facingRad[4] = {1.5708f, -1.5708f, 3.14159f, 0.0f};
-            m_visorYaw = facingRad[m_playerFacing];
-            m_visorPitch = 0.0f;
-            eng.Renderer().SetSkip2DLightmap(true);
-            eng.Audio().PlaySfx("audio/sfx/sfx_visor_toggle.wav", 0.85f);
-        } else if (m_visor3DActive) {
-            m_visor3DActive = false;
-            eng.Renderer().SetSkip2DLightmap(false);
-            eng.Audio().PlaySfx("audio/sfx/sfx_visor_toggle.wav", 0.70f);
-        }
+    if (m_screen == GameScreen::Paused) {
+        EnableCursor();
+        UpdatePauseMenu(eng);
+        return;
     }
 
-    if (m_visor3DActive) {
-        m_visorBattery = std::max(0.0f, m_visorBattery - dt * 6.5f);
-        if (m_visorBattery <= 0.0f) {
-            m_visor3DActive = false;
-            eng.Renderer().SetSkip2DLightmap(false);
-            eng.Audio().PlaySfx("audio/sfx/sfx_visor_toggle.wav", 0.70f);
-        }
+    if (IsKeyPressed(KEY_V)) {
+        if (eng.Dialogue().IsActive()) eng.Dialogue().CloseDialogue();
+        if (m_inspectionUI.IsAnyModalOpen()) m_inspectionUI.CloseAll();
+        SetVisor3DActive(eng, !m_visor3DActive);
+        if (m_visor3DActive) m_toggledVisorThisFrame = true;
+    }
+
+    if (!eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && !m_sanity.IsGameOver()) {
+        UpdatePlayerMovement(eng, dt);
+        Update3DVisorShooter(eng, dt);
     } else {
-        m_visorBattery = std::min(100.0f, m_visorBattery + dt * 9.0f);
+        m_playerBody.velocity = {0.0f, 0.0f};
+        m_isMoving = false;
     }
 
     if (m_screen == GameScreen::EndlessMode) {
         if (IsKeyPressed(KEY_ESCAPE)) {
-            m_screen = GameScreen::Paused;
-            m_pauseSelectedBtn = 0;
+            if (m_visor3DActive) {
+                SetVisor3DActive(eng, false);
+            } else {
+                m_screen = GameScreen::Paused;
+                m_pauseSelectedBtn = 0;
+            }
             return;
         }
 
@@ -475,6 +685,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         }
 
         if (m_endlessDirector.IsGameOver()) {
+            EnableCursor();
             if (IsKeyPressed(KEY_R)) {
                 StartEndlessShift(eng);
             } else if (IsKeyPressed(KEY_ESCAPE)) {
@@ -499,13 +710,13 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
             m_footstepTimer = 0.25f;
         }
 
-        if (IsKeyPressed(KEY_F)) {
+        if (!m_visor3DActive && IsKeyPressed(KEY_F)) {
             auto& fl = eng.Lighting().GetFlashlight();
             fl.enabled = !fl.enabled;
             eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.7f);
         }
 
-        if (m_nearestTrigger.has_value() && IsKeyPressed(KEY_E)) {
+        if (!m_visor3DActive && m_nearestTrigger.has_value() && IsKeyPressed(KEY_E)) {
             std::string tid = m_nearestTrigger->id;
             if (tid == "trig_breaker") {
                 m_blackoutMode = false;
@@ -549,13 +760,9 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         return;
     }
 
-    if (m_screen == GameScreen::Paused) {
-        UpdatePauseMenu(eng);
-        return;
-    }
-
     m_sanity.Update(eng, dt, m_playerBody.position);
     if (m_sanity.IsGameOver()) {
+        EnableCursor();
         systems::GameOverCommand goCmd = m_sanity.UpdateGameOverInput(eng);
         if (goCmd == systems::GameOverCommand::RestoreCheckpoint) {
             m_sanity.RestoreCheckpointTo(eng, m_playerBody.position);
@@ -574,8 +781,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         if (m_inspectionUI.IsAnyModalOpen()) {
             m_inspectionUI.CloseAll();
         } else if (m_visor3DActive) {
-            m_visor3DActive = false;
-            eng.Renderer().SetSkip2DLightmap(false);
+            SetVisor3DActive(eng, false);
         } else if (!eng.Dialogue().IsActive()) {
             m_screen = GameScreen::Paused;
             m_pauseSelectedBtn = 0;
@@ -601,22 +807,24 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
 
     if (!eng.Dialogue().IsActive()) {
         if (IsKeyPressed(KEY_TAB)) {
+            if (m_visor3DActive) SetVisor3DActive(eng, false);
             m_inspectionUI.ToggleNotebook(eng);
         }
         if (IsKeyPressed(KEY_R)) {
+            if (m_visor3DActive) SetVisor3DActive(eng, false);
             m_inspectionUI.ToggleRulesSheet(eng);
             eng.State().SetFlag("read_wall_rules");
         }
     }
 
-    if (!eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && IsKeyPressed(KEY_E)) {
+    if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && IsKeyPressed(KEY_E)) {
         if (m_nearestTrigger.has_value() && !m_nearestTrigger->dialogueId.empty()) {
             eng.Dialogue().StartDialogue(m_nearestTrigger->dialogueId);
             eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.45f);
         }
     }
 
-    if (IsKeyPressed(KEY_F)) {
+    if (!m_visor3DActive && IsKeyPressed(KEY_F)) {
         auto& fl = eng.Lighting().GetFlashlight();
         fl.enabled = !fl.enabled;
         m_toggledFlashlightThisFrame = true;
@@ -766,7 +974,7 @@ void LastOrderGame::RenderPauseMenu(engine::core::Engine& eng) const {
 
 void LastOrderGame::OnAction(engine::core::Engine& eng, const engine::core::EngineAction& action) {
     if (action.type == "give_item") {
-        m_cooking.StartPreparation(eng, action.target, 1.6f);
+        m_cooking.StartPreparation(eng, action.target, 1.4f);
     } else if (action.type == "set_flag") {
         if (action.target == "kurt_served" || action.target == "n3_gleb_served") {
             m_cooking.PlaceDishOnTable("booth_1", "coffee_sugar");
@@ -872,7 +1080,8 @@ void LastOrderGame::OnRenderWorld(engine::core::Engine& eng) {
     int nightToRender = (m_screen == GameScreen::EndlessMode) ? 2 : m_currentNight;
     if (m_visor3DActive) {
         m_world.Render3DVisor(eng, nightToRender, m_playerBody.Center(),
-                              m_visorYaw, m_visorPitch, m_guests);
+                              m_visorYaw, m_visorPitch, m_guests,
+                              m_anomalies3D, m_walkAnimTimer, m_gunRecoilTimer);
     } else {
         m_world.Render(eng, nightToRender,
                        m_playerBody, m_playerFacing, m_isMoving, m_walkAnimTimer,
@@ -888,6 +1097,7 @@ void LastOrderGame::RenderDebugOverlay(engine::core::Engine& eng) const {
     DrawRectangle(14, 108, 415, 212, Color{10, 18, 12, 235});
     DrawRectangleLinesEx(Rectangle{14, 108, 415, 212}, 2.0f, Color{80, 240, 120, 255});
 
+    engine::math::Vec2 camOff = m_world.ComputeCameraOffset(m_playerBody.Center());
     char buf[512];
     std::snprintf(buf, sizeof(buf),
                   "DEBUG MODE [F3] | FPS: %d | Ночь: %d\n"
@@ -899,7 +1109,7 @@ void LastOrderGame::RenderDebugOverlay(engine::core::Engine& eng) const {
                   "[F8 / G] Тест 14 скримеров (1.5 сек MAX ЗВУК)",
                   GetFPS(), m_currentNight,
                   m_playerBody.Center().x, m_playerBody.Center().y,
-                  m_world.ComputeCameraOffset(m_playerBody.Center()).x, m_world.ComputeCameraOffset(m_playerBody.Center()).y,
+                  camOff.x, camOff.y,
                   m_debugNoclip ? "ВКЛ" : "ВЫКЛ",
                   m_visor3DActive ? "3D ВКЛ" : "2D",
                   m_nearestTrigger.has_value() ? m_nearestTrigger->id.c_str() : "нет");
@@ -922,28 +1132,61 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     Font font = eng.Assets().GetMainFont();
 
     if (m_visor3DActive) {
-        DrawRectangleLinesEx(Rectangle{12, 12, 1256, 696}, 4.0f, Color{214, 69, 69, 200});
-        DrawCircleLines(640, 360, 18.0f, Color{214, 69, 69, 180});
-        DrawLine(620, 360, 660, 360, Color{214, 69, 69, 180});
-        DrawLine(640, 340, 640, 380, Color{214, 69, 69, 180});
-        char vBuf[128];
-        std::snprintf(vBuf, sizeof(vBuf), "3D-ВИЗОР «ОКО-86» АКТИВЕН (ЗАРЯД: %d%%) — [Q/E/Мышь] Поворот | [V] Выключить",
-                      static_cast<int>(m_visorBattery));
-        DrawRectangle(340, 62, 600, 34, Color{24, 8, 12, 230});
-        DrawRectangleLines(340, 62, 600, 34, Color{214, 69, 69, 255});
-        engine::graphics::TextLayout::DrawCentered(font, vBuf, 640.0f, 70.0f, 17.5f, Color{255, 110, 110, 255});
+        DrawRectangleLinesEx(Rectangle{10, 10, 1260, 700}, 3.0f, Color{90, 245, 200, 210});
+        DrawCircleLines(640, 360, 20.0f, Color{90, 245, 200, 210});
+        DrawLine(616, 360, 664, 360, Color{90, 245, 200, 210});
+        DrawLine(640, 336, 640, 384, Color{90, 245, 200, 210});
+
+        if (m_hitMarkerTimer > 0.0f) {
+            DrawLineEx(Vector2{624, 344}, Vector2{656, 376}, 3.0f, Color{255, 55, 55, 255});
+            DrawLineEx(Vector2{656, 344}, Vector2{624, 376}, 3.0f, Color{255, 55, 55, 255});
+        }
+
+        int activeAnomalies = 0;
+        for (const auto& a : m_anomalies3D) {
+            if (a.active) activeAnomalies++;
+        }
+
+        char vBuf[256];
+        std::snprintf(vBuf, sizeof(vBuf),
+                      "3D-ШУТЕР И СКАНЕР «ОКО-86» | АКТИВНЫХ АНОМАЛИЙ: %d | УБИТО: %d | СЧЁТ: %d",
+                      activeAnomalies, m_anomaliesKilled, m_shooterScore);
+        DrawRectangle(280, 56, 720, 36, Color{10, 22, 24, 235});
+        DrawRectangleLines(280, 56, 720, 36, Color{90, 245, 200, 255});
+        engine::graphics::TextLayout::DrawCentered(font, vBuf, 640.0f, 65.0f, 18.0f, Color{110, 255, 215, 255});
+
+        DrawRectangle(280, 96, 720, 30, Color{18, 12, 22, 220});
+        engine::graphics::TextLayout::DrawCentered(
+            font,
+            "[ЛКМ / SPACE / F] Выстрел плазмой | [X] Вызвать волну монстров | [Мышь / Q / E] Прицел | [V] В 2D-режим",
+            640.0f, 102.0f, 16.5f, Color{244, 184, 96, 245});
+
+        if (!m_scannerTargetText.empty()) {
+            char scanBuf[256];
+            std::snprintf(scanBuf, sizeof(scanBuf), "ЦЕЛЬ ЗАХВАЧЕНА (%.1f м): %s", m_scannerTargetDist, m_scannerTargetText.c_str());
+            DrawRectangle(340, 396, 600, 34, Color{42, 12, 16, 235});
+            DrawRectangleLines(340, 396, 600, 34, Color{255, 70, 70, 255});
+            engine::graphics::TextLayout::DrawCentered(font, scanBuf, 640.0f, 404.0f, 18.0f, Color{255, 110, 110, 255});
+        }
+
+        if (m_visorKillBannerTimer > 0.0f && !m_visorKillBanner.empty()) {
+            DrawRectangle(340, 134, 600, 36, Color{36, 20, 14, 240});
+            DrawRectangleLines(340, 134, 600, 36, Color{244, 184, 96, 255});
+            engine::graphics::TextLayout::DrawCentered(font, m_visorKillBanner, 640.0f, 143.0f, 18.5f, Color{244, 184, 96, 255});
+        }
     }
 
+    engine::math::Vec2 camOff = m_world.ComputeCameraOffset(m_playerBody.Center());
     if (m_screen == GameScreen::EndlessMode) {
         m_endlessDirector.RenderUI(eng);
-        m_cooking.RenderUI(eng, m_world.ComputeCameraOffset(m_playerBody.Center()));
+        m_cooking.RenderUI(eng, camOff);
         RenderDebugOverlay(eng);
         m_settingsUI.Render(eng);
         return;
     }
 
     m_tutorial.RenderUIOverlay(eng);
-    m_cooking.RenderUI(eng, m_world.ComputeCameraOffset(m_playerBody.Center()));
+    m_cooking.RenderUI(eng, camOff);
 
     DrawRectangle(1018, 12, 248, 86, Color{10, 13, 26, 238});
     DrawRectangleLinesEx(Rectangle{1018, 12, 248, 86}, 2.0f, Color{196, 122, 59, 255});
@@ -971,11 +1214,9 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     std::string trayText = "В руках: " + (held.empty() ? std::string("Пусто") : held);
     DrawTextEx(font, trayText.c_str(), Vector2{28, 22}, 19.0f, 1.0f, Color{244, 184, 96, 255});
 
-    char visorSub[96];
-    std::snprintf(visorSub, sizeof(visorSub), "[V] 3D-Визор (%d%%) | [TAB] Задачи | [R] Устав", static_cast<int>(m_visorBattery));
-    DrawTextEx(font, visorSub, Vector2{28, 56}, 15.5f, 1.0f, Color{188, 178, 162, 255});
+    DrawTextEx(font, "[V] 3D-Шутер/Сканер | [TAB] Задачи | [R] Устав", Vector2{24, 56}, 15.0f, 1.0f, Color{110, 255, 215, 255});
 
-    if (!eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && !m_sanity.IsGameOver() && m_nearestTrigger.has_value()) {
+    if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && !m_sanity.IsGameOver() && m_nearestTrigger.has_value()) {
         std::string prompt = "[E] " + m_nearestTrigger->label;
         Vector2 sz = MeasureTextEx(font, prompt.c_str(), 22.0f, 1.0f);
         float px = (1280.0f - sz.x) * 0.5f;
@@ -987,9 +1228,9 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     m_inspectionUI.Render(eng, m_currentNight, BuildMirrorState(eng));
     RenderDebugOverlay(eng);
 
-    const char* controls = "WASD: Ходьба | E: Действие | F: Фонарик | V: 3D-Визор «ОКО-86» | TAB: Тетрадь | R: Устав | F3: Debug | ESC: Пауза";
+    const char* controls = "WASD: Ходьба | V: 3D-Шутер и Сканер «ОКО-86» (ЛКМ/SPACE — Огонь, X — Волна) | E: Действие | F: Фонарик | TAB: Задачи | F3: Debug";
     DrawRectangle(0, 688, 1280, 32, Color{10, 13, 26, 235});
-    DrawTextEx(font, controls, Vector2{18, 694}, 16.5f, 1.0f, Color{188, 178, 162, 235});
+    DrawTextEx(font, controls, Vector2{14, 694}, 15.5f, 1.0f, Color{188, 178, 162, 235});
 
     if (m_sanity.IsGameOver()) {
         m_sanity.RenderGameOverModal(eng, m_currentNight);
@@ -999,6 +1240,8 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     m_settingsUI.Render(eng);
 }
 
-void LastOrderGame::OnShutdown(engine::core::Engine& ) {}
+void LastOrderGame::OnShutdown(engine::core::Engine& ) {
+    EnableCursor();
+}
 
 }
