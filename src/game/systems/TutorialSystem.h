@@ -7,11 +7,11 @@ namespace game::systems {
 
 enum class TutorialStep {
     Step1_Movement = 0,
-    Step2_Flashlight,
-    Step3_Visor3D,
-    Step4_ShootAnomaly3D,
-    Step5_ReadNote,
-    Step6_ReadRules,
+    Step2_ReadNote,
+    Step3_ReadRules,
+    Step4_TalkToKurt,
+    Step5_BrewCoffee,
+    Step6_ServeKurt,
     Completed
 };
 

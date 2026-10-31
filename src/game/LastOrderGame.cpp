@@ -54,17 +54,21 @@ void LastOrderGame::SpawnInitial3DAnomalies(int nightNumber) {
     m_anomalySpawnTimer = 55.0f;
     m_scannerTargetText.clear();
 
-    m_anomalies3D.push_back({m_nextAnomalyId++, 0, "Кровавый Разлом",  {34.0f,  98.0f},  1.15f, 2, 2, 0.0f, true});
-    m_anomalies3D.push_back({m_nextAnomalyId++, 1, "Теневой Сталкер",  {282.0f, 146.0f}, 1.05f, 2 + nightNumber / 3, 2 + nightNumber / 3, 0.0f, true});
+    if (nightNumber <= 1) {
+        return;
+    }
+
+    m_anomalies3D.push_back({m_nextAnomalyId++, 0, "Кровавый Разлом", {34.0f,  98.0f},  1.15f, 2, 2, 0.0f, true});
+    m_anomalies3D.push_back({m_nextAnomalyId++, 1, "Теневой Сталкер", {282.0f, 146.0f}, 1.05f, 2 + nightNumber / 3, 2 + nightNumber / 3, 0.0f, true});
 }
 
 void LastOrderGame::Spawn3DShooterWave(engine::core::Engine& eng, int count) {
     static const engine::math::Vec2 spawnSpots[8] = {
         {32.0f,  46.0f},
         {32.0f,  146.0f},
-        {96.0f,  104.0f},
-        {156.0f, 104.0f},
-        {216.0f, 104.0f},
+        {108.0f, 104.0f},
+        {188.0f, 104.0f},
+        {268.0f, 104.0f},
         {284.0f, 62.0f},
         {284.0f, 148.0f},
         {156.0f, 154.0f}
@@ -104,7 +108,7 @@ void LastOrderGame::StartEndlessShift(engine::core::Engine& eng) {
     eng.State().Reset();
     eng.Time().Reset(23, 0, 1.80f);
 
-    m_playerBody.position = {144.0f, 44.0f};
+    m_playerBody.position = {112.0f, 46.0f};
     m_playerBody.colliderOffset = {9.0f, 18.0f};
     m_playerBody.colliderSize = {14.0f, 11.0f};
     m_playerBody.velocity = {0.0f, 0.0f};
@@ -175,14 +179,14 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
 
     eng.Time().Reset(22, 0, 1.80f);
 
-    m_playerBody.position = {144.0f, 44.0f};
+    m_playerBody.position = {112.0f, 46.0f};
     m_playerBody.colliderOffset = {9.0f, 18.0f};
     m_playerBody.colliderSize = {14.0f, 11.0f};
     m_playerBody.velocity = {0.0f, 0.0f};
     m_playerFacing = 0;
     m_blackoutMode = false;
     m_lightsFlickering = false;
-    m_ambientScreamerTimer = 18.0f;
+    m_ambientScreamerTimer = 42.0f;
     SetVisor3DActive(eng, false);
 
     m_cooking.Reset();
@@ -196,50 +200,58 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
     if (nightNumber == 1) {
         eng.Audio().PlayAmbient("audio/bgm/amb_cafe_calm_lp.ogg", 0.70f);
         m_guests = {
-            {"kurt",     "Дядя Курт",          "sprites/characters/spr_kurt.png",  "trig_booth1", "kurt_talk",     {56.0f,  68.0f},  8,   false, false, true},
-            {"katya",    "Студентка Катя",     "sprites/characters/spr_vera.png",  "trig_booth3", "katya_talk",    {116.0f, 68.0f},  35,  false, false, true},
-            {"valya",    "Тётя Валя",          "sprites/characters/spr_valya.png", "trig_booth2", "valya_talk",    {56.0f,  110.0f}, 70,  false, false, true},
-            {"danila",   "Водитель Данила",    "sprites/characters/spr_kurt.png",  "trig_booth7", "danila_talk",   {236.0f, 68.0f},  110, false, false, true},
-            {"hatman",   "Человек в шляпе",    "sprites/characters/spr_guest.png", "trig_booth5", "hatman_talk",   {176.0f, 68.0f},  145, false, true,  false},
-            {"bride_n1", "Невеста с обочины",  "sprites/characters/spr_vera.png",  "trig_booth8", "bride_n1_talk", {176.0f, 110.0f}, 190, false, true,  false}
+            {"kurt",     "Дядя Курт",          "sprites/characters/spr_kurt.png",  "trig_booth1", "kurt_talk",     {64.0f,  68.0f},  0,   false, false, true, 0, "kurt_served",        false, -1.0f},
+            {"katya",    "Студентка Катя",     "sprites/characters/spr_vera.png",  "trig_booth3", "katya_talk",    {144.0f, 68.0f},  25,  false, false, true, 0, "katya_served",       false, -1.0f},
+            {"valya",    "Тётя Валя",          "sprites/characters/spr_valya.png", "trig_booth2", "valya_talk",    {64.0f,  110.0f}, 55,  false, false, true, 0, "valya_served",       false, -1.0f},
+            {"danila",   "Водитель Данила",    "sprites/characters/spr_kurt.png",  "trig_booth4", "danila_talk",   {144.0f, 110.0f}, 95,  false, false, true, 0, "danila_served",      false, -1.0f},
+            {"hatman",   "Человек в шляпе",    "sprites/characters/spr_guest.png", "trig_booth5", "hatman_talk",   {224.0f, 68.0f},  140, false, true,  false,0, "hatman_served_safe", false, -1.0f},
+            {"bride_n1", "Невеста с обочины",  "sprites/characters/spr_vera.png",  "trig_booth1", "bride_n1_talk", {64.0f,  68.0f},  185, false, true,  false,0, "bride_n1_banished",  false, -1.0f}
         };
     } else if (nightNumber == 2) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.75f);
         m_guests = {
-            {"arkhip",      "Механик Архип",       "sprites/characters/spr_kurt.png",  "trig_booth3", "arkhip_talk",         {116.0f, 68.0f},  12,  false, false, true},
-            {"valya_n2",    "Тётя Валя",           "sprites/characters/spr_valya.png", "trig_booth2", "n2_valya_talk",       {56.0f,  110.0f}, 50,  false, false, true},
-            {"semen_n2",    "Радист Семён",        "sprites/characters/spr_guest.png", "trig_booth7", "semen_n2_talk",       {236.0f, 68.0f},  90,  false, false, true},
-            {"fake_kurt",   "Дядя Курт (?)",       "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {56.0f,  68.0f},  130, false, true,  false},
-            {"wet_stalker", "Мокрый Путник",       "sprites/characters/spr_guest.png", "trig_booth8", "wet_stalker_talk",    {176.0f, 110.0f}, 175, false, true,  false},
-            {"guest_t6",    "Фигура за Столом №6", "sprites/characters/spr_guest.png", "trig_table6", "n2_guest_table6_talk",{236.0f, 110.0f}, 220, false, true,  false}
+            {"arkhip",      "Механик Архип",       "sprites/characters/spr_kurt.png",  "trig_booth3", "arkhip_talk",         {144.0f, 68.0f},  5,   false, false, true, 0, "n2_arkhip_served",      false, -1.0f},
+            {"valya_n2",    "Тётя Валя",           "sprites/characters/spr_valya.png", "trig_booth2", "n2_valya_talk",       {64.0f,  110.0f}, 40,  false, false, true, 0, "n2_valya_served",       false, -1.0f},
+            {"semen_n2",    "Радист Семён",        "sprites/characters/spr_guest.png", "trig_booth4", "semen_n2_talk",       {144.0f, 110.0f}, 80,  false, false, true, 0, "semen_served",          false, -1.0f},
+            {"fake_kurt",   "Дядя Курт (?)",       "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {64.0f,  68.0f},  125, false, true,  false,0, "n2_fake_kurt_resolved", false, -1.0f},
+            {"wet_stalker", "Мокрый Путник",       "sprites/characters/spr_guest.png", "trig_booth5", "wet_stalker_talk",    {224.0f, 68.0f},  170, false, true,  false,0, "n2_fake_kurt_resolved", false, -1.0f},
+            {"guest_t6",    "Фигура за Столом №6", "sprites/characters/spr_guest.png", "trig_table6", "n2_guest_table6_talk",{224.0f, 110.0f}, 215, false, true,  false,0, "n2_guest_survived",     false, -1.0f}
         };
     } else if (nightNumber == 3) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.85f);
         m_guests = {
-            {"gleb",        "Следователь Глеб",   "sprites/characters/spr_kurt.png",  "trig_booth4", "gleb_talk",            {116.0f, 110.0f}, 12,  false, false, true},
-            {"korsakov_n3", "Доктор Корсаков",    "sprites/characters/spr_guest.png", "trig_booth7", "korsakov_n3_talk",     {236.0f, 68.0f},  55,  false, false, true},
-            {"katya_n3",    "Попутчица (?)",      "sprites/characters/spr_vera.png",  "trig_booth5", "katya_mimic_talk",     {176.0f, 68.0f},  95,  false, true,  false},
-            {"faceless_n3", "Официантка 1986",    "sprites/characters/spr_lera.png",  "trig_booth8", "faceless_n3_talk",     {176.0f, 110.0f}, 150, false, true,  false},
-            {"boss_n3",     "Сущность Стола №6",  "sprites/characters/spr_guest.png", "trig_table6", "n3_guest_table6_talk", {236.0f, 110.0f}, 215, false, true,  false}
+            {"gleb",        "Следователь Глеб",   "sprites/characters/spr_kurt.png",  "trig_booth4", "gleb_talk",            {144.0f, 110.0f}, 5,   false, false, true, 0, "n3_gleb_served",    false, -1.0f},
+            {"korsakov_n3", "Доктор Корсаков",    "sprites/characters/spr_guest.png", "trig_booth2", "korsakov_n3_talk",     {64.0f,  110.0f}, 45,  false, false, true, 0, "korsakov_served",   false, -1.0f},
+            {"katya_n3",    "Попутчица (?)",      "sprites/characters/spr_vera.png",  "trig_booth5", "katya_mimic_talk",     {224.0f, 68.0f},  90,  false, true,  false,0, "n3_mimic_banished", false, -1.0f},
+            {"faceless_n3", "Официантка 1986",    "sprites/characters/spr_lera.png",  "trig_booth1", "faceless_n3_talk",     {64.0f,  68.0f},  140, false, true,  false,0, "n3_mimic_banished", false, -1.0f},
+            {"boss_n3",     "Сущность Стола №6",  "sprites/characters/spr_guest.png", "trig_table6", "n3_guest_table6_talk", {224.0f, 110.0f}, 210, false, true,  false,0, "n3_boss_resolved",  false, -1.0f}
         };
     } else if (nightNumber == 4) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.90f);
         m_guests = {
-            {"officer_n4",   "Офицер Борис",      "sprites/characters/spr_guest.png", "trig_booth3", "n4_officer_boris_talk",{116.0f, 68.0f},  12,  false, false, true},
-            {"mikhail_n4",   "Тень Михаила",      "sprites/characters/spr_kurt.png",  "trig_booth7", "mikhail_n4_talk",      {236.0f, 68.0f},  60,  false, false, true},
-            {"arkhip_mimic", "Архип (?)",         "sprites/characters/spr_kurt.png",  "trig_booth2", "katya_mimic_talk",     {56.0f,  110.0f}, 105, false, true,  false},
-            {"fake_kurt4",   "Двойник Курта",     "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {56.0f,  68.0f},  150, false, true,  false},
-            {"mirror_twin",  "Зеркальный Мимик",  "sprites/characters/spr_vera.png",  "trig_booth8", "mirror_twin_talk",     {176.0f, 110.0f}, 190, false, true,  false}
+            {"officer_n4",   "Офицер Борис",      "sprites/characters/spr_guest.png", "trig_booth3", "n4_officer_boris_talk",{144.0f, 68.0f},  5,   false, false, true, 0, "n4_officer_served",     false, -1.0f},
+            {"mikhail_n4",   "Тень Михаила",      "sprites/characters/spr_kurt.png",  "trig_booth4", "mikhail_n4_talk",      {144.0f, 110.0f}, 50,  false, false, true, 0, "mikhail_served",        false, -1.0f},
+            {"arkhip_mimic", "Архип (?)",         "sprites/characters/spr_kurt.png",  "trig_booth2", "katya_mimic_talk",     {64.0f,  110.0f}, 95,  false, true,  false,0, "n3_mimic_banished",     false, -1.0f},
+            {"fake_kurt4",   "Двойник Курта",     "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {64.0f,  68.0f},  140, false, true,  false,0, "n2_fake_kurt_resolved", false, -1.0f},
+            {"mirror_twin",  "Зеркальный Мимик",  "sprites/characters/spr_vera.png",  "trig_booth5", "mirror_twin_talk",     {224.0f, 68.0f},  185, false, true,  false,0, "n2_fake_kurt_resolved", false, -1.0f}
         };
     } else {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.95f);
         m_guests = {
-            {"vera_spirit",  "Силуэт Веры",         "sprites/characters/spr_vera.png",  "trig_booth4", "vera_spirit_talk",   {116.0f, 110.0f}, 10,  false, false, true},
-            {"gleb_n5",      "Следователь Глеб",    "sprites/characters/spr_kurt.png",  "trig_booth1", "gleb_talk",          {56.0f,  68.0f},  50,  false, false, true},
-            {"kurt_n5",      "Дядя Курт",           "sprites/characters/spr_kurt.png",  "trig_booth7", "kurt_n5_talk",       {236.0f, 68.0f},  95,  false, false, true},
-            {"harbinger_n5", "Вестник Перекрёстка", "sprites/characters/spr_guest.png", "trig_booth8", "harbinger_n5_talk",  {176.0f, 110.0f}, 140, false, true,  false},
-            {"boss_n5",      "Хозяин Перекрёстка",  "sprites/characters/spr_guest.png", "trig_table6", "n5_boss_table6_talk",{236.0f, 110.0f}, 185, false, true,  false}
+            {"vera_spirit",  "Силуэт Веры",         "sprites/characters/spr_vera.png",  "trig_booth4", "vera_spirit_talk",   {144.0f, 110.0f}, 5,   false, false, true, 0, "n5_relic_collected", false, -1.0f},
+            {"gleb_n5",      "Следователь Глеб",    "sprites/characters/spr_kurt.png",  "trig_booth1", "gleb_talk",          {64.0f,  68.0f},  45,  false, false, true, 0, "n3_gleb_served",     false, -1.0f},
+            {"kurt_n5",      "Дядя Курт",           "sprites/characters/spr_kurt.png",  "trig_booth3", "kurt_n5_talk",       {144.0f, 68.0f},  90,  false, false, true, 0, "kurt5_served",       false, -1.0f},
+            {"harbinger_n5", "Вестник Перекрёстка", "sprites/characters/spr_guest.png", "trig_booth5", "harbinger_n5_talk",  {224.0f, 68.0f},  135, false, true,  false,0, "n2_fake_kurt_resolved", false, -1.0f},
+            {"boss_n5",      "Хозяин Перекрёстка",  "sprites/characters/spr_guest.png", "trig_table6", "n5_boss_table6_talk",{224.0f, 110.0f}, 180, false, true,  false,0, "n5_boss_banished",   false, -1.0f}
         };
+    }
+
+    for (auto& g : m_guests) {
+        if (g.spawnMinuteOffset == 0) {
+            g.spawned = true;
+            eng.Physics().SetTriggerEnabled(g.triggerId, true);
+            eng.Physics().UpdateTriggerDialogue(g.triggerId, g.dialogueId, g.name);
+        }
     }
 
     m_tutorial.Reset(nightNumber, withTutorial);
@@ -293,7 +305,7 @@ void LastOrderGame::UpdatePlayerMovement(engine::core::Engine& eng, float dt) {
         fl.directionDeg = dirAngles[m_playerFacing];
     }
 
-    m_nearestTrigger = eng.Physics().FindNearestTrigger(m_playerBody.Center(), 24.0f);
+    m_nearestTrigger = eng.Physics().FindNearestTrigger(m_playerBody.Center(), 26.0f);
 }
 
 void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
@@ -354,6 +366,7 @@ void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
         float dot = dir.x * lookDir.x + dir.y * lookDir.y;
         if (dot >= 0.90f) {
             g.spawned = false;
+            g.finished = true;
             eng.Physics().SetTriggerEnabled(g.triggerId, false);
             m_hitMarkerTimer = 0.30f;
             m_anomaliesKilled++;
@@ -361,9 +374,7 @@ void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
             eng.State().SetFlag("visor_first_hit");
             eng.State().SetFlag("anomalies_cleared_3d");
             eng.State().AddSanity(15);
-            if (g.id == "fake_kurt" || g.id == "fake_kurt4") eng.State().SetFlag("n2_fake_kurt_resolved");
-            if (g.id == "hatman") eng.State().SetFlag("hatman_served_safe");
-            if (g.id == "katya_n3" || g.id == "arkhip_mimic") eng.State().SetFlag("n3_mimic_banished");
+            if (!g.completedFlag.empty()) eng.State().SetFlag(g.completedFlag);
             eng.Renderer().TriggerFlash(Color{244, 184, 96, 180}, 0.30f);
             eng.Audio().PlaySfx("audio/sfx/sfx_window_bang.wav", 0.85f);
             m_visorKillBanner = "ДВОЙНИК ИЗГНАН: " + g.name;
@@ -396,7 +407,7 @@ void LastOrderGame::Update3DVisorShooter(engine::core::Engine& eng, float dt) {
         if (a.type == 1 || a.type == 2) {
             float moveSpd = m_visor3DActive
                 ? ((a.type == 2) ? 24.0f : 16.0f)
-                : ((a.type == 2) ? 14.0f : 10.0f);
+                : ((a.type == 2) ? 13.0f : 9.0f);
             if (dist > 13.0f) {
                 a.pos += (toPlayer / dist) * moveSpd * dt;
             }
@@ -438,7 +449,8 @@ void LastOrderGame::Update3DVisorShooter(engine::core::Engine& eng, float dt) {
         }
     }
 
-    if (activeCount < 2) {
+    bool allowAutoAnomalies = (m_screen == GameScreen::EndlessMode) || (m_currentNight >= 2);
+    if (allowAutoAnomalies && activeCount < 2) {
         m_anomalySpawnTimer -= dt;
         if (m_anomalySpawnTimer <= 0.0f) {
             m_anomalySpawnTimer = 55.0f;
@@ -448,7 +460,7 @@ void LastOrderGame::Update3DVisorShooter(engine::core::Engine& eng, float dt) {
 
     if (m_visor3DActive) {
         if (IsKeyPressed(KEY_X)) {
-            Spawn3DShooterWave(eng, 5);
+            Spawn3DShooterWave(eng, 4);
         }
 
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_F)) {
@@ -481,34 +493,69 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
     eng.Time().SetPaused(pauseShiftClock);
     eng.Time().Tick(fixedDt);
 
+    for (auto& g : m_guests) {
+        if (!g.spawned || g.finished) continue;
+        bool isDone = (!g.completedFlag.empty() && eng.State().HasFlag(g.completedFlag));
+        if (g.id == "hatman" && eng.State().HasFlag("hatman_served_anomaly")) isDone = true;
+        if (isDone) {
+            if (g.leaveTimer < 0.0f) {
+                g.leaveTimer = 1.6f;
+            } else if (!eng.Dialogue().IsActive()) {
+                g.leaveTimer -= fixedDt;
+                if (g.leaveTimer <= 0.0f) {
+                    g.spawned = false;
+                    g.finished = true;
+                    eng.Physics().SetTriggerEnabled(g.triggerId, false);
+                    m_cooking.RemoveDishFromTable(g.triggerId);
+                    eng.Audio().PlaySfx("audio/sfx/sfx_door_bell.wav", 0.65f);
+                }
+            }
+        }
+    }
+
     if (eng.Dialogue().IsActive() || m_inspectionUI.IsAnyModalOpen()) {
         return;
     }
 
-    m_ambientScreamerTimer -= fixedDt;
-    if (m_ambientScreamerTimer <= 0.0f) {
-        float nightFactor = static_cast<float>(std::max(1, m_currentNight));
-        m_ambientScreamerTimer = std::max(38.0f, 62.0f - nightFactor * 4.0f);
-        int roll = std::rand() % 100;
-        if (roll < 42 + m_currentNight * 7) {
-            TriggerScreamer(eng, SCREAMER_IDS[std::rand() % 14]);
-            eng.State().AddSanity(-8);
-        } else {
-            eng.Audio().PlaySfx("audio/sfx/sfx_whisper_vera.wav", 0.90f);
-            eng.Renderer().TriggerFlash(Color{185, 18, 28, 130}, 0.30f);
-            eng.Renderer().TriggerShake(3.8f, 0.40f);
+    if (m_currentNight >= 2) {
+        m_ambientScreamerTimer -= fixedDt;
+        if (m_ambientScreamerTimer <= 0.0f) {
+            float nightFactor = static_cast<float>(m_currentNight);
+            m_ambientScreamerTimer = std::max(38.0f, 65.0f - nightFactor * 4.0f);
+            int roll = std::rand() % 100;
+            if (roll < 38 + m_currentNight * 7) {
+                TriggerScreamer(eng, SCREAMER_IDS[std::rand() % 14]);
+                eng.State().AddSanity(-8);
+            } else {
+                eng.Audio().PlaySfx("audio/sfx/sfx_whisper_vera.wav", 0.90f);
+                eng.Renderer().TriggerFlash(Color{185, 18, 28, 130}, 0.30f);
+                eng.Renderer().TriggerShake(3.8f, 0.40f);
+            }
         }
     }
 
     float elapsedMins = eng.Time().GetShiftElapsedMinutes();
 
     for (auto& g : m_guests) {
-        if ((g.id == "fake_kurt" || g.id == "fake_kurt4") && eng.State().HasFlag("n2_fake_kurt_resolved")) continue;
-        if ((g.id == "katya_n3" || g.id == "arkhip_mimic") && eng.State().HasFlag("n3_mimic_banished")) continue;
-        if (!g.spawned && elapsedMins >= static_cast<float>(g.spawnMinuteOffset)) {
-            g.spawned = true;
-            eng.Physics().SetTriggerEnabled(g.triggerId, true);
-            eng.Audio().PlaySfx("audio/sfx/sfx_door_bell.wav", 0.85f);
+        if (g.spawned || g.finished) continue;
+        if (!g.completedFlag.empty() && eng.State().HasFlag(g.completedFlag)) {
+            g.finished = true;
+            continue;
+        }
+        if (elapsedMins >= static_cast<float>(g.spawnMinuteOffset)) {
+            bool tableBusy = false;
+            for (const auto& other : m_guests) {
+                if (other.spawned && other.triggerId == g.triggerId) {
+                    tableBusy = true;
+                    break;
+                }
+            }
+            if (!tableBusy) {
+                g.spawned = true;
+                eng.Physics().SetTriggerEnabled(g.triggerId, true);
+                eng.Physics().UpdateTriggerDialogue(g.triggerId, g.dialogueId, g.name);
+                eng.Audio().PlaySfx("audio/sfx/sfx_door_bell.wav", 0.85f);
+            }
         }
     }
 
@@ -563,9 +610,10 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
     } else if (m_currentNight == 3) {
         if (eng.State().HasFlag("n3_mirror_key_found")) {
             for (auto& g : m_guests) {
-                if (g.id == "boss_n3" && !g.spawned) {
+                if (g.id == "boss_n3" && !g.spawned && !g.finished) {
                     g.spawned = true;
                     eng.Physics().SetTriggerEnabled(g.triggerId, true);
+                    eng.Physics().UpdateTriggerDialogue(g.triggerId, g.dialogueId, g.name);
                     eng.Audio().PlaySfx("audio/sfx/sfx_door_bell.wav", 0.85f);
                 }
             }
@@ -587,9 +635,10 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
     } else if (m_currentNight == 5) {
         if (eng.State().HasFlag("n5_relic_collected")) {
             for (auto& g : m_guests) {
-                if (g.id == "boss_n5" && !g.spawned) {
+                if (g.id == "boss_n5" && !g.spawned && !g.finished) {
                     g.spawned = true;
                     eng.Physics().SetTriggerEnabled(g.triggerId, true);
+                    eng.Physics().UpdateTriggerDialogue(g.triggerId, g.dialogueId, g.name);
                     eng.Audio().PlaySfx("audio/sfx/sfx_door_bell.wav", 0.85f);
                 }
             }
@@ -907,7 +956,7 @@ ui::MirrorWorldState LastOrderGame::BuildMirrorState(const engine::core::Engine&
         if (g.triggerId == "trig_booth1" || g.triggerId == "trig_booth2") {
             ms.guestAtTable2 = true;
             ms.table2HasReflection = g.hasReflection;
-        } else if (g.triggerId == "trig_booth3" || g.triggerId == "trig_booth5" || g.triggerId == "trig_booth7" || g.triggerId == "trig_booth8") {
+        } else if (g.triggerId == "trig_booth3" || g.triggerId == "trig_booth5") {
             ms.guestAtTable1 = true;
             ms.table1HasReflection = g.hasReflection;
         } else if (g.triggerId == "trig_table6") {
@@ -1004,18 +1053,24 @@ void LastOrderGame::OnAction(engine::core::Engine& eng, const engine::core::Engi
     if (action.type == "give_item") {
         m_cooking.StartPreparation(eng, action.target, 1.4f);
     } else if (action.type == "set_flag") {
-        if (action.target == "kurt_served" || action.target == "n3_gleb_served") {
-            m_cooking.PlaceDishOnTable("booth_1", "coffee_sugar");
+        if (action.target == "kurt_served") {
+            m_cooking.PlaceDishOnTable("trig_booth1", "coffee_sugar");
         } else if (action.target == "katya_served") {
-            m_cooking.PlaceDishOnTable("booth_3", "tea_sugar");
+            m_cooking.PlaceDishOnTable("trig_booth3", "tea_sugar");
         } else if (action.target == "n2_arkhip_served" || action.target == "n4_officer_served") {
-            m_cooking.PlaceDishOnTable("booth_3", "coffee_black");
-        } else if (action.target == "danila_served" || action.target == "semen_served" || action.target == "korsakov_served" || action.target == "mikhail_served" || action.target == "kurt5_served") {
-            m_cooking.PlaceDishOnTable("booth_7", "coffee_sugar");
+            m_cooking.PlaceDishOnTable("trig_booth3", "coffee_black");
+        } else if (action.target == "kurt5_served") {
+            m_cooking.PlaceDishOnTable("trig_booth3", "coffee_sugar");
+        } else if (action.target == "danila_served" || action.target == "semen_served" || action.target == "n3_gleb_served") {
+            m_cooking.PlaceDishOnTable("trig_booth4", "coffee_sugar");
+        } else if (action.target == "mikhail_served") {
+            m_cooking.PlaceDishOnTable("trig_booth4", "cherry_pie");
+        } else if (action.target == "korsakov_served") {
+            m_cooking.PlaceDishOnTable("trig_booth2", "tea_sugar");
         } else if (action.target == "valya_served" || action.target == "n2_valya_served") {
-            m_cooking.PlaceDishOnTable("booth_2", "cherry_pie");
+            m_cooking.PlaceDishOnTable("trig_booth2", "cherry_pie");
         } else if (action.target == "hatman_served_safe" || action.target == "hatman_served_anomaly") {
-            m_cooking.PlaceDishOnTable("booth_5", "tea_sugar");
+            m_cooking.PlaceDishOnTable("trig_booth5", "tea_sugar");
         } else if (action.target == "night1_completed") {
             m_sanity.MarkNightCompleted(1);
         } else if (action.target == "night2_completed") {
@@ -1043,9 +1098,11 @@ void LastOrderGame::OnAction(engine::core::Engine& eng, const engine::core::Engi
             eng.Renderer().TriggerFlash(Color{168, 36, 36, 240}, 0.65f);
             eng.Renderer().TriggerShake(4.2f, 0.55f);
             for (auto& g : m_guests) {
-                if (g.anomalous) {
+                if (g.anomalous && g.spawned) {
                     g.spawned = false;
+                    g.finished = true;
                     eng.Physics().SetTriggerEnabled(g.triggerId, false);
+                    break;
                 }
             }
         } else if (action.target == "start_minigame_n1") {
@@ -1122,6 +1179,7 @@ void LastOrderGame::OnRenderWorld(engine::core::Engine& eng) {
                        m_lightsFlickering, m_blackoutMode, m_debugMode, m_nearestTrigger,
                        m_guests, m_anomalies3D);
         m_cooking.RenderWorld(eng, m_world.ComputeCameraOffset(m_playerBody.Center()));
+        m_tutorial.RenderWorldGuides(eng, m_playerBody.Center());
     }
 }
 
@@ -1137,7 +1195,7 @@ void LastOrderGame::RenderDebugOverlay(engine::core::Engine& eng) const {
                   "DEBUG [F3] | FPS: %d | Ночь: %d\n"
                   "Позиция: (%.1f, %.1f)\n"
                   "Noclip [N]: %s | Визор: %s\n"
-                  "Триггер: %s\n"
+                  "Триггер: %s (%s)\n"
                   "[1..5] Ночь | [F2] +30м | [L] Свет\n"
                   "[F5..F7, F9, F10] Мини-игры 1..5\n"
                   "[F8 / G] Скример",
@@ -1145,7 +1203,8 @@ void LastOrderGame::RenderDebugOverlay(engine::core::Engine& eng) const {
                   m_playerBody.Center().x, m_playerBody.Center().y,
                   m_debugNoclip ? "ВКЛ" : "ВЫКЛ",
                   m_visor3DActive ? "3D" : "2D",
-                  m_nearestTrigger.has_value() ? m_nearestTrigger->id.c_str() : "нет");
+                  m_nearestTrigger.has_value() ? m_nearestTrigger->id.c_str() : "нет",
+                  m_nearestTrigger.has_value() ? m_nearestTrigger->dialogueId.c_str() : "-");
 
     DrawTextEx(font, buf, Vector2{24, 116}, 16.5f, 1.0f, Color{110, 255, 140, 255});
 }

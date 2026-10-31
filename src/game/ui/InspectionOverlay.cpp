@@ -170,7 +170,6 @@ void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNig
 
     if (currentNight == 1) {
         drawTask("Прочитать письмо на кассе", eng.State().HasFlag("read_mikhail_note"));
-        drawTask("Зачистить 3D-аномалии в режиме Визора [V] (ЛКМ — огонь)", eng.State().HasFlag("anomalies_cleared_3d"));
         drawTask("Обслужить Дядю Курта (Стол №1)", eng.State().HasFlag("kurt_served"));
         drawTask("Обслужить Студентку Катю (Стол №3)", eng.State().HasFlag("katya_served"));
         drawTask("Обслужить Тётю Валю (Стол №2)", eng.State().HasFlag("valya_served"));

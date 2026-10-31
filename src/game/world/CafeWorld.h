@@ -20,6 +20,9 @@ struct GuestNpc {
     bool anomalous = false;
     bool hasReflection = true;
     int spriteFrame = 0;
+    std::string completedFlag;
+    bool finished = false;
+    float leaveTimer = -1.0f;
 };
 
 struct VisorAnomaly3D {

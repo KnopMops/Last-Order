@@ -26,15 +26,12 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
     phys.AddStaticCollider("kitchen_fridge", {274.0f, 22.0f,  28.0f,  18.0f});
     phys.AddStaticCollider("corr_generator", {12.0f,  64.0f,  18.0f,  18.0f});
 
-    phys.AddStaticCollider("booth_1",        {60.0f,  84.0f,  20.0f,  12.0f});
-    phys.AddStaticCollider("booth_3",        {120.0f, 84.0f,  20.0f,  12.0f});
-    phys.AddStaticCollider("booth_5",        {180.0f, 84.0f,  20.0f,  12.0f});
-    phys.AddStaticCollider("booth_7",        {240.0f, 84.0f,  20.0f,  12.0f});
-
-    phys.AddStaticCollider("booth_2",        {60.0f,  126.0f, 20.0f,  12.0f});
-    phys.AddStaticCollider("booth_4",        {120.0f, 126.0f, 20.0f,  12.0f});
-    phys.AddStaticCollider("booth_8",        {180.0f, 126.0f, 20.0f,  12.0f});
-    phys.AddStaticCollider("booth_table6",   {240.0f, 126.0f, 20.0f,  12.0f});
+    phys.AddStaticCollider("booth_1",        {68.0f,  84.0f,  20.0f,  12.0f});
+    phys.AddStaticCollider("booth_2",        {68.0f,  126.0f, 20.0f,  12.0f});
+    phys.AddStaticCollider("booth_3",        {148.0f, 84.0f,  20.0f,  12.0f});
+    phys.AddStaticCollider("booth_4",        {148.0f, 126.0f, 20.0f,  12.0f});
+    phys.AddStaticCollider("booth_5",        {228.0f, 84.0f,  20.0f,  12.0f});
+    phys.AddStaticCollider("booth_table6",   {228.0f, 126.0f, 20.0f,  12.0f});
 
     std::string noteDlg =
         (nightNumber == 1) ? "note_mikhail_intro" :
@@ -66,15 +63,12 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
     phys.AddTrigger({"trig_backdoor", "Уличный контейнер",   "backdoor_window_inspect", {118.0f, 150.0f, 38.0f, 22.0f}, true});
     phys.AddTrigger({"trig_window",   "Окно на шоссе",       windowDlg,             {168.0f, 150.0f, 40.0f, 22.0f}, true});
 
-    phys.AddTrigger({"trig_booth1",   "Стол №1",             "",                    {50.0f,  72.0f,  36.0f, 32.0f}, false});
-    phys.AddTrigger({"trig_booth3",   "Стол №3",             "",                    {110.0f, 72.0f,  36.0f, 32.0f}, false});
-    phys.AddTrigger({"trig_booth5",   "Стол №5",             "",                    {170.0f, 72.0f,  36.0f, 32.0f}, false});
-    phys.AddTrigger({"trig_booth7",   "Стол №7",             "",                    {230.0f, 72.0f,  36.0f, 32.0f}, false});
-
-    phys.AddTrigger({"trig_booth2",   "Стол №2",             "",                    {50.0f,  114.0f, 36.0f, 32.0f}, false});
-    phys.AddTrigger({"trig_booth4",   "Стол №4",             "",                    {110.0f, 114.0f, 36.0f, 32.0f}, false});
-    phys.AddTrigger({"trig_booth8",   "Стол №8",             "",                    {170.0f, 114.0f, 36.0f, 32.0f}, false});
-    phys.AddTrigger({"trig_table6",   "Стол №6",             "",                    {230.0f, 114.0f, 36.0f, 32.0f}, false});
+    phys.AddTrigger({"trig_booth1",   "Стол №1",             "",                    {56.0f,  70.0f,  42.0f, 36.0f}, false});
+    phys.AddTrigger({"trig_booth2",   "Стол №2",             "",                    {56.0f,  112.0f, 42.0f, 36.0f}, false});
+    phys.AddTrigger({"trig_booth3",   "Стол №3",             "",                    {136.0f, 70.0f,  42.0f, 36.0f}, false});
+    phys.AddTrigger({"trig_booth4",   "Стол №4",             "",                    {136.0f, 112.0f, 42.0f, 36.0f}, false});
+    phys.AddTrigger({"trig_booth5",   "Стол №5",             "",                    {216.0f, 70.0f,  42.0f, 36.0f}, false});
+    phys.AddTrigger({"trig_table6",   "Стол №6",             "",                    {216.0f, 112.0f, 42.0f, 36.0f}, false});
 }
 
 void CafeWorld::BuildLighting(engine::core::Engine& eng, int nightNumber) {
@@ -86,9 +80,9 @@ void CafeWorld::BuildLighting(engine::core::Engine& eng, int nightNumber) {
     light.SetAmbientColor(amb);
 
     light.AddPointLight({"lamp_counter",  {140.0f, 44.0f},  95.0f, Color{244, 184, 96, 255}, 1.0f,  2.5f, 0.03f, true});
-    light.AddPointLight({"lamp_hall_L",   {85.0f,  105.0f}, 85.0f, Color{244, 184, 96, 255}, 0.90f, 1.8f, 0.02f, true});
-    light.AddPointLight({"lamp_hall_C",   {160.0f, 105.0f}, 85.0f, Color{244, 184, 96, 255}, 0.88f, 2.1f, 0.03f, true});
-    light.AddPointLight({"lamp_hall_R",   {235.0f, 105.0f}, 80.0f, Color{244, 184, 96, 255}, 0.82f, 3.2f, 0.04f, true});
+    light.AddPointLight({"lamp_hall_L",   {78.0f,  105.0f}, 85.0f, Color{244, 184, 96, 255}, 0.90f, 1.8f, 0.02f, true});
+    light.AddPointLight({"lamp_hall_C",   {158.0f, 105.0f}, 85.0f, Color{244, 184, 96, 255}, 0.88f, 2.1f, 0.03f, true});
+    light.AddPointLight({"lamp_hall_R",   {238.0f, 105.0f}, 80.0f, Color{244, 184, 96, 255}, 0.82f, 3.2f, 0.04f, true});
     light.AddPointLight({"lamp_jukebox",  {60.0f,  30.0f},  50.0f, Color{214, 69,  69, 255}, 0.70f, 6.0f, 0.08f, true});
     light.AddPointLight({"lamp_kitchen",  {268.0f, 36.0f},  75.0f, Color{216, 230, 242, 255},0.85f, 4.0f, 0.05f, true});
     light.AddPointLight({"lamp_corridor", {24.0f,  90.0f},  65.0f, Color{143, 169, 196, 255},0.75f, 5.0f, 0.08f, true});
@@ -186,15 +180,12 @@ void CafeWorld::Render(engine::core::Engine& eng,
     DrawRectangleLines(122, 162, 28, 10, Color{143, 169, 196, 255});
     DrawRectangle(170, 166, 34, 5,  Color{143, 169, 196, 220});
 
-    DrawTexture(texBooth,  56,  80,  WHITE);
-    DrawTexture(texBooth,  116, 80,  WHITE);
-    DrawTexture(texBooth,  176, 80,  WHITE);
-    DrawTexture(texBooth,  236, 80,  WHITE);
-
-    DrawTexture(texBooth,  56,  122, WHITE);
-    DrawTexture(texBooth,  116, 122, WHITE);
-    DrawTexture(texBooth,  176, 122, WHITE);
-    DrawTexture(texTable6, 236, 122, WHITE);
+    DrawTexture(texBooth,  64,  80,  WHITE);
+    DrawTexture(texBooth,  64,  122, WHITE);
+    DrawTexture(texBooth,  144, 80,  WHITE);
+    DrawTexture(texBooth,  144, 122, WHITE);
+    DrawTexture(texBooth,  224, 80,  WHITE);
+    DrawTexture(texTable6, 224, 122, WHITE);
 
     float tNow = static_cast<float>(GetTime());
     for (const auto& a : anomalies) {
@@ -328,11 +319,11 @@ void CafeWorld::Render3DVisor(engine::core::Engine& eng,
     drawBlock(82,  42,  112, 12,  1.05f, Color{125, 62, 38, 255}, Color{244, 184, 96, 200});
     drawBlock(52,  22,  16,  18,  1.70f, Color{168, 42, 68, 255}, Color{255, 120, 160, 255});
 
-    const float bx[4] = {60.0f, 120.0f, 180.0f, 240.0f};
-    for (int i = 0; i < 4; ++i) {
+    const float bx[3] = {68.0f, 148.0f, 228.0f};
+    for (int i = 0; i < 3; ++i) {
         drawBlock(bx[i], 84.0f,  20.0f, 12.0f, 0.85f, Color{110, 56, 36, 255}, Color{196, 122, 59, 200});
-        Color row2Col = (i == 3) ? Color{88, 20, 28, 255} : Color{110, 56, 36, 255};
-        Color row2Wire = (i == 3) ? Color{255, 50, 50, 255} : Color{196, 122, 59, 200};
+        Color row2Col = (i == 2) ? Color{88, 20, 28, 255} : Color{110, 56, 36, 255};
+        Color row2Wire = (i == 2) ? Color{255, 50, 50, 255} : Color{196, 122, 59, 200};
         drawBlock(bx[i], 126.0f, 20.0f, 12.0f, 0.85f, row2Col, row2Wire);
     }
 

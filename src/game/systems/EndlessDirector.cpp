@@ -66,9 +66,9 @@ void EndlessDirector::Reset() {
     m_elapsedSeconds = 0.0f;
     m_score = 0;
     m_tension = 22.0f;
-    m_screamerCooldown = 10.0f;
+    m_screamerCooldown = 12.0f;
     m_blackoutTimer = 42.0f;
-    m_ambientScareTimer = 7.0f;
+    m_ambientScareTimer = 8.0f;
     m_blackoutActive = false;
     m_patronSpawnTimer = 4.0f;
     m_pendingScreamer = false;
@@ -77,14 +77,12 @@ void EndlessDirector::Reset() {
     m_lastStatusMsg.clear();
     m_statusTimer = 0.0f;
 
-    m_patrons[0] = {"p1", "Стол №1", "trig_booth1", "sprites/characters/spr_kurt.png",  {56.0f,  68.0f},  EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[1] = {"p2", "Стол №2", "trig_booth2", "sprites/characters/spr_valya.png", {56.0f,  110.0f}, EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[2] = {"p3", "Стол №3", "trig_booth3", "sprites/characters/spr_guest.png", {116.0f, 68.0f},  EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[3] = {"p4", "Стол №4", "trig_booth4", "sprites/characters/spr_vera.png",  {116.0f, 110.0f}, EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[4] = {"p5", "Стол №5", "trig_booth5", "sprites/characters/spr_kurt.png",  {176.0f, 68.0f},  EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[5] = {"p6", "Стол №6", "trig_table6", "sprites/characters/spr_guest.png", {236.0f, 110.0f}, EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[6] = {"p7", "Стол №7", "trig_booth7", "sprites/characters/spr_vera.png",  {236.0f, 68.0f},  EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[7] = {"p8", "Стол №8", "trig_booth8", "sprites/characters/spr_guest.png", {176.0f, 110.0f}, EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[0] = {"p1", "Стол №1", "trig_booth1", "sprites/characters/spr_kurt.png",  {64.0f,  68.0f},  EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[1] = {"p2", "Стол №2", "trig_booth2", "sprites/characters/spr_valya.png", {64.0f,  110.0f}, EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[2] = {"p3", "Стол №3", "trig_booth3", "sprites/characters/spr_guest.png", {144.0f, 68.0f},  EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[3] = {"p4", "Стол №4", "trig_booth4", "sprites/characters/spr_vera.png",  {144.0f, 110.0f}, EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[4] = {"p5", "Стол №5", "trig_booth5", "sprites/characters/spr_kurt.png",  {224.0f, 68.0f},  EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[5] = {"p6", "Стол №6", "trig_table6", "sprites/characters/spr_guest.png", {224.0f, 110.0f}, EndlessPatronState::Empty, "", 0.0f};
 }
 
 void EndlessDirector::Update(engine::core::Engine& eng, float dt, engine::math::Vec2 , bool hasLight) {
@@ -112,7 +110,7 @@ void EndlessDirector::Update(engine::core::Engine& eng, float dt, engine::math::
 
     m_ambientScareTimer -= dt;
     if (m_ambientScareTimer <= 0.0f) {
-        m_ambientScareTimer = std::max(4.5f, 11.0f - difficultyScale * 2.0f);
+        m_ambientScareTimer = std::max(5.5f, 12.0f - difficultyScale * 2.0f);
         int r = std::rand() % 4;
         if (r == 0) eng.Audio().PlaySfx("audio/sfx/sfx_phantom_steps.wav", 0.95f);
         else if (r == 1) eng.Audio().PlaySfx("audio/sfx/sfx_window_bang.wav", 0.90f);
@@ -122,9 +120,9 @@ void EndlessDirector::Update(engine::core::Engine& eng, float dt, engine::math::
         eng.Renderer().TriggerFlash(Color{185, 20, 28, 120}, 0.28f);
     }
 
-    if (m_tension >= 68.0f && m_screamerCooldown <= 0.0f) {
+    if (m_tension >= 72.0f && m_screamerCooldown <= 0.0f) {
         m_tension = 24.0f;
-        m_screamerCooldown = std::max(8.0f, 16.0f - difficultyScale * 1.5f);
+        m_screamerCooldown = std::max(10.0f, 18.0f - difficultyScale * 1.5f);
         m_pendingScreamer = true;
         int idx = std::rand() % 14;
         m_pendingScreamerId = ALL_SCREAMERS[idx];
@@ -158,10 +156,10 @@ void EndlessDirector::UpdatePatrons(engine::core::Engine& eng, float dt) {
     if (m_patronSpawnTimer <= 0.0f) {
         m_patronSpawnTimer = std::max(5.0f, 11.0f - (m_elapsedSeconds / 60.0f));
 
-        for (int attempt = 0; attempt < 8; ++attempt) {
-            int i = (std::rand() + attempt) % 8;
+        for (int attempt = 0; attempt < 6; ++attempt) {
+            int i = (std::rand() + attempt) % 6;
             if (m_patrons[i].state == EndlessPatronState::Empty) {
-                bool isMimic = (std::rand() % 100) < 45;
+                bool isMimic = (std::rand() % 100) < 42;
                 if (isMimic) {
                     m_patrons[i].state = EndlessPatronState::AnomalyMimic;
                     m_patrons[i].requestedItem.clear();
@@ -177,7 +175,7 @@ void EndlessDirector::UpdatePatrons(engine::core::Engine& eng, float dt) {
         }
     }
 
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 6; ++i) {
         if (m_patrons[i].state != EndlessPatronState::Empty) {
             m_patrons[i].patienceTimer -= dt;
             if (m_patrons[i].patienceTimer <= 0.0f) {
@@ -192,7 +190,7 @@ void EndlessDirector::UpdatePatrons(engine::core::Engine& eng, float dt) {
 
 void EndlessDirector::SyncGuestNpcs(std::vector<world::GuestNpc>& outGuests) const {
     outGuests.clear();
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 6; ++i) {
         if (m_patrons[i].state != EndlessPatronState::Empty) {
             bool isMimic = (m_patrons[i].state == EndlessPatronState::AnomalyMimic);
             outGuests.push_back(world::GuestNpc{
@@ -212,7 +210,7 @@ void EndlessDirector::SyncGuestNpcs(std::vector<world::GuestNpc>& outGuests) con
 }
 
 void EndlessDirector::InteractWithBooth(engine::core::Engine& eng, const std::string& triggerId, bool flashlightOn) {
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < 6; ++i) {
         if (m_patrons[i].triggerId == triggerId && m_patrons[i].state != EndlessPatronState::Empty) {
             if (m_patrons[i].state == EndlessPatronState::AnomalyMimic) {
                 if (flashlightOn) {
@@ -223,7 +221,7 @@ void EndlessDirector::InteractWithBooth(engine::core::Engine& eng, const std::st
                     eng.Renderer().TriggerFlash(Color{244, 184, 96, 200}, 0.35f);
                     eng.Renderer().TriggerShake(3.5f, 0.4f);
                     eng.Audio().PlaySfx("audio/sfx/sfx_window_bang.wav", 0.85f);
-                    m_lastStatusMsg = "Двойник изгнан! (+350 очков)";
+                    m_lastStatusMsg = "Двойник изгнан и покинул зал! (+350 очков)";
                     m_statusTimer = 3.5f;
                 } else {
                     m_pendingScreamer = true;
@@ -240,7 +238,7 @@ void EndlessDirector::InteractWithBooth(engine::core::Engine& eng, const std::st
                     m_tension = std::max(0.0f, m_tension - 22.0f);
                     eng.State().AddSanity(12);
                     eng.Audio().PlaySfx("audio/sfx/sfx_cash_register.wav", 0.85f);
-                    m_lastStatusMsg = "Заказ выполнен! (+250 очков)";
+                    m_lastStatusMsg = "Гость обслужен и ушёл! (+250 очков)";
                     m_statusTimer = 3.5f;
                 } else {
                     const char* reqName = (m_patrons[i].requestedItem == "coffee_sugar") ? "Кофе" : "Вишнёвый пирог";

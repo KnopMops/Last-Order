@@ -50,15 +50,13 @@ void CookingSystem::StartPreparation(engine::core::Engine& eng, const std::strin
 }
 
 void CookingSystem::PlaceDishOnTable(const std::string& tableId, const std::string& itemId) {
-    engine::math::Vec2 pos = {68.0f, 78.0f};
-    if (tableId == "booth_1")      pos = {68.0f,  78.0f};
-    else if (tableId == "booth_2") pos = {68.0f,  120.0f};
-    else if (tableId == "booth_3") pos = {128.0f, 78.0f};
-    else if (tableId == "booth_4") pos = {128.0f, 120.0f};
-    else if (tableId == "booth_5") pos = {188.0f, 78.0f};
-    else if (tableId == "booth_6") pos = {248.0f, 120.0f};
-    else if (tableId == "booth_7") pos = {248.0f, 78.0f};
-    else if (tableId == "booth_8") pos = {188.0f, 120.0f};
+    engine::math::Vec2 pos = {76.0f, 78.0f};
+    if (tableId == "booth_1" || tableId == "trig_booth1")      pos = {76.0f,  78.0f};
+    else if (tableId == "booth_2" || tableId == "trig_booth2") pos = {76.0f,  120.0f};
+    else if (tableId == "booth_3" || tableId == "trig_booth3") pos = {156.0f, 78.0f};
+    else if (tableId == "booth_4" || tableId == "trig_booth4") pos = {156.0f, 120.0f};
+    else if (tableId == "booth_5" || tableId == "trig_booth5") pos = {236.0f, 78.0f};
+    else if (tableId == "booth_6" || tableId == "trig_table6") pos = {236.0f, 120.0f};
 
     for (auto& d : m_servedDishes) {
         if (d.tableId == tableId) {
@@ -67,6 +65,20 @@ void CookingSystem::PlaceDishOnTable(const std::string& tableId, const std::stri
         }
     }
     m_servedDishes.push_back({tableId, itemId, pos});
+}
+
+void CookingSystem::RemoveDishFromTable(const std::string& tableId) {
+    m_servedDishes.erase(
+        std::remove_if(m_servedDishes.begin(), m_servedDishes.end(),
+                       [&](const TableDish& d) {
+                           return d.tableId == tableId ||
+                                  (tableId == "trig_booth1" && d.tableId == "booth_1") ||
+                                  (tableId == "trig_booth2" && d.tableId == "booth_2") ||
+                                  (tableId == "trig_booth3" && d.tableId == "booth_3") ||
+                                  (tableId == "trig_booth4" && d.tableId == "booth_4") ||
+                                  (tableId == "trig_booth5" && d.tableId == "booth_5");
+                       }),
+        m_servedDishes.end());
 }
 
 void CookingSystem::Update(engine::core::Engine& eng, float dt, engine::math::Vec2 playerCenter) {

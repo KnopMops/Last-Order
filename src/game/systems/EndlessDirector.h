@@ -64,7 +64,7 @@ private:
     bool m_blackoutActive = false;
 
     float m_patronSpawnTimer = 6.0f;
-    EndlessPatron m_patrons[8];
+    EndlessPatron m_patrons[6];
 
     bool m_pendingScreamer = false;
     std::string m_pendingScreamerId;
