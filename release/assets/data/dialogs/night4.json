@@ -1,0 +1,164 @@
+{
+  "nodes": [
+    {
+      "id": "n4_intro_diary",
+      "lines": [
+        {
+          "speaker": "Ночь 4 — «Полночный звонок»",
+          "text": "«Кафе окружено двойниками. Ответь на звонок настенного телефона, обслужи патрульного Бориса и выжги зеркальных мимиков через Настенное зеркало»."
+        }
+      ],
+      "choices": [
+        {
+          "text": "[04:00] Закрыть кассу и перейти к финальной Ночи 5",
+          "nextNode": "n4_ending_complete",
+          "requireFlag": "n4_shift_0400_ready"
+        },
+        {
+          "text": "Начать смену",
+          "nextNode": "",
+          "forbidFlag": "n4_shift_0400_ready",
+          "actions": [
+            { "type": "set_flag", "target": "n4_read_diary" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n4_phone_ring_talk",
+      "lines": [
+        {
+          "speaker": "Телефон на стене",
+          "text": "Сквозь треск помех слышен голос Веры: «Лера, они лезут сквозь зеркало в левом коридоре! Подойди к зеркалу и выжги пятерых двойников лучом фонарика!»"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Принять предупреждение и положить трубку",
+          "nextNode": "",
+          "actions": [
+            { "type": "set_flag", "target": "n4_phone_answered" },
+            { "type": "play_sfx", "target": "audio/sfx/sfx_phone_whisper.wav" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n4_officer_boris_talk",
+      "lines": [
+        {
+          "speaker": "Офицер Борис (Стол №3)",
+          "text": "На 47-м километре шоссе машины идут по кругу. Налей мне крепкого эспрессо без сахара, нужно продержаться до рассвета."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Подать крепкий эспрессо без сахара",
+          "requireHeldItem": "coffee_black",
+          "forbidFlag": "n4_officer_served",
+          "actions": [
+            { "type": "clear_item", "target": "" },
+            { "type": "set_flag", "target": "n4_officer_served" },
+            { "type": "add_sanity", "value": 15 },
+            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" }
+          ],
+          "nextNode": "n4_officer_done"
+        },
+        {
+          "text": "Подать чёрный кофе с сахаром",
+          "requireHeldItem": "coffee_sugar",
+          "forbidFlag": "n4_officer_served",
+          "actions": [
+            { "type": "clear_item", "target": "" },
+            { "type": "set_flag", "target": "n4_officer_served" },
+            { "type": "add_sanity", "value": 10 },
+            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" }
+          ],
+          "nextNode": "n4_officer_done"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "n4_officer_done",
+      "lines": [
+        {
+          "speaker": "Офицер Борис",
+          "text": "Спасибо. Проверяй остальных гостей через Визор [V] — двое в зале явно не люди."
+        }
+      ]
+    },
+    {
+      "id": "n4_jukebox_haunted",
+      "lines": [
+        {
+          "speaker": "Музыкальный автомат и Зазеркалье",
+          "text": "Автомат играет мелодию 1986 года задом наперёд, а зеркала вокруг трещат от натиска двойников."
+        }
+      ],
+      "choices": [
+        {
+          "text": "[3D Мини-игра] Войти в Зазеркалье и выжечь 5 двойников",
+          "forbidFlag": "n4_jukebox_cleared",
+          "actions": [
+            { "type": "event", "target": "start_minigame_n4" }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Выдернуть шнур питания",
+          "forbidFlag": "n4_jukebox_cleared",
+          "actions": [
+            { "type": "set_flag", "target": "n4_jukebox_cleared" },
+            { "type": "event", "target": "stabilize_lights" },
+            { "type": "screamer", "target": "sc_night10_bloody_mirror" }
+          ],
+          "nextNode": "n4_jukebox_silenced"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "n4_jukebox_silenced",
+      "lines": [
+        {
+          "speaker": "Лера",
+          "text": "Музыкальный автомат обесточен."
+        }
+      ]
+    },
+    {
+      "id": "n4_ending_complete",
+      "lines": [
+        {
+          "speaker": "04:00 — Конец Ночи 4",
+          "text": "Четвёртая смена завершена. Осталась последняя, пятая ночь — суд Хозяина Перекрёстка."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Перейти к Ночи 5: «Последний заказ (Финал)»",
+          "actions": [
+            { "type": "set_flag", "target": "night4_completed" },
+            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" },
+            { "type": "event", "target": "start_night_5" }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Остаться в зале",
+          "actions": [
+            { "type": "set_flag", "target": "night4_completed" }
+          ],
+          "nextNode": ""
+        }
+      ]
+    }
+  ]
+}

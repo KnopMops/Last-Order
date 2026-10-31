@@ -1,0 +1,128 @@
+{
+  "nodes": [
+    {
+      "id": "n5_intro_diary",
+      "lines": [
+        {
+          "speaker": "Ночь 5 — «Последний заказ: Финал»",
+          "text": "«Лера, это ночь суда. Выбеги на старое шоссе через южную дверь, чтобы собрать 3 Осколка Реликвии 1986 года, а затем встреть Хозяина Перекрёстка за Столом №6»."
+        }
+      ],
+      "choices": [
+        {
+          "text": "[04:00] Открыть двери кафе навстречу рассвету (ФИНАЛ)",
+          "nextNode": "n5_ending_true",
+          "requireFlag": "n5_boss_banished"
+        },
+        {
+          "text": "Принять финальную смену",
+          "nextNode": "",
+          "forbidFlag": "n5_boss_banished",
+          "actions": [
+            { "type": "set_flag", "target": "n5_read_diary" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vera_spirit_talk",
+      "lines": [
+        {
+          "speaker": "Вера (Стол №4)",
+          "text": "«Лера, чтобы уничтожить контракт Хозяина Перекрёстка, нужны три Осколка Реликвии. Они разбросаны на ночном шоссе прямо за южной дверью кафе»."
+        }
+      ],
+      "choices": [
+        {
+          "text": "[3D Мини-игра] Выбежать на ночное шоссе за Реликвией (250 м)",
+          "forbidFlag": "n5_relic_collected",
+          "actions": [
+            { "type": "event", "target": "start_minigame_n5" }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "n5_boss_table6_talk",
+      "lines": [
+        {
+          "speaker": "Хозяин Перекрёстка (Стол №6)",
+          "text": "«Часы пробили 03:33. Отдай мне своё имя и прими Последний заказ — или предъяви собранную Реликвию 1986 года»."
+        }
+      ],
+      "choices": [
+        {
+          "text": "[ИСТИННЫЙ ФИНАЛ] Предъявить Реликвию 1986 года и Ключ Веры: «Счёт закрыт!»",
+          "nextNode": "n5_boss_defeated_true",
+          "forbidFlag": "n5_boss_banished",
+          "actions": [
+            { "type": "set_flag", "target": "n5_boss_banished" },
+            { "type": "set_flag", "target": "n5_shift_0400_ready" },
+            { "type": "event", "target": "stabilize_lights" },
+            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" }
+          ]
+        },
+        {
+          "text": "[3D ПОГОНЯ] Сразиться с тенями на шоссе и забрать Реликвию!",
+          "forbidFlag": "n5_relic_collected",
+          "actions": [
+            { "type": "event", "target": "start_minigame_n5" }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "[ТЁМНЫЙ ФИНАЛ] Подчиниться и записать Последний заказ",
+          "nextNode": "n5_boss_accepted_dark",
+          "forbidFlag": "n5_boss_banished",
+          "actions": [
+            { "type": "screamer", "target": "sc_night14_skull_glitch" },
+            { "type": "add_sanity", "value": -100 }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "n5_boss_defeated_true",
+      "lines": [
+        {
+          "speaker": "Хозяин Перекрёстка",
+          "text": "Осколки Реликвии вспыхивают ослепительным пламенем! Тень Хозяина рассыпается пеплом, а на часах наступает 04:00 утра."
+        }
+      ]
+    },
+    {
+      "id": "n5_boss_accepted_dark",
+      "lines": [
+        {
+          "speaker": "Тёмный финал",
+          "text": "Кафе поглощает вас навсегда."
+        }
+      ]
+    },
+    {
+      "id": "n5_ending_true",
+      "lines": [
+        {
+          "speaker": "РАССВЕТ 1998 ГОДА — ФИНАЛ ИГРЫ",
+          "text": "Туман над шоссе рассеивается, и первые лучи солнца освещают зал «Тёплого угла». Проклятие 1986 года снято навсегда!"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Завершить игру и выйти в Главное меню",
+          "nextNode": "",
+          "actions": [
+            { "type": "set_flag", "target": "night5_completed" },
+            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" },
+            { "type": "event", "target": "return_main_menu" }
+          ]
+        }
+      ]
+    }
+  ]
+}
