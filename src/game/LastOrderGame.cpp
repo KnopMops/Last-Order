@@ -306,10 +306,12 @@ void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
         hitA.hp -= 1;
         hitA.hitFlash = 0.18f;
         m_hitMarkerTimer = 0.22f;
+        eng.State().SetFlag("visor_first_hit");
         if (hitA.hp <= 0) {
             hitA.active = false;
             m_anomaliesKilled++;
             m_shooterScore += 150;
+            eng.State().SetFlag("anomalies_cleared_3d");
             eng.State().AddSanity(10);
             m_endlessDirector.OnSanityRestored(15);
             eng.Audio().PlaySfx("audio/sfx/sfx_chase_relic_pickup.wav", 0.85f);
@@ -333,6 +335,8 @@ void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
             m_hitMarkerTimer = 0.30f;
             m_anomaliesKilled++;
             m_shooterScore += 300;
+            eng.State().SetFlag("visor_first_hit");
+            eng.State().SetFlag("anomalies_cleared_3d");
             eng.State().AddSanity(15);
             if (g.id == "fake_kurt" || g.id == "fake_kurt4") eng.State().SetFlag("n2_fake_kurt_resolved");
             if (g.id == "hatman") eng.State().SetFlag("hatman_served_safe");

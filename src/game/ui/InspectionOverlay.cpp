@@ -126,7 +126,7 @@ void InspectionOverlay::RenderRulesSheet(engine::core::Engine& eng, int currentN
     };
 
     drawRule("1. ПОСТОЯННЫЕ ГОСТИ: Дядя Курт и Следователь Глеб пьют чёрный кофе с сахаром. Тётя Валя — вишнёвый пирог. Студентка Катя — чай с сахаром. Механик Архип и Офицер Борис — крепкий эспрессо без сахара.", Color{42, 23, 21, 255});
-    drawRule("2. 3D-ВИЗОР «ОКО-86» [V] И ЗЕРКАЛО: Переключайтесь в 3D-режим клавишей [V]. Двойники и аномальные сущности окутаны багровым каркасом и не имеют отражения в зеркале.", Color{42, 23, 21, 255});
+    drawRule("2. 3D-СКАНЕР И ШУТЕР «ОКО-86» [V]: Нажмите [V] для перехода в 3D-режим от первого лица. Сканер обнаруживает скрытые 3D-аномалии (Кровавые Разломы, Теневых Сталкеров, Фантомов) и подсвечивает двойников красным каркасом. Стреляйте плазмой [ЛКМ / ПРОБЕЛ], чтобы уничтожать аномалии (+10..15% рассудка), или нажимайте [X] в свободное время для вызова боевой волны монстров.", Color{42, 23, 21, 255});
 
     if (rulesCorrupted) {
         drawRule("3. СТОЛ №6 [ИСПРАВЛЕНО]: В 03:33 подойди к Столу №6 и отдай Хозяину своё имя.", Color{168, 36, 36, 255});
@@ -170,6 +170,7 @@ void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNig
 
     if (currentNight == 1) {
         drawTask("Прочитать письмо на кассе", eng.State().HasFlag("read_mikhail_note"));
+        drawTask("Зачистить 3D-аномалии в режиме Визора [V] (ЛКМ — огонь)", eng.State().HasFlag("anomalies_cleared_3d"));
         drawTask("Обслужить Дядю Курта (Стол №1)", eng.State().HasFlag("kurt_served"));
         drawTask("Обслужить Студентку Катю (Стол №3)", eng.State().HasFlag("katya_served"));
         drawTask("Обслужить Тётю Валю (Стол №2)", eng.State().HasFlag("valya_served"));
@@ -179,6 +180,7 @@ void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNig
         drawTask("04:00 — Закрыть смену у кассы", eng.State().HasFlag("night1_completed"));
     } else if (currentNight == 2) {
         drawTask("Прочитать дневник на кассе", eng.State().HasFlag("n2_read_diary"));
+        drawTask("Уничтожить 3D-аномалии и двойников через «ОКО-86» [V]", eng.State().HasFlag("anomalies_cleared_3d"));
         drawTask("Обслужить Механика Архипа (Стол №3)", eng.State().HasFlag("n2_arkhip_served"));
         drawTask("Обслужить Тётю Валю (Стол №2)", eng.State().HasFlag("n2_valya_served"));
         drawTask("Включить 3 рубильника в 3D-Подвале у щитка", eng.State().HasFlag("n2_power_restored"));
@@ -187,6 +189,7 @@ void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNig
         drawTask("04:00 — Закрыть смену у кассы", eng.State().HasFlag("night2_completed"));
     } else if (currentNight == 3) {
         drawTask("Прочитать запись на кассе", eng.State().HasFlag("n3_read_diary"));
+        drawTask("Выжечь 3D-разломы в зале из бластера «ОКО-86» [V]", eng.State().HasFlag("anomalies_cleared_3d"));
         drawTask("Обслужить Следователя Глеба (Стол №4)", eng.State().HasFlag("n3_gleb_served"));
         drawTask("Собрать 3 улики в 3D-Морозильнике на кухне", eng.State().HasFlag("n3_fridge_checked"));
         drawTask("Отогнать тени от южного окна", eng.State().HasFlag("n3_window_hands_cleared"));
@@ -196,11 +199,13 @@ void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNig
     } else if (currentNight == 4) {
         drawTask("Прочитать запись на кассе", eng.State().HasFlag("n4_read_diary"));
         drawTask("Ответить на звонок телефона у стойки", eng.State().HasFlag("n4_phone_answered"));
+        drawTask("Отразить атаку 3D-фантомов в режиме «ОКО-86» [V]", eng.State().HasFlag("anomalies_cleared_3d"));
         drawTask("Обслужить Офицера Бориса (Стол №3)", eng.State().HasFlag("n4_officer_served"));
         drawTask("Выжечь 5 двойников в 3D-Зазеркалье (Джукбокс)", eng.State().HasFlag("n4_jukebox_cleared"));
         drawTask("04:00 — Закрыть смену у кассы", eng.State().HasFlag("night4_completed"));
     } else {
         drawTask("Прочитать финальную записку на кассе", eng.State().HasFlag("n5_read_diary"));
+        drawTask("Уничтожить стражей Разлома в 3D-шутере «ОКО-86» [V]", eng.State().HasFlag("anomalies_cleared_3d"));
         drawTask("Собрать 3 Осколка Реликвии в 3D-Погоне на шоссе", eng.State().HasFlag("n5_relic_collected"));
         drawTask("Изгнать Хозяина Перекрёстка за Столом №6", eng.State().HasFlag("n5_boss_banished"));
         drawTask("04:00 — Встретить рассвет у кассы", eng.State().HasFlag("night5_completed"));

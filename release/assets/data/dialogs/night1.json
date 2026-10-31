@@ -13,12 +13,19 @@
       "id": "visor_inspect",
       "lines": [
         {
-          "speaker": "Визор «ОКО-86»",
-          "text": "Экспериментальный оптический прибор Михаила. Нажмите клавишу [V] в любой момент смены, чтобы переключить камеру из 2D в 3D-режим от первого лица и увидеть багровую ауру двойников."
+          "speaker": "Комплекс «ОКО-86» (Сканер + Плазменный излучатель)",
+          "text": "Секретная разработка НИИ «Спектр-86», оставленная Михаилом. Нажмите [V], чтобы перейти в 3D-режим от первого лица: сканер обнаруживает невидимые в 2D Кровавые Разломы, Теневых Сталкеров и подсвечивает гостей-двойников."
+        },
+        {
+          "speaker": "Комплекс «ОКО-86»",
+          "text": "В 3D-режиме нажимайте [ЛКМ] или [ПРОБЕЛ] для стрельбы плазмой по аномалиям и двойникам (+рассудок и очки). В свободное время между гостями нажимайте [X], чтобы призывать волны 3D-монстров и зачищать зал!"
         }
       ],
       "onEnd": [
-        { "type": "set_flag", "target": "visor_checked" }
+        {
+          "type": "set_flag",
+          "target": "visor_checked"
+        }
       ]
     },
     {
@@ -26,11 +33,11 @@
       "lines": [
         {
           "speaker": "Письмо Михаила",
-          "text": "«Лера, спасибо, что вышла в ночную смену. Изучи памятку правил [R]. Кофемашина на стойке, печь и морозильник — на кухне справа, щиток и зеркало — в левом коридоре»."
+          "text": "«Лера, спасибо, что вышла в ночную смену. Изучи устав [R] и тетрадь [TAB]. Кофемашина на стойке, печь и морозильник — на кухне справа, щиток и зеркало — в левом коридоре»."
         },
         {
           "speaker": "Письмо Михаила",
-          "text": "«Используй визор [V], чтобы проверять подозрительных гостей в 3D. Когда зашипит радио — настрой частоту. И не обслуживай Стол №6 после трёх ночи»."
+          "text": "«На стойке лежит мой 3D-визор с плазменным излучателем „ОКО-86“ [V]. С его помощью ты можешь в 3D обнаруживать и расстреливать пространственные аномалии [ЛКМ], изгонять мимиков и тренироваться на волнах теней [X] в свободное время»."
         }
       ],
       "choices": [
@@ -45,7 +52,10 @@
         }
       ],
       "onEnd": [
-        { "type": "set_flag", "target": "read_mikhail_note" }
+        {
+          "type": "set_flag",
+          "target": "read_mikhail_note"
+        }
       ]
     },
     {
@@ -53,15 +63,18 @@
       "lines": [
         {
           "speaker": "Памятка правил",
-          "text": "1. Дядя Курт пьёт чёрный кофе с сахаром. Тётя Валя берёт вишнёвый пирог. Студентка Катя — сладкий чай. Механик Архип и Офицер Борис — крепкий эспрессо без сахара."
+          "text": "1. Постоянные гости: Дядя Курт и Глеб пьют чёрный кофе с сахаром. Тётя Валя берёт вишнёвый пирог. Студентка Катя — сладкий чай. Механик Архип и Офицер Борис — крепкий эспрессо без сахара."
         },
         {
           "speaker": "Памятка правил",
-          "text": "2. Если гость не отражается в зеркале или светится красным в 3D-Визоре [V] — это двойник. Гоните его прочь или подайте чай с сахаром.\n3. При мигании света в 03:00 скажите: «Доброй ночи!»."
+          "text": "2. Включайте 3D-режим «ОКО-86» клавишей [V]: сканер показывает скрытые 3D-аномалии и багровый каркас двойников. Уничтожайте их выстрелами плазмы [ЛКМ / ПРОБЕЛ] или вызывайте волны монстров [X] в свободную минуту.\n3. При мигании света в 03:00 скажите: «Доброй ночи!»."
         }
       ],
       "onEnd": [
-        { "type": "set_flag", "target": "read_wall_rules" }
+        {
+          "type": "set_flag",
+          "target": "read_wall_rules"
+        }
       ]
     },
     {
@@ -76,8 +89,14 @@
         {
           "text": "Погладить Уголька (+10% рассудка)",
           "actions": [
-            { "type": "add_sanity", "value": 10 },
-            { "type": "play_sfx", "target": "audio/sfx/sfx_cat_purr.wav" }
+            {
+              "type": "add_sanity",
+              "value": 10
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cat_purr.wav"
+            }
           ],
           "nextNode": ""
         },
@@ -99,40 +118,70 @@
         {
           "text": "Чёрный кофе с сахаром",
           "actions": [
-            { "type": "play_sfx", "target": "audio/sfx/sfx_coffee_pour.wav" },
-            { "type": "give_item", "target": "coffee_sugar" }
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_coffee_pour.wav"
+            },
+            {
+              "type": "give_item",
+              "target": "coffee_sugar"
+            }
           ],
           "nextNode": ""
         },
         {
           "text": "Крепкий эспрессо без сахара",
           "actions": [
-            { "type": "play_sfx", "target": "audio/sfx/sfx_coffee_pour.wav" },
-            { "type": "give_item", "target": "coffee_black" }
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_coffee_pour.wav"
+            },
+            {
+              "type": "give_item",
+              "target": "coffee_black"
+            }
           ],
           "nextNode": ""
         },
         {
           "text": "Чай с сахаром",
           "actions": [
-            { "type": "play_sfx", "target": "audio/sfx/sfx_coffee_pour.wav" },
-            { "type": "give_item", "target": "tea_sugar" }
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_coffee_pour.wav"
+            },
+            {
+              "type": "give_item",
+              "target": "tea_sugar"
+            }
           ],
           "nextNode": ""
         },
         {
           "text": "Пустой чай без сахара",
           "actions": [
-            { "type": "play_sfx", "target": "audio/sfx/sfx_coffee_pour.wav" },
-            { "type": "give_item", "target": "tea_nosugar" }
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_coffee_pour.wav"
+            },
+            {
+              "type": "give_item",
+              "target": "tea_nosugar"
+            }
           ],
           "nextNode": ""
         },
         {
           "text": "Выпить чашку эспрессо самому (+20% рассудка)",
           "actions": [
-            { "type": "add_sanity", "value": 20 },
-            { "type": "play_sfx", "target": "audio/sfx/sfx_coffee_sip.wav" }
+            {
+              "type": "add_sanity",
+              "value": 20
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_coffee_sip.wav"
+            }
           ],
           "nextNode": ""
         },
@@ -154,23 +203,38 @@
         {
           "text": "Разогреть вишнёвый пирог",
           "actions": [
-            { "type": "play_sfx", "target": "audio/sfx/sfx_pie_microwave_bell.wav" },
-            { "type": "give_item", "target": "cherry_pie" }
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_pie_microwave_bell.wav"
+            },
+            {
+              "type": "give_item",
+              "target": "cherry_pie"
+            }
           ],
           "nextNode": ""
         },
         {
           "text": "Взять пакет с мусором",
           "actions": [
-            { "type": "give_item", "target": "trash_bag" }
+            {
+              "type": "give_item",
+              "target": "trash_bag"
+            }
           ],
           "nextNode": ""
         },
         {
           "text": "Перекусить горячим тостом (+15% рассудка)",
           "actions": [
-            { "type": "add_sanity", "value": 15 },
-            { "type": "play_sfx", "target": "audio/sfx/sfx_pie_microwave_bell.wav" }
+            {
+              "type": "add_sanity",
+              "value": 15
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_pie_microwave_bell.wav"
+            }
           ],
           "nextNode": ""
         },
@@ -193,8 +257,14 @@
           "text": "Подать чёрный кофе с сахаром",
           "requireHeldItem": "coffee_sugar",
           "actions": [
-            { "type": "clear_item", "target": "" },
-            { "type": "set_flag", "target": "kurt_served" }
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "kurt_served"
+            }
           ],
           "nextNode": "kurt_served_thanks"
         },
@@ -202,8 +272,14 @@
           "text": "Подать пустой чай без сахара",
           "requireHeldItem": "tea_nosugar",
           "actions": [
-            { "type": "clear_item", "target": "" },
-            { "type": "add_sanity", "value": -10 }
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "add_sanity",
+              "value": -10
+            }
           ],
           "nextNode": "wrong_order_node"
         },
@@ -235,9 +311,18 @@
           "text": "Подать чай с сахаром",
           "requireHeldItem": "tea_sugar",
           "actions": [
-            { "type": "clear_item", "target": "" },
-            { "type": "set_flag", "target": "katya_served" },
-            { "type": "add_sanity", "value": 10 }
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "katya_served"
+            },
+            {
+              "type": "add_sanity",
+              "value": 10
+            }
           ],
           "nextNode": "katya_served_thanks"
         },
@@ -269,8 +354,14 @@
           "text": "Подать тёплый вишнёвый пирог",
           "requireHeldItem": "cherry_pie",
           "actions": [
-            { "type": "clear_item", "target": "" },
-            { "type": "set_flag", "target": "valya_served" }
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "valya_served"
+            }
           ],
           "nextNode": "valya_served_thanks"
         },
@@ -301,7 +392,10 @@
         {
           "text": "[Мини-игра] Настроить частоту радиоприёмника",
           "actions": [
-            { "type": "event", "target": "start_minigame_n1" }
+            {
+              "type": "event",
+              "target": "start_minigame_n1"
+            }
           ],
           "nextNode": ""
         },
@@ -324,8 +418,14 @@
           "text": "Подать чай с сахаром",
           "requireHeldItem": "tea_sugar",
           "actions": [
-            { "type": "clear_item", "target": "" },
-            { "type": "set_flag", "target": "hatman_served_safe" }
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "hatman_served_safe"
+            }
           ],
           "nextNode": "hatman_safe_end"
         },
@@ -333,10 +433,22 @@
           "text": "Подать пустой чай без сахара",
           "requireHeldItem": "tea_nosugar",
           "actions": [
-            { "type": "clear_item", "target": "" },
-            { "type": "set_flag", "target": "hatman_served_anomaly" },
-            { "type": "screamer", "target": "sc_night9_shadow_reaper" },
-            { "type": "add_sanity", "value": -25 }
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "hatman_served_anomaly"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night9_shadow_reaper"
+            },
+            {
+              "type": "add_sanity",
+              "value": -25
+            }
           ],
           "nextNode": "hatman_anomaly_end"
         },
@@ -364,7 +476,10 @@
         }
       ],
       "onEnd": [
-        { "type": "event", "target": "flash_dark" }
+        {
+          "type": "event",
+          "target": "flash_dark"
+        }
       ]
     },
     {
@@ -390,17 +505,32 @@
         {
           "text": "Сказать: «Доброй ночи!»",
           "actions": [
-            { "type": "set_flag", "target": "rule_goodnight_ok" },
-            { "type": "event", "target": "stabilize_lights" }
+            {
+              "type": "set_flag",
+              "target": "rule_goodnight_ok"
+            },
+            {
+              "type": "event",
+              "target": "stabilize_lights"
+            }
           ],
           "nextNode": "light_flicker_success"
         },
         {
           "text": "Промолчать",
           "actions": [
-            { "type": "screamer", "target": "sc_night8_tv_demon" },
-            { "type": "add_sanity", "value": -25 },
-            { "type": "event", "target": "stabilize_lights" }
+            {
+              "type": "screamer",
+              "target": "sc_night8_tv_demon"
+            },
+            {
+              "type": "add_sanity",
+              "value": -25
+            },
+            {
+              "type": "event",
+              "target": "stabilize_lights"
+            }
           ],
           "nextNode": "light_flicker_fail"
         }
@@ -424,7 +554,10 @@
         }
       ],
       "onEnd": [
-        { "type": "event", "target": "stabilize_lights" }
+        {
+          "type": "event",
+          "target": "stabilize_lights"
+        }
       ]
     },
     {
@@ -440,10 +573,22 @@
           "text": "Выбросить пакет с мусором",
           "requireHeldItem": "trash_bag",
           "actions": [
-            { "type": "clear_item", "target": "" },
-            { "type": "set_flag", "target": "trash_taken_out" },
-            { "type": "screamer", "target": "sc_night1_window" },
-            { "type": "add_sanity", "value": -10 }
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "trash_taken_out"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night1_window"
+            },
+            {
+              "type": "add_sanity",
+              "value": -10
+            }
           ],
           "nextNode": "after_screamer_1"
         },
@@ -474,15 +619,24 @@
         {
           "text": "Перейти к Ночи 2: «Дождь и Двойники»",
           "actions": [
-            { "type": "set_flag", "target": "night1_completed" },
-            { "type": "event", "target": "start_night_2" }
+            {
+              "type": "set_flag",
+              "target": "night1_completed"
+            },
+            {
+              "type": "event",
+              "target": "start_night_2"
+            }
           ],
           "nextNode": ""
         },
         {
           "text": "Остаться в зале",
           "actions": [
-            { "type": "set_flag", "target": "night1_completed" }
+            {
+              "type": "set_flag",
+              "target": "night1_completed"
+            }
           ],
           "nextNode": ""
         }

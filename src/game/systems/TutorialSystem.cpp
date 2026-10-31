@@ -38,17 +38,23 @@ void TutorialSystem::Update(engine::core::Engine& eng, engine::math::Vec2 , floa
             break;
         case TutorialStep::Step3_Visor3D:
             if (toggledVisor) {
-                m_step = TutorialStep::Step4_ReadNote;
+                m_step = TutorialStep::Step4_ShootAnomaly3D;
                 eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.6f);
             }
             break;
-        case TutorialStep::Step4_ReadNote:
+        case TutorialStep::Step4_ShootAnomaly3D:
+            if (st.HasFlag("visor_first_hit") || st.HasFlag("anomalies_cleared_3d")) {
+                m_step = TutorialStep::Step5_ReadNote;
+                eng.Audio().PlaySfx("audio/sfx/sfx_pie_microwave_bell.wav", 0.65f);
+            }
+            break;
+        case TutorialStep::Step5_ReadNote:
             if (st.HasFlag("read_mikhail_note") && !eng.Dialogue().IsActive()) {
-                m_step = TutorialStep::Step5_ReadRules;
+                m_step = TutorialStep::Step6_ReadRules;
                 eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.6f);
             }
             break;
-        case TutorialStep::Step5_ReadRules:
+        case TutorialStep::Step6_ReadRules:
             if (st.HasFlag("read_wall_rules") && !eng.Dialogue().IsActive()) {
                 m_step = TutorialStep::Completed;
                 eng.Audio().PlaySfx("audio/sfx/sfx_pie_microwave_bell.wav", 0.75f);
@@ -69,27 +75,30 @@ void TutorialSystem::RenderUIOverlay(engine::core::Engine& eng) const {
     const char* msg = "";
     switch (m_step) {
         case TutorialStep::Step1_Movement:
-            msg = "ОБУЧЕНИЕ (1/5): Пройдитесь по залу [W, A, S, D]   ([Backspace] — скрыть)";
+            msg = "ОБУЧЕНИЕ (1/6): Пройдитесь по залу [W, A, S, D]   ([Backspace] — пропустить)";
             break;
         case TutorialStep::Step2_Flashlight:
-            msg = "ОБУЧЕНИЕ (2/5): Нажмите [F], чтобы включить фонарик";
+            msg = "ОБУЧЕНИЕ (2/6): Нажмите [F], чтобы включить тактический фонарик";
             break;
         case TutorialStep::Step3_Visor3D:
-            msg = "ОБУЧЕНИЕ (3/5): Нажмите [V], чтобы проверить 3D-Визор «ОКО-86» (показывает ауру двойников)";
+            msg = "ОБУЧЕНИЕ (3/6): Нажмите [V], чтобы включить 3D-Сканер и Шутер «ОКО-86»";
             break;
-        case TutorialStep::Step4_ReadNote:
-            msg = "ОБУЧЕНИЕ (4/5): Подойдите к Кассе на стойке и нажмите [E]";
+        case TutorialStep::Step4_ShootAnomaly3D:
+            msg = "ОБУЧЕНИЕ (4/6): В 3D-режиме наведите прицел на аномалию и выстрелите [ЛКМ / ПРОБЕЛ] ([X] — волна)";
             break;
-        case TutorialStep::Step5_ReadRules:
-            msg = "ОБУЧЕНИЕ (5/5): Изучите Правила смены [R] или на стене [E]";
+        case TutorialStep::Step5_ReadNote:
+            msg = "ОБУЧЕНИЕ (5/6): Выйдите в 2D [V], подойдите к Кассе на стойке и нажмите [E]";
+            break;
+        case TutorialStep::Step6_ReadRules:
+            msg = "ОБУЧЕНИЕ (6/6): Откройте Устав смены [R] или Тетрадь задач [TAB]";
             break;
         default:
             return;
     }
 
-    DrawRectangle(340, 14, 640, 42, Color{10, 13, 26, 235});
-    DrawRectangleLinesEx(Rectangle{340, 14, 640, 42}, 1.5f, Color{244, 184, 96, 255});
-    DrawTextEx(font, msg, Vector2{356, 25}, 18.0f, 1.0f, Color{244, 184, 96, 255});
+    DrawRectangle(250, 12, 780, 40, Color{10, 13, 26, 240});
+    DrawRectangleLinesEx(Rectangle{250, 12, 780, 40}, 1.5f, Color{244, 184, 96, 255});
+    engine::graphics::TextLayout::DrawCentered(font, msg, 640.0f, 22.0f, 17.5f, Color{244, 184, 96, 255});
 }
 
 }

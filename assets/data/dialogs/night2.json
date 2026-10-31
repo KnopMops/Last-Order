@@ -5,7 +5,7 @@
       "lines": [
         {
           "speaker": "Ночь 2 — «Дождь и Двойники»",
-          "text": "«Лера, сегодня из тумана приходят двойники. Проверяй гостей через настенное зеркало или 3D-Визор [V]. Если выбьет пробки — спускайся к рубильникам котельной в левом коридоре»."
+          "text": "«Лера, туман с шоссе прорывается прямо в зал в виде 3D-разломов и двойников. Включай „ОКО-86“ [V], выжигай аномалии и лже-Курта плазменным бластером [ЛКМ], а когда выбьет пробки — перезапусти 3 рубильника в 3D-подвале»."
         }
       ],
       "choices": [
@@ -19,7 +19,10 @@
           "nextNode": "",
           "forbidFlag": "n2_shift_0400_ready",
           "actions": [
-            { "type": "set_flag", "target": "n2_read_diary" }
+            {
+              "type": "set_flag",
+              "target": "n2_read_diary"
+            }
           ]
         }
       ]
@@ -37,10 +40,22 @@
           "text": "Подать крепкий эспрессо без сахара",
           "requireHeldItem": "coffee_black",
           "actions": [
-            { "type": "clear_item", "target": "" },
-            { "type": "set_flag", "target": "n2_arkhip_served" },
-            { "type": "add_sanity", "value": 10 },
-            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" }
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "n2_arkhip_served"
+            },
+            {
+              "type": "add_sanity",
+              "value": 10
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            }
           ],
           "nextNode": "arkhip_done"
         },
@@ -73,9 +88,18 @@
           "requireHeldItem": "cherry_pie",
           "forbidFlag": "n2_valya_served",
           "actions": [
-            { "type": "clear_item", "target": "" },
-            { "type": "set_flag", "target": "n2_valya_served" },
-            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" }
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "n2_valya_served"
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            }
           ],
           "nextNode": "n2_valya_done"
         },
@@ -103,7 +127,10 @@
         }
       ],
       "onEnd": [
-        { "type": "set_flag", "target": "n2_mirror_checked" }
+        {
+          "type": "set_flag",
+          "target": "n2_mirror_checked"
+        }
       ]
     },
     {
@@ -119,7 +146,10 @@
           "text": "[3D Мини-игра] Спуститься в котельную и включить 3 рубильника",
           "forbidFlag": "n2_power_restored",
           "actions": [
-            { "type": "event", "target": "start_minigame_n2" }
+            {
+              "type": "event",
+              "target": "start_minigame_n2"
+            }
           ],
           "nextNode": ""
         },
@@ -127,9 +157,18 @@
           "text": "Вглядеться в окно у щитка",
           "forbidFlag": "n2_window_scared",
           "actions": [
-            { "type": "set_flag", "target": "n2_window_scared" },
-            { "type": "screamer", "target": "sc_night2_toilet" },
-            { "type": "add_sanity", "value": -12 }
+            {
+              "type": "set_flag",
+              "target": "n2_window_scared"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night2_toilet"
+            },
+            {
+              "type": "add_sanity",
+              "value": -12
+            }
           ],
           "nextNode": "n2_fusebox_screamer"
         },
@@ -161,8 +200,14 @@
           "text": "Разоблачить двойника и прогнать из кафе",
           "forbidFlag": "n2_fake_kurt_resolved",
           "actions": [
-            { "type": "set_flag", "target": "n2_fake_kurt_resolved" },
-            { "type": "event", "target": "banish_fake_kurt" }
+            {
+              "type": "set_flag",
+              "target": "n2_fake_kurt_resolved"
+            },
+            {
+              "type": "event",
+              "target": "banish_fake_kurt"
+            }
           ],
           "nextNode": "n2_fake_kurt_banished"
         },
@@ -171,11 +216,26 @@
           "requireHeldItem": "tea_sugar",
           "forbidFlag": "n2_fake_kurt_resolved",
           "actions": [
-            { "type": "clear_item", "target": "" },
-            { "type": "set_flag", "target": "n2_fake_kurt_resolved" },
-            { "type": "screamer", "target": "sc_night6_mirror_hand" },
-            { "type": "add_sanity", "value": -35 },
-            { "type": "event", "target": "banish_fake_kurt" }
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "n2_fake_kurt_resolved"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night6_mirror_hand"
+            },
+            {
+              "type": "add_sanity",
+              "value": -35
+            },
+            {
+              "type": "event",
+              "target": "banish_fake_kurt"
+            }
           ],
           "nextNode": "n2_fake_kurt_mistake"
         },
@@ -216,8 +276,14 @@
           "text": "Отказать в обслуживании Стола №6",
           "forbidFlag": "n2_guest_survived",
           "actions": [
-            { "type": "set_flag", "target": "n2_guest_survived" },
-            { "type": "event", "target": "flash_dark" }
+            {
+              "type": "set_flag",
+              "target": "n2_guest_survived"
+            },
+            {
+              "type": "event",
+              "target": "flash_dark"
+            }
           ],
           "nextNode": "n2_guest_refused"
         },
@@ -225,9 +291,18 @@
           "text": "Принять заказ",
           "forbidFlag": "n2_guest_survived",
           "actions": [
-            { "type": "set_flag", "target": "n2_guest_survived" },
-            { "type": "screamer", "target": "sc_night7_guest_mouth" },
-            { "type": "add_sanity", "value": -50 }
+            {
+              "type": "set_flag",
+              "target": "n2_guest_survived"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night7_guest_mouth"
+            },
+            {
+              "type": "add_sanity",
+              "value": -50
+            }
           ],
           "nextNode": "n2_guest_accepted_bad"
         }
@@ -263,16 +338,28 @@
         {
           "text": "Перейти к Ночи 3: «Голоса в трубах»",
           "actions": [
-            { "type": "set_flag", "target": "night2_completed" },
-            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" },
-            { "type": "event", "target": "start_night_3" }
+            {
+              "type": "set_flag",
+              "target": "night2_completed"
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            },
+            {
+              "type": "event",
+              "target": "start_night_3"
+            }
           ],
           "nextNode": ""
         },
         {
           "text": "Остаться в зале",
           "actions": [
-            { "type": "set_flag", "target": "night2_completed" }
+            {
+              "type": "set_flag",
+              "target": "night2_completed"
+            }
           ],
           "nextNode": ""
         }

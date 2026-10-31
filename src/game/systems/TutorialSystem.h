@@ -9,8 +9,9 @@ enum class TutorialStep {
     Step1_Movement = 0,
     Step2_Flashlight,
     Step3_Visor3D,
-    Step4_ReadNote,
-    Step5_ReadRules,
+    Step4_ShootAnomaly3D,
+    Step5_ReadNote,
+    Step6_ReadRules,
     Completed
 };
 

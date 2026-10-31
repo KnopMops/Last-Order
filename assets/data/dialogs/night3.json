@@ -5,7 +5,7 @@
       "lines": [
         {
           "speaker": "Ночь 3 — «Голоса в трубах»",
-          "text": "«В 1986 году я спрятался в подсобке, когда Хозяин перекрёстка пришёл за Верой. Найди 3 части замёрзшего чека в Холодильной камере, отогни тени от окна и забери ключ Веры у зеркала»."
+          "text": "«В 1986 году Разлом поглотил Веру. Используй 3D-шутер „ОКО-86“ [V], чтобы отстреливать черепов-фантомов и сталкеров в зале, собери 3 части чека в 3D-Морозильнике и забери серебряный ключ Веры у зеркала»."
         }
       ],
       "choices": [
@@ -19,7 +19,10 @@
           "nextNode": "",
           "forbidFlag": "n3_shift_0400_ready",
           "actions": [
-            { "type": "set_flag", "target": "n3_read_diary" }
+            {
+              "type": "set_flag",
+              "target": "n3_read_diary"
+            }
           ]
         }
       ]
@@ -37,10 +40,22 @@
           "text": "Подать чёрный кофе с сахаром",
           "requireHeldItem": "coffee_sugar",
           "actions": [
-            { "type": "clear_item", "target": "" },
-            { "type": "set_flag", "target": "n3_gleb_served" },
-            { "type": "add_sanity", "value": 15 },
-            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" }
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "n3_gleb_served"
+            },
+            {
+              "type": "add_sanity",
+              "value": 15
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            }
           ],
           "nextNode": "gleb_done"
         },
@@ -71,8 +86,14 @@
         {
           "text": "Ослепить двойника фонариком и изгнать",
           "actions": [
-            { "type": "set_flag", "target": "n3_mimic_banished" },
-            { "type": "event", "target": "banish_fake_kurt" }
+            {
+              "type": "set_flag",
+              "target": "n3_mimic_banished"
+            },
+            {
+              "type": "event",
+              "target": "banish_fake_kurt"
+            }
           ],
           "nextNode": "n3_mimic_gone"
         },
@@ -104,7 +125,10 @@
           "text": "[3D Мини-игра] Войти в морозильный лабиринт за уликами 1986 года",
           "forbidFlag": "n3_fridge_checked",
           "actions": [
-            { "type": "event", "target": "start_minigame_n3" }
+            {
+              "type": "event",
+              "target": "start_minigame_n3"
+            }
           ],
           "nextNode": ""
         },
@@ -127,9 +151,18 @@
           "text": "Осмотреть ступени с фонариком и забрать журнал учёта",
           "forbidFlag": "n3_basement_checked",
           "actions": [
-            { "type": "set_flag", "target": "n3_basement_checked" },
-            { "type": "screamer", "target": "sc_night3_basement" },
-            { "type": "add_sanity", "value": -10 }
+            {
+              "type": "set_flag",
+              "target": "n3_basement_checked"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night3_basement"
+            },
+            {
+              "type": "add_sanity",
+              "value": -10
+            }
           ],
           "nextNode": "n3_basement_opened"
         },
@@ -161,9 +194,18 @@
           "text": "Ослепить тени за окном лучом фонарика [F]",
           "forbidFlag": "n3_window_hands_cleared",
           "actions": [
-            { "type": "set_flag", "target": "n3_window_hands_cleared" },
-            { "type": "screamer", "target": "sc_night5_window_hands" },
-            { "type": "event", "target": "stabilize_lights" }
+            {
+              "type": "set_flag",
+              "target": "n3_window_hands_cleared"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night5_window_hands"
+            },
+            {
+              "type": "event",
+              "target": "stabilize_lights"
+            }
           ],
           "nextNode": "n3_window_cleared"
         },
@@ -195,8 +237,14 @@
           "text": "Принять серебряный ключ Веры",
           "forbidFlag": "n3_mirror_key_found",
           "actions": [
-            { "type": "set_flag", "target": "n3_mirror_key_found" },
-            { "type": "screamer", "target": "sc_night6_mirror_hand" }
+            {
+              "type": "set_flag",
+              "target": "n3_mirror_key_found"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night6_mirror_hand"
+            }
           ],
           "nextNode": "n3_mirror_key_taken"
         },
@@ -229,10 +277,22 @@
           "requireFlag": "n3_mirror_key_found",
           "forbidFlag": "n3_boss_resolved",
           "actions": [
-            { "type": "set_flag", "target": "n3_boss_resolved" },
-            { "type": "set_flag", "target": "n3_shift_0400_ready" },
-            { "type": "event", "target": "stabilize_lights" },
-            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" }
+            {
+              "type": "set_flag",
+              "target": "n3_boss_resolved"
+            },
+            {
+              "type": "set_flag",
+              "target": "n3_shift_0400_ready"
+            },
+            {
+              "type": "event",
+              "target": "stabilize_lights"
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            }
           ],
           "nextNode": "n3_boss_defeated"
         },
@@ -240,11 +300,26 @@
           "text": "Отказаться обслуживать Стол №6",
           "forbidFlag": "n3_boss_resolved",
           "actions": [
-            { "type": "set_flag", "target": "n3_boss_resolved" },
-            { "type": "set_flag", "target": "n3_shift_0400_ready" },
-            { "type": "screamer", "target": "sc_night11_ceiling_crawler" },
-            { "type": "add_sanity", "value": -20 },
-            { "type": "event", "target": "stabilize_lights" }
+            {
+              "type": "set_flag",
+              "target": "n3_boss_resolved"
+            },
+            {
+              "type": "set_flag",
+              "target": "n3_shift_0400_ready"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night11_ceiling_crawler"
+            },
+            {
+              "type": "add_sanity",
+              "value": -20
+            },
+            {
+              "type": "event",
+              "target": "stabilize_lights"
+            }
           ],
           "nextNode": "n3_boss_survived_standard"
         }
@@ -280,16 +355,28 @@
         {
           "text": "Перейти к Ночи 4: «Полночный звонок»",
           "actions": [
-            { "type": "set_flag", "target": "night3_completed" },
-            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" },
-            { "type": "event", "target": "start_night_4" }
+            {
+              "type": "set_flag",
+              "target": "night3_completed"
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            },
+            {
+              "type": "event",
+              "target": "start_night_4"
+            }
           ],
           "nextNode": ""
         },
         {
           "text": "Остаться в зале",
           "actions": [
-            { "type": "set_flag", "target": "night3_completed" }
+            {
+              "type": "set_flag",
+              "target": "night3_completed"
+            }
           ],
           "nextNode": ""
         }

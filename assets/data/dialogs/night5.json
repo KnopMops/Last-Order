@@ -5,7 +5,7 @@
       "lines": [
         {
           "speaker": "Ночь 5 — «Последний заказ: Финал»",
-          "text": "«Лера, это ночь суда. Выбеги на старое шоссе через южную дверь, чтобы собрать 3 Осколка Реликвии 1986 года, а затем встреть Хозяина Перекрёстка за Столом №6»."
+          "text": "«Ночь суда настала. Очисти зал от 3D-стражей Разлома с помощью плазменного излучателя „ОКО-86“ [V], добудь 3 Осколка Реликвии 1986 года в 3D-погоне на шоссе и уничтожь контракт Хозяина Перекрёстка за Столом №6!»"
         }
       ],
       "choices": [
@@ -19,7 +19,10 @@
           "nextNode": "",
           "forbidFlag": "n5_boss_banished",
           "actions": [
-            { "type": "set_flag", "target": "n5_read_diary" }
+            {
+              "type": "set_flag",
+              "target": "n5_read_diary"
+            }
           ]
         }
       ]
@@ -37,7 +40,10 @@
           "text": "[3D Мини-игра] Выбежать на ночное шоссе за Реликвией (250 м)",
           "forbidFlag": "n5_relic_collected",
           "actions": [
-            { "type": "event", "target": "start_minigame_n5" }
+            {
+              "type": "event",
+              "target": "start_minigame_n5"
+            }
           ],
           "nextNode": ""
         },
@@ -61,17 +67,32 @@
           "nextNode": "n5_boss_defeated_true",
           "forbidFlag": "n5_boss_banished",
           "actions": [
-            { "type": "set_flag", "target": "n5_boss_banished" },
-            { "type": "set_flag", "target": "n5_shift_0400_ready" },
-            { "type": "event", "target": "stabilize_lights" },
-            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" }
+            {
+              "type": "set_flag",
+              "target": "n5_boss_banished"
+            },
+            {
+              "type": "set_flag",
+              "target": "n5_shift_0400_ready"
+            },
+            {
+              "type": "event",
+              "target": "stabilize_lights"
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            }
           ]
         },
         {
           "text": "[3D ПОГОНЯ] Сразиться с тенями на шоссе и забрать Реликвию!",
           "forbidFlag": "n5_relic_collected",
           "actions": [
-            { "type": "event", "target": "start_minigame_n5" }
+            {
+              "type": "event",
+              "target": "start_minigame_n5"
+            }
           ],
           "nextNode": ""
         },
@@ -80,8 +101,14 @@
           "nextNode": "n5_boss_accepted_dark",
           "forbidFlag": "n5_boss_banished",
           "actions": [
-            { "type": "screamer", "target": "sc_night14_skull_glitch" },
-            { "type": "add_sanity", "value": -100 }
+            {
+              "type": "screamer",
+              "target": "sc_night14_skull_glitch"
+            },
+            {
+              "type": "add_sanity",
+              "value": -100
+            }
           ]
         }
       ]
@@ -117,9 +144,18 @@
           "text": "Завершить игру и выйти в Главное меню",
           "nextNode": "",
           "actions": [
-            { "type": "set_flag", "target": "night5_completed" },
-            { "type": "play_sfx", "target": "audio/sfx/sfx_cash_register.wav" },
-            { "type": "event", "target": "return_main_menu" }
+            {
+              "type": "set_flag",
+              "target": "night5_completed"
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            },
+            {
+              "type": "event",
+              "target": "return_main_menu"
+            }
           ]
         }
       ]
