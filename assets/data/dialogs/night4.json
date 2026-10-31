@@ -216,6 +216,86 @@
           "nextNode": ""
         }
       ]
+    },
+    {
+      "id": "mikhail_n4_talk",
+      "lines": [
+        {
+          "speaker": "Тень Михаила (Стол №7)",
+          "text": "«Лера... прости, что заманил тебя сюда. Я пытался выкупить душу Веры у Хозяина Перекрёстка. Принеси на этот стол вишнёвый пирог в память о ней»."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Подать тёплый вишнёвый пирог",
+          "requireHeldItem": "cherry_pie",
+          "actions": [
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "mikhail_served"
+            },
+            {
+              "type": "add_sanity",
+              "value": 20
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            }
+          ],
+          "nextNode": "mikhail_n4_done"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "mikhail_n4_done",
+      "lines": [
+        {
+          "speaker": "Тень Михаила",
+          "text": "«Спасибо... Завтра в полночь собери три осколка Реликвии на шоссе, и проклятие падёт»."
+        }
+      ]
+    },
+    {
+      "id": "mirror_twin_talk",
+      "lines": [
+        {
+          "speaker": "Зеркальный Мимик (Стол №8)",
+          "text": "Стеклянные пальцы скребут по столешнице под оглушительный треск амальгамы!"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Разбить зеркальное наваждение светом",
+          "actions": [
+            {
+              "type": "screamer",
+              "target": "sc_night8_tv_demon"
+            },
+            {
+              "type": "add_sanity",
+              "value": 10
+            },
+            {
+              "type": "event",
+              "target": "banish_fake_kurt"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
     }
   ]
 }

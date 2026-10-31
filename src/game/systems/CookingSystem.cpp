@@ -41,22 +41,24 @@ void CookingSystem::StartPreparation(engine::core::Engine& eng, const std::strin
     m_timer = 0.0f;
 
     if (itemId == "cherry_pie") {
-        m_stationPos = {502.0f, 36.0f};
+        m_stationPos = {250.0f, 28.0f};
         eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.7f);
     } else {
-        m_stationPos = {304.0f, 84.0f};
+        m_stationPos = {148.0f, 44.0f};
         eng.Audio().PlaySfx("audio/sfx/sfx_coffee_pour.wav", 0.75f);
     }
 }
 
 void CookingSystem::PlaceDishOnTable(const std::string& tableId, const std::string& itemId) {
-    engine::math::Vec2 pos = {172.0f, 132.0f};
-    if (tableId == "booth_1")      pos = {172.0f, 132.0f};
-    else if (tableId == "booth_2") pos = {172.0f, 212.0f};
-    else if (tableId == "booth_3") pos = {284.0f, 132.0f};
-    else if (tableId == "booth_4") pos = {284.0f, 212.0f};
-    else if (tableId == "booth_5") pos = {392.0f, 132.0f};
-    else if (tableId == "booth_6") pos = {392.0f, 212.0f};
+    engine::math::Vec2 pos = {68.0f, 78.0f};
+    if (tableId == "booth_1")      pos = {68.0f,  78.0f};
+    else if (tableId == "booth_2") pos = {68.0f,  120.0f};
+    else if (tableId == "booth_3") pos = {128.0f, 78.0f};
+    else if (tableId == "booth_4") pos = {128.0f, 120.0f};
+    else if (tableId == "booth_5") pos = {188.0f, 78.0f};
+    else if (tableId == "booth_6") pos = {248.0f, 120.0f};
+    else if (tableId == "booth_7") pos = {248.0f, 78.0f};
+    else if (tableId == "booth_8") pos = {188.0f, 120.0f};
 
     for (auto& d : m_servedDishes) {
         if (d.tableId == tableId) {
@@ -83,7 +85,7 @@ void CookingSystem::Update(engine::core::Engine& eng, float dt, engine::math::Ve
 
     if (m_readyToPickup) {
         float dist = (playerCenter - m_stationPos).Length();
-        if (dist <= 75.0f || IsKeyPressed(KEY_E)) {
+        if (dist <= 65.0f || IsKeyPressed(KEY_E)) {
             eng.State().GiveItem(m_itemId, m_itemName);
             m_active = false;
             m_readyToPickup = false;

@@ -641,6 +641,127 @@
           "nextNode": ""
         }
       ]
+    },
+    {
+      "id": "danila_talk",
+      "lines": [
+        {
+          "speaker": "Водитель Данила (Стол №7)",
+          "text": "В восемьдесят шестом здесь на перекрёстке сгорел рейсовый автобус, а сегодня я снова видел его фары в тумане... Налей мне крепкого эспрессо без сахара, руки дрожат."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Подать крепкий эспрессо без сахара",
+          "requireHeldItem": "coffee_black",
+          "actions": [
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "danila_served"
+            },
+            {
+              "type": "add_sanity",
+              "value": 12
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            }
+          ],
+          "nextNode": "danila_done"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "danila_done",
+      "lines": [
+        {
+          "speaker": "Водитель Данила",
+          "text": "Спасибо. Смотри на пол: когда по кафе бегают чёрные тени с красными глазами — сразу включай прибор Михаила на стойке."
+        }
+      ]
+    },
+    {
+      "id": "bride_n1_talk",
+      "lines": [
+        {
+          "speaker": "Невеста с обочины (Стол №8)",
+          "text": "С мокрой фаты капает болотная вода. Не моргая, фигура шепчет чужим голосом: «Я жду автобус с четырнадцатого августа... Дай мне пустого холодного чая»."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Изгнать аномалию лучом фонарика",
+          "actions": [
+            {
+              "type": "set_flag",
+              "target": "bride_n1_banished"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night13_grinning_face"
+            },
+            {
+              "type": "add_sanity",
+              "value": 10
+            },
+            {
+              "type": "event",
+              "target": "banish_fake_kurt"
+            }
+          ],
+          "nextNode": "bride_n1_gone"
+        },
+        {
+          "text": "Подать пустой чай без сахара",
+          "requireHeldItem": "tea_nosugar",
+          "actions": [
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night12_corridor_rush"
+            },
+            {
+              "type": "add_sanity",
+              "value": -25
+            }
+          ],
+          "nextNode": "bride_n1_attack"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "bride_n1_gone",
+      "lines": [
+        {
+          "speaker": "Лера",
+          "text": "С пронзительным воплем фигура в фате рассыпается пеплом!"
+        }
+      ]
+    },
+    {
+      "id": "bride_n1_attack",
+      "lines": [
+        {
+          "speaker": "Аномалия",
+          "text": "Мертвенно-бледное лицо бросается прямо на вас из-за стола!"
+        }
+      ]
     }
   ]
 }

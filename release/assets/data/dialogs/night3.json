@@ -381,6 +381,86 @@
           "nextNode": ""
         }
       ]
+    },
+    {
+      "id": "korsakov_n3_talk",
+      "lines": [
+        {
+          "speaker": "Доктор Корсаков (Стол №7)",
+          "text": "Михаил твердил на допросах, что каждую ночь в кафе возвращается смена четырнадцатого августа. Принесите мне чашку чая с сахаром, коллега."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Подать чай с сахаром",
+          "requireHeldItem": "tea_sugar",
+          "actions": [
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "korsakov_served"
+            },
+            {
+              "type": "add_sanity",
+              "value": 15
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            }
+          ],
+          "nextNode": "korsakov_n3_done"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "korsakov_n3_done",
+      "lines": [
+        {
+          "speaker": "Доктор Корсаков",
+          "text": "Не смотрите в глаза официантке за соседним столом — на её бейдже написано ваше имя."
+        }
+      ]
+    },
+    {
+      "id": "faceless_n3_talk",
+      "lines": [
+        {
+          "speaker": "Официантка 1986 (Стол №8)",
+          "text": "Фигура в вашем фартуке поднимает гладкое лицо без глаз и рта: «Твоя смена закончилась двенадцать лет назад, Лера!»"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Ослепить двойника и разорвать наваждение",
+          "actions": [
+            {
+              "type": "screamer",
+              "target": "sc_night10_bloody_mirror"
+            },
+            {
+              "type": "add_sanity",
+              "value": 10
+            },
+            {
+              "type": "event",
+              "target": "banish_fake_kurt"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
     }
   ]
 }

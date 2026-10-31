@@ -58,13 +58,13 @@ private:
     float m_bestTime = 0.0f;
 
     float m_tension = 20.0f;
-    float m_screamerCooldown = 16.0f;
-    float m_blackoutTimer = 55.0f;
-    float m_ambientScareTimer = 11.0f;
+    float m_screamerCooldown = 12.0f;
+    float m_blackoutTimer = 45.0f;
+    float m_ambientScareTimer = 8.0f;
     bool m_blackoutActive = false;
 
-    float m_patronSpawnTimer = 8.0f;
-    EndlessPatron m_patrons[6];
+    float m_patronSpawnTimer = 6.0f;
+    EndlessPatron m_patrons[8];
 
     bool m_pendingScreamer = false;
     std::string m_pendingScreamerId;

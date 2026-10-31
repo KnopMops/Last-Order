@@ -74,9 +74,10 @@ private:
     float m_flashTimer = 0.0f;
 
     Texture2D m_screamerTex{};
-    float m_screamerDuration = 1.5f;
+    float m_screamerDuration = 2.1f;
     float m_screamerTimer = 0.0f;
     float m_invertTimer = 0.0f;
+    float m_aftershockTimer = 0.0f;
 };
 
 }

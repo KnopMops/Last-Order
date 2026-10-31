@@ -9,6 +9,14 @@
 
 namespace game {
 
+static const char* SCREAMER_IDS[14] = {
+    "sc_night1_window", "sc_night2_toilet", "sc_night3_basement",
+    "sc_night4_fridge", "sc_night5_window_hands", "sc_night6_mirror_hand",
+    "sc_night7_guest_mouth", "sc_night8_tv_demon", "sc_night9_shadow_reaper",
+    "sc_night10_bloody_mirror", "sc_night11_ceiling_crawler", "sc_night12_corridor_rush",
+    "sc_night13_grinning_face", "sc_night14_skull_glitch"
+};
+
 void LastOrderGame::OnInit(engine::core::Engine& eng) {
     const std::string base = eng.Assets().GetBaseDir();
     eng.Dialogue().LoadFromJsonFile(base + "/data/dialogs/night1.json");
@@ -43,25 +51,25 @@ void LastOrderGame::SetVisor3DActive(engine::core::Engine& eng, bool active) {
 void LastOrderGame::SpawnInitial3DAnomalies(int nightNumber) {
     m_anomalies3D.clear();
     m_nextAnomalyId = 1;
-    m_anomalySpawnTimer = 9.0f;
+    m_anomalySpawnTimer = 11.0f;
     m_scannerTargetText.clear();
 
-    m_anomalies3D.push_back({m_nextAnomalyId++, 0, "Аномальный Разлом (Коридор)", {75.0f, 145.0f}, 1.15f, 2, 2, 0.0f, true});
-    m_anomalies3D.push_back({m_nextAnomalyId++, 1, "Теневой Сталкер (Кухня)",     {520.0f, 110.0f}, 1.05f, 3, 3, 0.0f, true});
-    m_anomalies3D.push_back({m_nextAnomalyId++, 2, "Череп-Фантом (Южный выход)",  {280.0f, 310.0f}, 1.25f, 2, 2, 0.0f, true});
-    m_anomalies3D.push_back({m_nextAnomalyId++, 0, "Узел Искажения (Стол №6)",    {405.0f, 240.0f}, 1.20f, 2 + nightNumber / 2, 2 + nightNumber / 2, 0.0f, true});
+    m_anomalies3D.push_back({m_nextAnomalyId++, 0, "Кровавый Разлом",  {34.0f,  98.0f},  1.15f, 2, 2, 0.0f, true});
+    m_anomalies3D.push_back({m_nextAnomalyId++, 1, "Теневой Сталкер",  {282.0f, 64.0f},  1.05f, 3, 3, 0.0f, true});
+    m_anomalies3D.push_back({m_nextAnomalyId++, 2, "Череп-Фантом",     {154.0f, 152.0f}, 1.25f, 2, 2, 0.0f, true});
+    m_anomalies3D.push_back({m_nextAnomalyId++, 0, "Узел Искажения",   {284.0f, 146.0f}, 1.20f, 2 + nightNumber / 2, 2 + nightNumber / 2, 0.0f, true});
 }
 
 void LastOrderGame::Spawn3DShooterWave(engine::core::Engine& eng, int count) {
     static const engine::math::Vec2 spawnSpots[8] = {
-        {72.0f,  75.0f},
-        {72.0f,  230.0f},
-        {215.0f, 175.0f},
-        {340.0f, 175.0f},
-        {505.0f, 95.0f},
-        {555.0f, 210.0f},
-        {285.0f, 315.0f},
-        {410.0f, 115.0f}
+        {32.0f,  46.0f},
+        {32.0f,  146.0f},
+        {96.0f,  104.0f},
+        {156.0f, 104.0f},
+        {216.0f, 104.0f},
+        {284.0f, 62.0f},
+        {284.0f, 148.0f},
+        {156.0f, 154.0f}
     };
 
     for (int i = 0; i < count; ++i) {
@@ -73,7 +81,7 @@ void LastOrderGame::Spawn3DShooterWave(engine::core::Engine& eng, int count) {
             m_nextAnomalyId++,
             type,
             name,
-            {sp.x + static_cast<float>((std::rand() % 21) - 10), sp.y + static_cast<float>((std::rand() % 21) - 10)},
+            {sp.x + static_cast<float>((std::rand() % 13) - 6), sp.y + static_cast<float>((std::rand() % 13) - 6)},
             (type == 1) ? 1.05f : 1.20f,
             hp,
             hp,
@@ -81,8 +89,8 @@ void LastOrderGame::Spawn3DShooterWave(engine::core::Engine& eng, int count) {
             true
         });
     }
-    m_visorKillBanner = "ВОЛНА ТЕНЕЙ ОБНАРУЖЕНА! ОГОНЬ [ЛКМ / SPACE]!";
-    m_visorKillBannerTimer = 3.0f;
+    m_visorKillBanner = "ВОЛНА ТЕНЕЙ В ЗАЛЕ!";
+    m_visorKillBannerTimer = 2.6f;
     eng.Audio().PlaySfx("audio/sfx/sfx_phantom_steps.wav", 0.85f);
 }
 
@@ -92,7 +100,7 @@ void LastOrderGame::StartEndlessShift(engine::core::Engine& eng) {
     eng.State().Reset();
     eng.Time().Reset(23, 0, 1.80f);
 
-    m_playerBody.position = {228.0f, 96.0f};
+    m_playerBody.position = {144.0f, 44.0f};
     m_playerBody.colliderOffset = {9.0f, 18.0f};
     m_playerBody.colliderSize = {14.0f, 11.0f};
     m_playerBody.velocity = {0.0f, 0.0f};
@@ -163,13 +171,14 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
 
     eng.Time().Reset(22, 0, 1.80f);
 
-    m_playerBody.position = {228.0f, 96.0f};
+    m_playerBody.position = {144.0f, 44.0f};
     m_playerBody.colliderOffset = {9.0f, 18.0f};
     m_playerBody.colliderSize = {14.0f, 11.0f};
     m_playerBody.velocity = {0.0f, 0.0f};
     m_playerFacing = 0;
     m_blackoutMode = false;
     m_lightsFlickering = false;
+    m_ambientScreamerTimer = 18.0f;
     SetVisor3DActive(eng, false);
 
     m_cooking.Reset();
@@ -183,39 +192,49 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
     if (nightNumber == 1) {
         eng.Audio().PlayAmbient("audio/bgm/amb_cafe_calm_lp.ogg", 0.70f);
         m_guests = {
-            {"kurt",   "Дядя Курт",       "sprites/characters/spr_kurt.png",  "trig_booth1", "kurt_talk",   {156.0f, 118.0f}, 10,  false, false, true},
-            {"katya",  "Студентка Катя",  "sprites/characters/spr_vera.png",  "trig_booth3", "katya_talk",  {268.0f, 118.0f}, 50,  false, false, true},
-            {"valya",  "Тётя Валя",       "sprites/characters/spr_valya.png", "trig_booth2", "valya_talk",  {156.0f, 198.0f}, 100, false, false, true},
-            {"hatman", "Человек в шляпе", "sprites/characters/spr_guest.png", "trig_booth5", "hatman_talk", {376.0f, 118.0f}, 160, false, true,  false}
+            {"kurt",     "Дядя Курт",          "sprites/characters/spr_kurt.png",  "trig_booth1", "kurt_talk",     {56.0f,  68.0f},  8,   false, false, true},
+            {"katya",    "Студентка Катя",     "sprites/characters/spr_vera.png",  "trig_booth3", "katya_talk",    {116.0f, 68.0f},  35,  false, false, true},
+            {"valya",    "Тётя Валя",          "sprites/characters/spr_valya.png", "trig_booth2", "valya_talk",    {56.0f,  110.0f}, 70,  false, false, true},
+            {"danila",   "Водитель Данила",    "sprites/characters/spr_kurt.png",  "trig_booth7", "danila_talk",   {236.0f, 68.0f},  110, false, false, true},
+            {"hatman",   "Человек в шляпе",    "sprites/characters/spr_guest.png", "trig_booth5", "hatman_talk",   {176.0f, 68.0f},  145, false, true,  false},
+            {"bride_n1", "Невеста с обочины",  "sprites/characters/spr_vera.png",  "trig_booth8", "bride_n1_talk", {176.0f, 110.0f}, 190, false, true,  false}
         };
     } else if (nightNumber == 2) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.75f);
         m_guests = {
-            {"arkhip",    "Механик Архип",       "sprites/characters/spr_kurt.png",  "trig_booth3", "arkhip_talk",         {268.0f, 118.0f}, 15,  false, false, true},
-            {"valya_n2",  "Тётя Валя",           "sprites/characters/spr_valya.png", "trig_booth2", "n2_valya_talk",       {156.0f, 198.0f}, 65,  false, false, true},
-            {"fake_kurt", "Дядя Курт (?)",       "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {156.0f, 118.0f}, 140, false, true,  false},
-            {"guest_t6",  "Фигура за Столом №6", "sprites/characters/spr_guest.png", "trig_table6", "n2_guest_table6_talk",{376.0f, 198.0f}, 240, false, true,  false}
+            {"arkhip",      "Механик Архип",       "sprites/characters/spr_kurt.png",  "trig_booth3", "arkhip_talk",         {116.0f, 68.0f},  12,  false, false, true},
+            {"valya_n2",    "Тётя Валя",           "sprites/characters/spr_valya.png", "trig_booth2", "n2_valya_talk",       {56.0f,  110.0f}, 50,  false, false, true},
+            {"semen_n2",    "Радист Семён",        "sprites/characters/spr_guest.png", "trig_booth7", "semen_n2_talk",       {236.0f, 68.0f},  90,  false, false, true},
+            {"fake_kurt",   "Дядя Курт (?)",       "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {56.0f,  68.0f},  130, false, true,  false},
+            {"wet_stalker", "Мокрый Путник",       "sprites/characters/spr_guest.png", "trig_booth8", "wet_stalker_talk",    {176.0f, 110.0f}, 175, false, true,  false},
+            {"guest_t6",    "Фигура за Столом №6", "sprites/characters/spr_guest.png", "trig_table6", "n2_guest_table6_talk",{236.0f, 110.0f}, 220, false, true,  false}
         };
     } else if (nightNumber == 3) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.85f);
         m_guests = {
-            {"gleb",     "Следователь Глеб",  "sprites/characters/spr_kurt.png",  "trig_booth4", "gleb_talk",            {268.0f, 198.0f}, 15,  false, false, true},
-            {"katya_n3", "Попутчица (?)",     "sprites/characters/spr_vera.png",  "trig_booth5", "katya_mimic_talk",     {376.0f, 118.0f}, 95,  false, true,  false},
-            {"boss_n3",  "Сущность Стола №6", "sprites/characters/spr_guest.png", "trig_table6", "n3_guest_table6_talk", {376.0f, 198.0f}, 230, false, true,  false}
+            {"gleb",        "Следователь Глеб",   "sprites/characters/spr_kurt.png",  "trig_booth4", "gleb_talk",            {116.0f, 110.0f}, 12,  false, false, true},
+            {"korsakov_n3", "Доктор Корсаков",    "sprites/characters/spr_guest.png", "trig_booth7", "korsakov_n3_talk",     {236.0f, 68.0f},  55,  false, false, true},
+            {"katya_n3",    "Попутчица (?)",      "sprites/characters/spr_vera.png",  "trig_booth5", "katya_mimic_talk",     {176.0f, 68.0f},  95,  false, true,  false},
+            {"faceless_n3", "Официантка 1986",    "sprites/characters/spr_lera.png",  "trig_booth8", "faceless_n3_talk",     {176.0f, 110.0f}, 150, false, true,  false},
+            {"boss_n3",     "Сущность Стола №6",  "sprites/characters/spr_guest.png", "trig_table6", "n3_guest_table6_talk", {236.0f, 110.0f}, 215, false, true,  false}
         };
     } else if (nightNumber == 4) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.90f);
         m_guests = {
-            {"officer_n4",   "Офицер Борис",   "sprites/characters/spr_guest.png", "trig_booth3", "n4_officer_boris_talk",{268.0f, 118.0f}, 15,  false, false, true},
-            {"arkhip_mimic", "Архип (?)",      "sprites/characters/spr_kurt.png",  "trig_booth2", "katya_mimic_talk",     {156.0f, 198.0f}, 95,  false, true,  false},
-            {"fake_kurt4",   "Двойник Курта",  "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {156.0f, 118.0f}, 170, false, true,  false}
+            {"officer_n4",   "Офицер Борис",      "sprites/characters/spr_guest.png", "trig_booth3", "n4_officer_boris_talk",{116.0f, 68.0f},  12,  false, false, true},
+            {"mikhail_n4",   "Тень Михаила",      "sprites/characters/spr_kurt.png",  "trig_booth7", "mikhail_n4_talk",      {236.0f, 68.0f},  60,  false, false, true},
+            {"arkhip_mimic", "Архип (?)",         "sprites/characters/spr_kurt.png",  "trig_booth2", "katya_mimic_talk",     {56.0f,  110.0f}, 105, false, true,  false},
+            {"fake_kurt4",   "Двойник Курта",     "sprites/characters/spr_kurt.png",  "trig_booth1", "n2_fake_kurt_talk",   {56.0f,  68.0f},  150, false, true,  false},
+            {"mirror_twin",  "Зеркальный Мимик",  "sprites/characters/spr_vera.png",  "trig_booth8", "mirror_twin_talk",     {176.0f, 110.0f}, 190, false, true,  false}
         };
     } else {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.95f);
         m_guests = {
-            {"vera_spirit", "Силуэт Веры",        "sprites/characters/spr_vera.png",  "trig_booth4", "vera_spirit_talk",   {268.0f, 198.0f}, 10,  false, false, true},
-            {"gleb_n5",     "Следователь Глеб",   "sprites/characters/spr_kurt.png",  "trig_booth1", "gleb_talk",          {156.0f, 118.0f}, 75,  false, false, true},
-            {"boss_n5",     "Хозяин Перекрёстка", "sprites/characters/spr_guest.png", "trig_table6", "n5_boss_table6_talk",{376.0f, 198.0f}, 190, false, true,  false}
+            {"vera_spirit",  "Силуэт Веры",         "sprites/characters/spr_vera.png",  "trig_booth4", "vera_spirit_talk",   {116.0f, 110.0f}, 10,  false, false, true},
+            {"gleb_n5",      "Следователь Глеб",    "sprites/characters/spr_kurt.png",  "trig_booth1", "gleb_talk",          {56.0f,  68.0f},  50,  false, false, true},
+            {"kurt_n5",      "Дядя Курт",           "sprites/characters/spr_kurt.png",  "trig_booth7", "kurt_n5_talk",       {236.0f, 68.0f},  95,  false, false, true},
+            {"harbinger_n5", "Вестник Перекрёстка", "sprites/characters/spr_guest.png", "trig_booth8", "harbinger_n5_talk",  {176.0f, 110.0f}, 140, false, true,  false},
+            {"boss_n5",      "Хозяин Перекрёстка",  "sprites/characters/spr_guest.png", "trig_table6", "n5_boss_table6_talk",{236.0f, 110.0f}, 185, false, true,  false}
         };
     }
 
@@ -250,7 +269,7 @@ void LastOrderGame::UpdatePlayerMovement(engine::core::Engine& eng, float dt) {
     }
 
     m_isMoving = (moveDir.LengthSq() > 0.01f);
-    float speed = m_visor3DActive ? 92.0f : 84.0f;
+    float speed = m_visor3DActive ? 78.0f : 72.0f;
     m_playerBody.velocity = moveDir.Normalized() * speed;
 
     engine::math::Vec2 prevPos = m_playerBody.position;
@@ -270,7 +289,7 @@ void LastOrderGame::UpdatePlayerMovement(engine::core::Engine& eng, float dt) {
         fl.directionDeg = dirAngles[m_playerFacing];
     }
 
-    m_nearestTrigger = eng.Physics().FindNearestTrigger(m_playerBody.Center(), 28.0f);
+    m_nearestTrigger = eng.Physics().FindNearestTrigger(m_playerBody.Center(), 24.0f);
 }
 
 void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
@@ -284,17 +303,17 @@ void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
     engine::math::Vec2 lookDir = {std::cos(m_visorYaw), std::sin(m_visorYaw)};
 
     int bestAnomalyIdx = -1;
-    float bestDist = 420.0f;
+    float bestDist = 320.0f;
 
     for (int i = 0; i < static_cast<int>(m_anomalies3D.size()); ++i) {
         auto& a = m_anomalies3D[i];
         if (!a.active) continue;
         engine::math::Vec2 toA = a.pos - pCenter;
         float dist = toA.Length();
-        if (dist < 8.0f || dist > bestDist) continue;
+        if (dist < 6.0f || dist > bestDist) continue;
         engine::math::Vec2 dir = toA / dist;
         float dot = dir.x * lookDir.x + dir.y * lookDir.y;
-        float hitCos = (dist < 55.0f) ? 0.82f : 0.92f;
+        float hitCos = (dist < 45.0f) ? 0.80f : 0.91f;
         if (dot >= hitCos) {
             bestDist = dist;
             bestAnomalyIdx = i;
@@ -315,8 +334,8 @@ void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
             eng.State().AddSanity(10);
             m_endlessDirector.OnSanityRestored(15);
             eng.Audio().PlaySfx("audio/sfx/sfx_chase_relic_pickup.wav", 0.85f);
-            m_visorKillBanner = "АНОМАЛИЯ УНИЧТОЖЕНА: " + hitA.label + " (+10% РАССУДКА)";
-            m_visorKillBannerTimer = 2.8f;
+            m_visorKillBanner = "АНОМАЛИЯ УНИЧТОЖЕНА: " + hitA.label;
+            m_visorKillBannerTimer = 2.4f;
         }
         return;
     }
@@ -326,10 +345,10 @@ void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
         engine::math::Vec2 gCenter = {g.pos.x + 16.0f, g.pos.y + 16.0f};
         engine::math::Vec2 toG = gCenter - pCenter;
         float dist = toG.Length();
-        if (dist > 320.0f || dist < 4.0f) continue;
+        if (dist > 280.0f || dist < 4.0f) continue;
         engine::math::Vec2 dir = toG / dist;
         float dot = dir.x * lookDir.x + dir.y * lookDir.y;
-        if (dot >= 0.91f) {
+        if (dot >= 0.90f) {
             g.spawned = false;
             eng.Physics().SetTriggerEnabled(g.triggerId, false);
             m_hitMarkerTimer = 0.30f;
@@ -343,8 +362,8 @@ void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
             if (g.id == "katya_n3" || g.id == "arkhip_mimic") eng.State().SetFlag("n3_mimic_banished");
             eng.Renderer().TriggerFlash(Color{244, 184, 96, 180}, 0.30f);
             eng.Audio().PlaySfx("audio/sfx/sfx_window_bang.wav", 0.85f);
-            m_visorKillBanner = "ДВОЙНИК ИЗГНАН ИЗ ЗАЛА: " + g.name + " (+300 ОЧКОВ)";
-            m_visorKillBannerTimer = 3.2f;
+            m_visorKillBanner = "ДВОЙНИК ИЗГНАН: " + g.name;
+            m_visorKillBannerTimer = 2.6f;
             return;
         }
     }
@@ -360,7 +379,7 @@ void LastOrderGame::Update3DVisorShooter(engine::core::Engine& eng, float dt) {
     engine::math::Vec2 lookDir = {std::cos(m_visorYaw), std::sin(m_visorYaw)};
 
     m_scannerTargetText.clear();
-    float bestScanDist = 420.0f;
+    float bestScanDist = 300.0f;
 
     int activeCount = 0;
     for (auto& a : m_anomalies3D) {
@@ -371,18 +390,16 @@ void LastOrderGame::Update3DVisorShooter(engine::core::Engine& eng, float dt) {
         engine::math::Vec2 toPlayer = pCenter - a.pos;
         float dist = toPlayer.Length();
         if (a.type == 1 || a.type == 2) {
-            float moveSpd = (a.type == 2) ? 34.0f : 22.0f;
-            if (m_visor3DActive && dist > 16.0f) {
+            float moveSpd = m_visor3DActive
+                ? ((a.type == 2) ? 24.0f : 16.0f)
+                : ((a.type == 2) ? 14.0f : 10.0f);
+            if (dist > 13.0f) {
                 a.pos += (toPlayer / dist) * moveSpd * dt;
             }
-            if (m_visor3DActive && dist <= 18.0f) {
+            if (dist <= 14.0f) {
                 a.active = false;
-                eng.State().AddSanity(-12);
-                eng.Renderer().TriggerFlash(Color{214, 40, 40, 200}, 0.35f);
-                eng.Renderer().TriggerShake(3.8f, 0.35f);
-                eng.Audio().PlaySfx("audio/sfx/sfx_heavy_knock.wav", 0.90f);
-                m_visorKillBanner = "ТЕНЬ АТАКОВАЛА ВАС! (-12% РАССУДКА)";
-                m_visorKillBannerTimer = 2.5f;
+                eng.State().AddSanity(-16);
+                TriggerScreamer(eng, (a.type == 1) ? "sc_night9_shadow_reaper" : "sc_night14_skull_glitch");
                 continue;
             }
         }
@@ -390,9 +407,9 @@ void LastOrderGame::Update3DVisorShooter(engine::core::Engine& eng, float dt) {
         if (m_visor3DActive && dist > 4.0f && dist < bestScanDist) {
             engine::math::Vec2 dirToA = (a.pos - pCenter) / dist;
             float dot = dirToA.x * lookDir.x + dirToA.y * lookDir.y;
-            if (dot >= 0.92f) {
+            if (dot >= 0.91f) {
                 bestScanDist = dist;
-                m_scannerTargetText = a.label + " [HP: " + std::to_string(a.hp) + "/" + std::to_string(a.maxHp) + "]";
+                m_scannerTargetText = a.label + " [" + std::to_string(a.hp) + "/" + std::to_string(a.maxHp) + "]";
                 m_scannerTargetDist = dist * 0.05f;
             }
         }
@@ -403,13 +420,13 @@ void LastOrderGame::Update3DVisorShooter(engine::core::Engine& eng, float dt) {
             if (!g.spawned) continue;
             engine::math::Vec2 gCenter = {g.pos.x + 16.0f, g.pos.y + 16.0f};
             float dist = (gCenter - pCenter).Length();
-            if (dist > 4.0f && dist < 350.0f) {
+            if (dist > 4.0f && dist < 260.0f) {
                 engine::math::Vec2 dirToG = (gCenter - pCenter) / dist;
                 float dot = dirToG.x * lookDir.x + dirToG.y * lookDir.y;
-                if (dot >= 0.92f) {
+                if (dot >= 0.91f) {
                     m_scannerTargetText = g.anomalous
-                        ? ("ОБНАРУЖЕН ДВОЙНИК: " + g.name + " [СТРЕЛЯЙТЕ ЛКМ!]")
-                        : ("ЧЕЛОВЕК (НОРМА): " + g.name);
+                        ? ("ДВОЙНИК: " + g.name)
+                        : ("ЧЕЛОВЕК: " + g.name);
                     m_scannerTargetDist = dist * 0.05f;
                     break;
                 }
@@ -417,13 +434,13 @@ void LastOrderGame::Update3DVisorShooter(engine::core::Engine& eng, float dt) {
         }
     }
 
-    if (m_visor3DActive) {
-        m_anomalySpawnTimer -= dt;
-        if (m_anomalySpawnTimer <= 0.0f || activeCount == 0) {
-            m_anomalySpawnTimer = 8.5f;
-            Spawn3DShooterWave(eng, (activeCount == 0) ? 3 : 2);
-        }
+    m_anomalySpawnTimer -= dt;
+    if (m_anomalySpawnTimer <= 0.0f || activeCount == 0) {
+        m_anomalySpawnTimer = m_visor3DActive ? 8.5f : 15.0f;
+        Spawn3DShooterWave(eng, (activeCount == 0) ? 3 : 2);
+    }
 
+    if (m_visor3DActive) {
         if (IsKeyPressed(KEY_X)) {
             Spawn3DShooterWave(eng, 5);
         }
@@ -460,6 +477,21 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
 
     if (eng.Dialogue().IsActive() || m_inspectionUI.IsAnyModalOpen()) {
         return;
+    }
+
+    m_ambientScreamerTimer -= fixedDt;
+    if (m_ambientScreamerTimer <= 0.0f) {
+        float nightFactor = static_cast<float>(std::max(1, m_currentNight));
+        m_ambientScreamerTimer = std::max(12.0f, 28.0f - nightFactor * 2.5f);
+        int roll = std::rand() % 100;
+        if (roll < 42 + m_currentNight * 7) {
+            TriggerScreamer(eng, SCREAMER_IDS[std::rand() % 14]);
+            eng.State().AddSanity(-8);
+        } else {
+            eng.Audio().PlaySfx("audio/sfx/sfx_whisper_vera.wav", 0.90f);
+            eng.Renderer().TriggerFlash(Color{185, 18, 28, 130}, 0.30f);
+            eng.Renderer().TriggerShake(3.8f, 0.40f);
+        }
     }
 
     float elapsedMins = eng.Time().GetShiftElapsedMinutes();
@@ -749,14 +781,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         }
 
         if (IsKeyPressed(KEY_F8) || IsKeyPressed(KEY_G)) {
-            const char* scIds[] = {
-                "sc_night1_window", "sc_night2_toilet", "sc_night3_basement",
-                "sc_night4_fridge", "sc_night5_window_hands", "sc_night6_mirror_hand",
-                "sc_night7_guest_mouth", "sc_night8_tv_demon", "sc_night9_shadow_reaper",
-                "sc_night10_bloody_mirror", "sc_night11_ceiling_crawler", "sc_night12_corridor_rush",
-                "sc_night13_grinning_face", "sc_night14_skull_glitch"
-            };
-            TriggerScreamer(eng, scIds[m_demoScreamerIdx % 14]);
+            TriggerScreamer(eng, SCREAMER_IDS[m_demoScreamerIdx % 14]);
             m_demoScreamerIdx++;
         }
 
@@ -854,14 +879,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
     }
 
     if ((IsKeyPressed(KEY_G) || IsKeyPressed(KEY_F8)) && !eng.Dialogue().IsActive()) {
-        const char* scIds[] = {
-            "sc_night1_window", "sc_night2_toilet", "sc_night3_basement",
-            "sc_night4_fridge", "sc_night5_window_hands", "sc_night6_mirror_hand",
-            "sc_night7_guest_mouth", "sc_night8_tv_demon", "sc_night9_shadow_reaper",
-            "sc_night10_bloody_mirror", "sc_night11_ceiling_crawler", "sc_night12_corridor_rush",
-            "sc_night13_grinning_face", "sc_night14_skull_glitch"
-        };
-        TriggerScreamer(eng, scIds[m_demoScreamerIdx % 14]);
+        TriggerScreamer(eng, SCREAMER_IDS[m_demoScreamerIdx % 14]);
         m_demoScreamerIdx++;
     }
 
@@ -883,7 +901,7 @@ ui::MirrorWorldState LastOrderGame::BuildMirrorState(const engine::core::Engine&
         if (g.triggerId == "trig_booth1" || g.triggerId == "trig_booth2") {
             ms.guestAtTable2 = true;
             ms.table2HasReflection = g.hasReflection;
-        } else if (g.triggerId == "trig_booth3" || g.triggerId == "trig_booth5") {
+        } else if (g.triggerId == "trig_booth3" || g.triggerId == "trig_booth5" || g.triggerId == "trig_booth7" || g.triggerId == "trig_booth8") {
             ms.guestAtTable1 = true;
             ms.table1HasReflection = g.hasReflection;
         } else if (g.triggerId == "trig_table6") {
@@ -954,7 +972,7 @@ void LastOrderGame::RenderPauseMenu(engine::core::Engine& eng) const {
     engine::graphics::TextLayout::DrawCentered(font, title, 640.0f, 125.0f, 24.0f, Color{244, 184, 96, 255}, 1.0f);
 
     const char* labels[8] = {
-        "Продолжить смену (ESC)",
+        "Продолжить смену",
         "Настройки",
         "Перезапустить Ночь 1",
         "Перезапустить Ночь 2",
@@ -986,6 +1004,8 @@ void LastOrderGame::OnAction(engine::core::Engine& eng, const engine::core::Engi
             m_cooking.PlaceDishOnTable("booth_3", "tea_sugar");
         } else if (action.target == "n2_arkhip_served" || action.target == "n4_officer_served") {
             m_cooking.PlaceDishOnTable("booth_3", "coffee_black");
+        } else if (action.target == "danila_served" || action.target == "semen_served" || action.target == "korsakov_served" || action.target == "mikhail_served" || action.target == "kurt5_served") {
+            m_cooking.PlaceDishOnTable("booth_7", "coffee_sugar");
         } else if (action.target == "valya_served" || action.target == "n2_valya_served") {
             m_cooking.PlaceDishOnTable("booth_2", "cherry_pie");
         } else if (action.target == "hatman_served_safe" || action.target == "hatman_served_anomaly") {
@@ -1050,9 +1070,10 @@ void LastOrderGame::OnAction(engine::core::Engine& eng, const engine::core::Engi
 void LastOrderGame::TriggerScreamer(engine::core::Engine& eng, const std::string& screamerId) {
     std::string texPath = "sprites/screamers/" + screamerId + ".png";
     Texture2D tex = eng.Assets().GetTexture(texPath);
-    eng.Renderer().TriggerScreamerOverlay(tex, 1.50f, true);
-    eng.Renderer().TriggerShake(5.5f, 1.25f);
-    eng.Time().PauseFor(1.1f);
+    eng.Renderer().TriggerScreamerOverlay(tex, 2.25f, true);
+    eng.Renderer().TriggerShake(9.5f, 1.90f);
+    eng.Renderer().TriggerFlash(Color{235, 10, 20, 240}, 0.55f);
+    eng.Time().PauseFor(1.35f);
 
     if (screamerId == "sc_night1_window")                 eng.Audio().PlayScreamerStinger("sfx_sc_01_window_gasp.wav");
     else if (screamerId == "sc_night2_toilet")            eng.Audio().PlayScreamerStinger("sfx_sc_02_whisper_hinge.wav");
@@ -1069,6 +1090,9 @@ void LastOrderGame::TriggerScreamer(engine::core::Engine& eng, const std::string
     else if (screamerId == "sc_night13_grinning_face")    eng.Audio().PlayScreamerStinger("sfx_sc_13_blood_curdle.wav");
     else if (screamerId == "sc_night14_skull_glitch")     eng.Audio().PlayScreamerStinger("sfx_sc_14_skull_glitch.wav");
     else                                                  eng.Audio().PlayScreamerStinger("sfx_sc_07_clock_chord.wav");
+
+    eng.Audio().PlaySfx("audio/sfx/sfx_blackout_burst.wav", 1.0f);
+    eng.Audio().PlaySfx("audio/sfx/sfx_heavy_knock.wav", 1.0f);
 }
 
 void LastOrderGame::OnRenderWorld(engine::core::Engine& eng) {
@@ -1089,7 +1113,8 @@ void LastOrderGame::OnRenderWorld(engine::core::Engine& eng) {
     } else {
         m_world.Render(eng, nightToRender,
                        m_playerBody, m_playerFacing, m_isMoving, m_walkAnimTimer,
-                       m_lightsFlickering, m_blackoutMode, m_debugMode, m_nearestTrigger, m_guests);
+                       m_lightsFlickering, m_blackoutMode, m_debugMode, m_nearestTrigger,
+                       m_guests, m_anomalies3D);
         m_cooking.RenderWorld(eng, m_world.ComputeCameraOffset(m_playerBody.Center()));
     }
 }
@@ -1101,21 +1126,19 @@ void LastOrderGame::RenderDebugOverlay(engine::core::Engine& eng) const {
     DrawRectangle(14, 108, 415, 212, Color{10, 18, 12, 235});
     DrawRectangleLinesEx(Rectangle{14, 108, 415, 212}, 2.0f, Color{80, 240, 120, 255});
 
-    engine::math::Vec2 camOff = m_world.ComputeCameraOffset(m_playerBody.Center());
     char buf[512];
     std::snprintf(buf, sizeof(buf),
-                  "DEBUG MODE [F3] | FPS: %d | Ночь: %d\n"
-                  "Позиция: (%.1f, %.1f) | Камера: (%.1f, %.1f)\n"
-                  "Коллизии: ВКЛ | Noclip [N]: %s | 3D-Визор [V]: %s\n"
+                  "DEBUG [F3] | FPS: %d | Ночь: %d\n"
+                  "Позиция: (%.1f, %.1f)\n"
+                  "Noclip [N]: %s | Визор: %s\n"
                   "Триггер: %s\n"
-                  "[1..5] Сменить Ночь | [F2] +30 мин | [L] Блэкаут\n"
-                  "[F5..F7, F9, F10] Запуск 2D/3D Мини-игр 1..5\n"
-                  "[F8 / G] Тест 14 скримеров (1.5 сек MAX ЗВУК)",
+                  "[1..5] Ночь | [F2] +30м | [L] Свет\n"
+                  "[F5..F7, F9, F10] Мини-игры 1..5\n"
+                  "[F8 / G] Скример",
                   GetFPS(), m_currentNight,
                   m_playerBody.Center().x, m_playerBody.Center().y,
-                  camOff.x, camOff.y,
                   m_debugNoclip ? "ВКЛ" : "ВЫКЛ",
-                  m_visor3DActive ? "3D ВКЛ" : "2D",
+                  m_visor3DActive ? "3D" : "2D",
                   m_nearestTrigger.has_value() ? m_nearestTrigger->id.c_str() : "нет");
 
     DrawTextEx(font, buf, Vector2{24, 116}, 16.5f, 1.0f, Color{110, 255, 140, 255});
@@ -1135,48 +1158,32 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
 
     Font font = eng.Assets().GetMainFont();
 
+    int activeAnomalies = 0;
+    for (const auto& a : m_anomalies3D) {
+        if (a.active) activeAnomalies++;
+    }
+
     if (m_visor3DActive) {
-        DrawRectangleLinesEx(Rectangle{10, 10, 1260, 700}, 3.0f, Color{90, 245, 200, 210});
-        DrawCircleLines(640, 360, 20.0f, Color{90, 245, 200, 210});
-        DrawLine(616, 360, 664, 360, Color{90, 245, 200, 210});
-        DrawLine(640, 336, 640, 384, Color{90, 245, 200, 210});
+        DrawRectangleLinesEx(Rectangle{10, 10, 1260, 700}, 2.0f, Color{90, 245, 200, 180});
+        DrawCircleLines(640, 360, 18.0f, Color{90, 245, 200, 200});
+        DrawLine(620, 360, 660, 360, Color{90, 245, 200, 200});
+        DrawLine(640, 340, 640, 380, Color{90, 245, 200, 200});
 
         if (m_hitMarkerTimer > 0.0f) {
             DrawLineEx(Vector2{624, 344}, Vector2{656, 376}, 3.0f, Color{255, 55, 55, 255});
             DrawLineEx(Vector2{656, 344}, Vector2{624, 376}, 3.0f, Color{255, 55, 55, 255});
         }
 
-        int activeAnomalies = 0;
-        for (const auto& a : m_anomalies3D) {
-            if (a.active) activeAnomalies++;
-        }
-
-        char vBuf[256];
-        std::snprintf(vBuf, sizeof(vBuf),
-                      "3D-ШУТЕР И СКАНЕР «ОКО-86» | АКТИВНЫХ АНОМАЛИЙ: %d | УБИТО: %d | СЧЁТ: %d",
-                      activeAnomalies, m_anomaliesKilled, m_shooterScore);
-        DrawRectangle(280, 56, 720, 36, Color{10, 22, 24, 235});
-        DrawRectangleLines(280, 56, 720, 36, Color{90, 245, 200, 255});
-        engine::graphics::TextLayout::DrawCentered(font, vBuf, 640.0f, 65.0f, 18.0f, Color{110, 255, 215, 255});
-
-        DrawRectangle(280, 96, 720, 30, Color{18, 12, 22, 220});
-        engine::graphics::TextLayout::DrawCentered(
-            font,
-            "[ЛКМ / SPACE / F] Выстрел плазмой | [X] Вызвать волну монстров | [Мышь / Q / E] Прицел | [V] В 2D-режим",
-            640.0f, 102.0f, 16.5f, Color{244, 184, 96, 245});
-
         if (!m_scannerTargetText.empty()) {
-            char scanBuf[256];
-            std::snprintf(scanBuf, sizeof(scanBuf), "ЦЕЛЬ ЗАХВАЧЕНА (%.1f м): %s", m_scannerTargetDist, m_scannerTargetText.c_str());
-            DrawRectangle(340, 396, 600, 34, Color{42, 12, 16, 235});
-            DrawRectangleLines(340, 396, 600, 34, Color{255, 70, 70, 255});
-            engine::graphics::TextLayout::DrawCentered(font, scanBuf, 640.0f, 404.0f, 18.0f, Color{255, 110, 110, 255});
+            DrawRectangle(420, 396, 440, 32, Color{42, 12, 16, 225});
+            DrawRectangleLines(420, 396, 440, 32, Color{255, 70, 70, 240});
+            engine::graphics::TextLayout::DrawCentered(font, m_scannerTargetText, 640.0f, 403.0f, 18.0f, Color{255, 110, 110, 255});
         }
 
         if (m_visorKillBannerTimer > 0.0f && !m_visorKillBanner.empty()) {
-            DrawRectangle(340, 134, 600, 36, Color{36, 20, 14, 240});
-            DrawRectangleLines(340, 134, 600, 36, Color{244, 184, 96, 255});
-            engine::graphics::TextLayout::DrawCentered(font, m_visorKillBanner, 640.0f, 143.0f, 18.5f, Color{244, 184, 96, 255});
+            DrawRectangle(420, 64, 440, 34, Color{36, 20, 14, 235});
+            DrawRectangleLines(420, 64, 440, 34, Color{244, 184, 96, 240});
+            engine::graphics::TextLayout::DrawCentered(font, m_visorKillBanner, 640.0f, 72.0f, 18.0f, Color{244, 184, 96, 255});
         }
     }
 
@@ -1192,8 +1199,9 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     m_tutorial.RenderUIOverlay(eng);
     m_cooking.RenderUI(eng, camOff);
 
-    DrawRectangle(1018, 12, 248, 86, Color{10, 13, 26, 238});
-    DrawRectangleLinesEx(Rectangle{1018, 12, 248, 86}, 2.0f, Color{196, 122, 59, 255});
+    DrawRectangle(1038, 12, 228, 84, Color{10, 13, 26, 232});
+    Color panelBorder = (activeAnomalies > 0) ? Color{214, 45, 45, 255} : Color{196, 122, 59, 255};
+    DrawRectangleLinesEx(Rectangle{1038, 12, 228, 84}, 2.0f, panelBorder);
 
     const char* nightTitle =
         (m_currentNight == 1) ? "НОЧЬ 1: СМЕНА" :
@@ -1201,40 +1209,36 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
         (m_currentNight == 3) ? "НОЧЬ 3: ТРУБЫ" :
         (m_currentNight == 4) ? "НОЧЬ 4: ЗВОНОК" :
                                 "НОЧЬ 5: ФИНАЛ";
-    DrawTextEx(font, nightTitle, Vector2{1032, 18}, 16.5f, 1.0f, Color{143, 169, 196, 255});
+    DrawTextEx(font, nightTitle, Vector2{1052, 18}, 16.5f, 1.0f, Color{143, 169, 196, 255});
 
     std::string timeStr = m_sanity.FormatHudClock(eng);
-    DrawTextEx(font, timeStr.c_str(), Vector2{1032, 40}, 24.0f, 1.0f, Color{244, 184, 96, 255});
+    DrawTextEx(font, timeStr.c_str(), Vector2{1052, 38}, 24.0f, 1.0f, Color{244, 184, 96, 255});
 
     int san = eng.State().GetSanity();
     char sanBuf[64];
     std::snprintf(sanBuf, sizeof(sanBuf), "Рассудок: %d%%", san);
     Color sanCol = (san < 40) ? Color{214, 69, 69, 255} : Color{232, 227, 217, 255};
-    DrawTextEx(font, sanBuf, Vector2{1032, 68}, 19.0f, 1.0f, sanCol);
+    DrawTextEx(font, sanBuf, Vector2{1052, 66}, 18.5f, 1.0f, sanCol);
 
-    DrawRectangle(14, 12, 310, 86, Color{10, 13, 26, 238});
-    DrawRectangleLinesEx(Rectangle{14, 12, 310, 86}, 2.0f, Color{196, 122, 59, 255});
     std::string held = eng.State().GetHeldItemName();
-    std::string trayText = "В руках: " + (held.empty() ? std::string("Пусто") : held);
-    DrawTextEx(font, trayText.c_str(), Vector2{28, 22}, 19.0f, 1.0f, Color{244, 184, 96, 255});
-
-    DrawTextEx(font, "[V] 3D-Шутер/Сканер | [TAB] Задачи | [R] Устав", Vector2{24, 56}, 15.0f, 1.0f, Color{110, 255, 215, 255});
+    if (!held.empty()) {
+        DrawRectangle(14, 12, 280, 44, Color{10, 13, 26, 232});
+        DrawRectangleLinesEx(Rectangle{14, 12, 280, 44}, 2.0f, Color{196, 122, 59, 255});
+        std::string trayText = "В руках: " + held;
+        DrawTextEx(font, trayText.c_str(), Vector2{26, 24}, 18.5f, 1.0f, Color{244, 184, 96, 255});
+    }
 
     if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && !m_sanity.IsGameOver() && m_nearestTrigger.has_value()) {
-        std::string prompt = "[E] " + m_nearestTrigger->label;
-        Vector2 sz = MeasureTextEx(font, prompt.c_str(), 22.0f, 1.0f);
+        std::string prompt = m_nearestTrigger->label;
+        Vector2 sz = MeasureTextEx(font, prompt.c_str(), 20.0f, 1.0f);
         float px = (1280.0f - sz.x) * 0.5f;
-        DrawRectangle(static_cast<int>(px - 18), 618, static_cast<int>(sz.x + 36), 40, Color{42, 23, 21, 245});
-        DrawRectangleLinesEx(Rectangle{px - 18, 618, sz.x + 36, 40}, 2.0f, Color{244, 184, 96, 255});
-        DrawTextEx(font, prompt.c_str(), Vector2{px, 627}, 22.0f, 1.0f, Color{244, 184, 96, 255});
+        DrawRectangle(static_cast<int>(px - 16), 658, static_cast<int>(sz.x + 32), 36, Color{42, 23, 21, 240});
+        DrawRectangleLinesEx(Rectangle{px - 16, 658, sz.x + 32, 36}, 1.5f, Color{244, 184, 96, 235});
+        DrawTextEx(font, prompt.c_str(), Vector2{px, 666}, 20.0f, 1.0f, Color{244, 184, 96, 255});
     }
 
     m_inspectionUI.Render(eng, m_currentNight, BuildMirrorState(eng));
     RenderDebugOverlay(eng);
-
-    const char* controls = "WASD: Ходьба | V: 3D-Шутер и Сканер «ОКО-86» (ЛКМ/SPACE — Огонь, X — Волна) | E: Действие | F: Фонарик | TAB: Задачи | F3: Debug";
-    DrawRectangle(0, 688, 1280, 32, Color{10, 13, 26, 235});
-    DrawTextEx(font, controls, Vector2{14, 694}, 15.5f, 1.0f, Color{188, 178, 162, 235});
 
     if (m_sanity.IsGameOver()) {
         m_sanity.RenderGameOverModal(eng, m_currentNight);

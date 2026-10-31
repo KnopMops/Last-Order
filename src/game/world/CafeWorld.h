@@ -36,8 +36,8 @@ struct VisorAnomaly3D {
 
 class CafeWorld {
 public:
-    static constexpr float WORLD_W = 640.0f;
-    static constexpr float WORLD_H = 360.0f;
+    static constexpr float WORLD_W = 320.0f;
+    static constexpr float WORLD_H = 180.0f;
 
     void BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNumber);
     void BuildLighting(engine::core::Engine& eng, int nightNumber);
@@ -54,7 +54,8 @@ public:
                 bool blackoutMode,
                 bool showDebugPhysics,
                 const std::optional<engine::physics::TriggerVolume>& nearestTrigger,
-                const std::vector<GuestNpc>& guests) const;
+                const std::vector<GuestNpc>& guests,
+                const std::vector<VisorAnomaly3D>& anomalies) const;
 
     void Render3DVisor(engine::core::Engine& eng,
                        int nightNumber,

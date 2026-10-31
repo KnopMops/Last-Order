@@ -65,24 +65,26 @@ void EndlessDirector::SaveRecords() {
 void EndlessDirector::Reset() {
     m_elapsedSeconds = 0.0f;
     m_score = 0;
-    m_tension = 18.0f;
-    m_screamerCooldown = 14.0f;
-    m_blackoutTimer = 48.0f;
-    m_ambientScareTimer = 9.0f;
+    m_tension = 22.0f;
+    m_screamerCooldown = 10.0f;
+    m_blackoutTimer = 42.0f;
+    m_ambientScareTimer = 7.0f;
     m_blackoutActive = false;
-    m_patronSpawnTimer = 5.0f;
+    m_patronSpawnTimer = 4.0f;
     m_pendingScreamer = false;
     m_pendingBlackout = false;
     m_gameOver = false;
-    m_lastStatusMsg = "Проверяйте гостей через Визор [V] и подавайте заказы [E].";
-    m_statusTimer = 6.0f;
+    m_lastStatusMsg.clear();
+    m_statusTimer = 0.0f;
 
-    m_patrons[0] = {"p1", "Стол №1", "trig_booth1", "sprites/characters/spr_kurt.png",  {156.0f, 118.0f}, EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[1] = {"p2", "Стол №2", "trig_booth2", "sprites/characters/spr_valya.png", {156.0f, 198.0f}, EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[2] = {"p3", "Стол №3", "trig_booth3", "sprites/characters/spr_guest.png", {268.0f, 118.0f}, EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[3] = {"p4", "Стол №4", "trig_booth4", "sprites/characters/spr_vera.png",  {268.0f, 198.0f}, EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[4] = {"p5", "Стол №5", "trig_booth5", "sprites/characters/spr_kurt.png",  {376.0f, 118.0f}, EndlessPatronState::Empty, "", 0.0f};
-    m_patrons[5] = {"p6", "Стол №6", "trig_table6", "sprites/characters/spr_guest.png", {376.0f, 198.0f}, EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[0] = {"p1", "Стол №1", "trig_booth1", "sprites/characters/spr_kurt.png",  {56.0f,  68.0f},  EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[1] = {"p2", "Стол №2", "trig_booth2", "sprites/characters/spr_valya.png", {56.0f,  110.0f}, EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[2] = {"p3", "Стол №3", "trig_booth3", "sprites/characters/spr_guest.png", {116.0f, 68.0f},  EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[3] = {"p4", "Стол №4", "trig_booth4", "sprites/characters/spr_vera.png",  {116.0f, 110.0f}, EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[4] = {"p5", "Стол №5", "trig_booth5", "sprites/characters/spr_kurt.png",  {176.0f, 68.0f},  EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[5] = {"p6", "Стол №6", "trig_table6", "sprites/characters/spr_guest.png", {236.0f, 110.0f}, EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[6] = {"p7", "Стол №7", "trig_booth7", "sprites/characters/spr_vera.png",  {236.0f, 68.0f},  EndlessPatronState::Empty, "", 0.0f};
+    m_patrons[7] = {"p8", "Стол №8", "trig_booth8", "sprites/characters/spr_guest.png", {176.0f, 110.0f}, EndlessPatronState::Empty, "", 0.0f};
 }
 
 void EndlessDirector::Update(engine::core::Engine& eng, float dt, engine::math::Vec2 , bool hasLight) {
@@ -98,9 +100,9 @@ void EndlessDirector::Update(engine::core::Engine& eng, float dt, engine::math::
         m_score += 8;
     }
 
-    float difficultyScale = 1.0f + (m_elapsedSeconds / 90.0f);
-    float tensionRate = (m_blackoutActive ? 4.2f : 1.6f) * difficultyScale;
-    if (!hasLight && m_blackoutActive) tensionRate += 3.5f;
+    float difficultyScale = 1.0f + (m_elapsedSeconds / 75.0f);
+    float tensionRate = (m_blackoutActive ? 4.8f : 2.1f) * difficultyScale;
+    if (!hasLight && m_blackoutActive) tensionRate += 3.8f;
 
     m_tension = std::clamp(m_tension + tensionRate * dt, 0.0f, 100.0f);
 
@@ -110,19 +112,19 @@ void EndlessDirector::Update(engine::core::Engine& eng, float dt, engine::math::
 
     m_ambientScareTimer -= dt;
     if (m_ambientScareTimer <= 0.0f) {
-        m_ambientScareTimer = std::max(5.0f, 14.0f - difficultyScale * 2.0f);
+        m_ambientScareTimer = std::max(4.5f, 11.0f - difficultyScale * 2.0f);
         int r = std::rand() % 4;
-        if (r == 0) eng.Audio().PlaySfx("audio/sfx/sfx_phantom_steps.wav", 0.90f);
-        else if (r == 1) eng.Audio().PlaySfx("audio/sfx/sfx_window_bang.wav", 0.85f);
-        else if (r == 2) eng.Audio().PlaySfx("audio/sfx/sfx_heavy_knock.wav", 0.85f);
-        else eng.Audio().PlaySfx("audio/sfx/sfx_whisper_vera.wav", 0.85f);
-        eng.Renderer().TriggerShake(2.8f, 0.35f);
-        eng.Renderer().TriggerFlash(Color{168, 36, 36, 95}, 0.22f);
+        if (r == 0) eng.Audio().PlaySfx("audio/sfx/sfx_phantom_steps.wav", 0.95f);
+        else if (r == 1) eng.Audio().PlaySfx("audio/sfx/sfx_window_bang.wav", 0.90f);
+        else if (r == 2) eng.Audio().PlaySfx("audio/sfx/sfx_heavy_knock.wav", 0.90f);
+        else eng.Audio().PlaySfx("audio/sfx/sfx_whisper_vera.wav", 0.90f);
+        eng.Renderer().TriggerShake(3.6f, 0.40f);
+        eng.Renderer().TriggerFlash(Color{185, 20, 28, 120}, 0.28f);
     }
 
-    if (m_tension >= 78.0f && m_screamerCooldown <= 0.0f) {
-        m_tension = 30.0f;
-        m_screamerCooldown = std::max(10.0f, 20.0f - difficultyScale * 1.5f);
+    if (m_tension >= 68.0f && m_screamerCooldown <= 0.0f) {
+        m_tension = 24.0f;
+        m_screamerCooldown = std::max(8.0f, 16.0f - difficultyScale * 1.5f);
         m_pendingScreamer = true;
         int idx = std::rand() % 14;
         m_pendingScreamerId = ALL_SCREAMERS[idx];
@@ -134,10 +136,10 @@ void EndlessDirector::Update(engine::core::Engine& eng, float dt, engine::math::
         if (m_blackoutTimer <= 0.0f) {
             m_blackoutActive = true;
             m_pendingBlackout = true;
-            m_blackoutTimer = std::max(35.0f, 65.0f - difficultyScale * 4.0f);
+            m_blackoutTimer = std::max(30.0f, 55.0f - difficultyScale * 4.0f);
             eng.Audio().PlaySfx("audio/sfx/sfx_blackout_burst.wav", 0.95f);
-            m_lastStatusMsg = "ВЫБИЛО ПРОБКИ! Почините генератор в левом коридоре [E]!";
-            m_statusTimer = 6.0f;
+            m_lastStatusMsg = "ВЫБИЛО ПРОБКИ! Почините электрощиток!";
+            m_statusTimer = 5.0f;
         }
     }
 
@@ -154,20 +156,20 @@ void EndlessDirector::Update(engine::core::Engine& eng, float dt, engine::math::
 void EndlessDirector::UpdatePatrons(engine::core::Engine& eng, float dt) {
     m_patronSpawnTimer -= dt;
     if (m_patronSpawnTimer <= 0.0f) {
-        m_patronSpawnTimer = std::max(6.0f, 14.0f - (m_elapsedSeconds / 60.0f));
+        m_patronSpawnTimer = std::max(5.0f, 11.0f - (m_elapsedSeconds / 60.0f));
 
-        for (int attempt = 0; attempt < 6; ++attempt) {
-            int i = (std::rand() + attempt) % 6;
+        for (int attempt = 0; attempt < 8; ++attempt) {
+            int i = (std::rand() + attempt) % 8;
             if (m_patrons[i].state == EndlessPatronState::Empty) {
-                bool isMimic = (std::rand() % 100) < 42;
+                bool isMimic = (std::rand() % 100) < 45;
                 if (isMimic) {
                     m_patrons[i].state = EndlessPatronState::AnomalyMimic;
                     m_patrons[i].requestedItem.clear();
-                    m_patrons[i].patienceTimer = 38.0f;
+                    m_patrons[i].patienceTimer = 36.0f;
                 } else {
                     m_patrons[i].state = EndlessPatronState::RegularOrder;
                     m_patrons[i].requestedItem = (std::rand() % 2 == 0) ? "coffee_sugar" : "cherry_pie";
-                    m_patrons[i].patienceTimer = 55.0f;
+                    m_patrons[i].patienceTimer = 52.0f;
                 }
                 eng.Audio().PlaySfx("audio/sfx/sfx_door_bell.wav", 0.75f);
                 break;
@@ -175,11 +177,11 @@ void EndlessDirector::UpdatePatrons(engine::core::Engine& eng, float dt) {
         }
     }
 
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 8; ++i) {
         if (m_patrons[i].state != EndlessPatronState::Empty) {
             m_patrons[i].patienceTimer -= dt;
             if (m_patrons[i].patienceTimer <= 0.0f) {
-                m_tension = std::min(100.0f, m_tension + 26.0f);
+                m_tension = std::min(100.0f, m_tension + 28.0f);
                 eng.State().AddSanity(-12);
                 m_patrons[i].state = EndlessPatronState::Empty;
                 eng.Audio().PlaySfx("audio/sfx/sfx_heavy_knock.wav", 0.85f);
@@ -190,7 +192,7 @@ void EndlessDirector::UpdatePatrons(engine::core::Engine& eng, float dt) {
 
 void EndlessDirector::SyncGuestNpcs(std::vector<world::GuestNpc>& outGuests) const {
     outGuests.clear();
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 8; ++i) {
         if (m_patrons[i].state != EndlessPatronState::Empty) {
             bool isMimic = (m_patrons[i].state == EndlessPatronState::AnomalyMimic);
             outGuests.push_back(world::GuestNpc{
@@ -210,7 +212,7 @@ void EndlessDirector::SyncGuestNpcs(std::vector<world::GuestNpc>& outGuests) con
 }
 
 void EndlessDirector::InteractWithBooth(engine::core::Engine& eng, const std::string& triggerId, bool flashlightOn) {
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 8; ++i) {
         if (m_patrons[i].triggerId == triggerId && m_patrons[i].state != EndlessPatronState::Empty) {
             if (m_patrons[i].state == EndlessPatronState::AnomalyMimic) {
                 if (flashlightOn) {
@@ -221,8 +223,8 @@ void EndlessDirector::InteractWithBooth(engine::core::Engine& eng, const std::st
                     eng.Renderer().TriggerFlash(Color{244, 184, 96, 200}, 0.35f);
                     eng.Renderer().TriggerShake(3.5f, 0.4f);
                     eng.Audio().PlaySfx("audio/sfx/sfx_window_bang.wav", 0.85f);
-                    m_lastStatusMsg = "Двойник изгнан лучом фонарика! (+350 очков)";
-                    m_statusTimer = 4.0f;
+                    m_lastStatusMsg = "Двойник изгнан! (+350 очков)";
+                    m_statusTimer = 3.5f;
                 } else {
                     m_pendingScreamer = true;
                     m_pendingScreamerId = ALL_SCREAMERS[std::rand() % 14];
@@ -239,11 +241,11 @@ void EndlessDirector::InteractWithBooth(engine::core::Engine& eng, const std::st
                     eng.State().AddSanity(12);
                     eng.Audio().PlaySfx("audio/sfx/sfx_cash_register.wav", 0.85f);
                     m_lastStatusMsg = "Заказ выполнен! (+250 очков)";
-                    m_statusTimer = 4.0f;
+                    m_statusTimer = 3.5f;
                 } else {
-                    const char* reqName = (m_patrons[i].requestedItem == "coffee_sugar") ? "Кофе (у стойки)" : "Пирог (на кухне)";
-                    m_lastStatusMsg = m_patrons[i].name + " просит: " + reqName;
-                    m_statusTimer = 4.5f;
+                    const char* reqName = (m_patrons[i].requestedItem == "coffee_sugar") ? "Кофе" : "Вишнёвый пирог";
+                    m_lastStatusMsg = m_patrons[i].name + ": " + reqName;
+                    m_statusTimer = 4.0f;
                     eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.6f);
                 }
             }
@@ -273,7 +275,7 @@ void EndlessDirector::RestorePower() {
     m_blackoutActive = false;
     m_tension = std::max(0.0f, m_tension - 30.0f);
     m_lastStatusMsg = "Питание восстановлено!";
-    m_statusTimer = 3.5f;
+    m_statusTimer = 3.0f;
 }
 
 void EndlessDirector::OnSanityRestored(int amount) {
@@ -304,7 +306,7 @@ void EndlessDirector::RenderUI(engine::core::Engine& eng) const {
 
         DrawRectangle(440, 420, 400, 50, Color{107, 51, 34, 255});
         DrawRectangleLinesEx(Rectangle{440, 420, 400, 50}, 2.0f, Color{244, 184, 96, 255});
-        engine::graphics::TextLayout::DrawCentered(font, "[R] Повторить | [ESC] Меню", 640.0f, 434.0f, 19.0f, Color{244, 184, 96, 255}, 1.0f);
+        engine::graphics::TextLayout::DrawCentered(font, "Повторить [R] | Меню [ESC]", 640.0f, 434.0f, 19.0f, Color{244, 184, 96, 255}, 1.0f);
         return;
     }
 
@@ -320,7 +322,7 @@ void EndlessDirector::RenderUI(engine::core::Engine& eng) const {
     DrawTextEx(font, "УГРОЗА:", Vector2{820, 15}, 18.0f, 1.0f, Color{214, 69, 69, 240});
     DrawRectangle(905, 15, 140, 18, Color{42, 23, 21, 240});
     DrawRectangle(907, 17, static_cast<int>(136.0f * (m_tension / 100.0f)), 14,
-                  (m_tension > 72.0f) ? Color{214, 69, 69, 255} : Color{244, 184, 96, 230});
+                  (m_tension > 68.0f) ? Color{214, 69, 69, 255} : Color{244, 184, 96, 230});
     DrawRectangleLines(905, 15, 140, 18, Color{196, 122, 59, 255});
 
     int sanity = eng.State().GetSanity();

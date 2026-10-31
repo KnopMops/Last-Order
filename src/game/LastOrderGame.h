@@ -87,6 +87,7 @@ private:
     int m_shooterScore = 0;
     int m_nextAnomalyId = 1;
     float m_anomalySpawnTimer = 10.0f;
+    float m_ambientScreamerTimer = 22.0f;
     std::string m_scannerTargetText;
     float m_scannerTargetDist = 0.0f;
     std::string m_visorKillBanner;

@@ -39,23 +39,31 @@ void Renderer::Update(float dt, float totalTime, const core::GameSettings& setti
     float effectiveStress = m_sanityStress;
     if (m_screamerTimer > 0.0f) {
         effectiveStress = 1.0f;
+    } else if (m_aftershockTimer > 0.0f) {
+        effectiveStress = std::max(effectiveStress, (m_aftershockTimer / 3.0f) * 0.85f);
+    }
+
+    float effectiveChroma = settings.chromaAberration;
+    if (m_screamerTimer > 0.0f) {
+        effectiveChroma = std::max(effectiveChroma, 1.0f);
     }
 
     SetShaderValue(m_crtShader, m_uTimeLoc,         &totalTime,                  SHADER_UNIFORM_FLOAT);
     SetShaderValue(m_crtShader, m_uDistortionLoc,   &settings.barrelDistortion,  SHADER_UNIFORM_FLOAT);
     SetShaderValue(m_crtShader, m_uScanlineLoc,     &settings.scanlineIntensity, SHADER_UNIFORM_FLOAT);
-    SetShaderValue(m_crtShader, m_uChromaLoc,       &settings.chromaAberration,  SHADER_UNIFORM_FLOAT);
+    SetShaderValue(m_crtShader, m_uChromaLoc,       &effectiveChroma,            SHADER_UNIFORM_FLOAT);
     SetShaderValue(m_crtShader, m_uBrightnessLoc,   &settings.brightness,        SHADER_UNIFORM_FLOAT);
     SetShaderValue(m_crtShader, m_uSanityStressLoc, &effectiveStress,            SHADER_UNIFORM_FLOAT);
 
     bool strobeInvert = false;
     if (m_invertTimer > 0.0f && !settings.safeScreamerMode) {
-        int tick = static_cast<int>(totalTime * 28.0f);
-        strobeInvert = (tick % 3 == 0);
+        int tick = static_cast<int>(totalTime * 36.0f);
+        strobeInvert = (tick % 2 == 0);
     }
     float inv = strobeInvert ? 1.0f : 0.0f;
     SetShaderValue(m_crtShader, m_uInvertLoc, &inv, SHADER_UNIFORM_FLOAT);
     if (m_invertTimer > 0.0f) m_invertTimer = std::max(0.0f, m_invertTimer - dt);
+    if (m_aftershockTimer > 0.0f) m_aftershockTimer = std::max(0.0f, m_aftershockTimer - dt);
 
     if (m_shakeTimer > 0.0f) {
         m_shakeTimer = std::max(0.0f, m_shakeTimer - dt);
@@ -116,21 +124,64 @@ void Renderer::EndWorldPass(LightingSystem& lighting, float totalTime) {
 
     if (m_screamerTimer > 0.0f && m_screamerTex.id != 0) {
         float progress = 1.0f - (m_screamerTimer / std::max(0.1f, m_screamerDuration));
-        float zoom = 1.0f + progress * 0.42f + std::sin(totalTime * 55.0f) * 0.05f;
-        float w = static_cast<float>(NATIVE_W) * zoom;
-        float h = static_cast<float>(NATIVE_H) * zoom;
-        float jx = (static_cast<float>(std::rand() % 17) - 8.0f) + shakePos.x;
-        float jy = (static_cast<float>(std::rand() % 17) - 8.0f) + shakePos.y;
-        Rectangle srcSc = {0.0f, 0.0f, static_cast<float>(m_screamerTex.width), static_cast<float>(m_screamerTex.height)};
-        Rectangle dstSc = {(NATIVE_W - w) * 0.5f + jx, (NATIVE_H - h) * 0.5f + jy, w, h};
-        Color tint = (static_cast<int>(totalTime * 35.0f) % 4 == 0) ? Color{255, 110, 110, 255} : WHITE;
-        DrawTexturePro(m_screamerTex, srcSc, dstSc, Vector2{0.0f, 0.0f}, 0.0f, tint);
+        float pulseZoom = 1.06f + progress * 0.62f + std::sin(totalTime * 75.0f) * 0.09f;
+        if ((std::rand() % 5) == 0) pulseZoom += 0.18f;
 
-        for (int g = 0; g < 6; ++g) {
-            int gy = std::rand() % NATIVE_H;
-            DrawRectangle(0, gy, NATIVE_W, 2, Color{214, 40, 40, 145});
+        float w = static_cast<float>(NATIVE_W) * pulseZoom;
+        float h = static_cast<float>(NATIVE_H) * pulseZoom;
+        float jx = (static_cast<float>(std::rand() % 25) - 12.0f) + shakePos.x;
+        float jy = (static_cast<float>(std::rand() % 25) - 12.0f) + shakePos.y;
+        float rot = std::sin(totalTime * 62.0f) * 4.5f;
+
+        Rectangle srcSc = {0.0f, 0.0f, static_cast<float>(m_screamerTex.width), static_cast<float>(m_screamerTex.height)};
+        Vector2 origin = {w * 0.5f, h * 0.5f};
+        Rectangle dstCenter = {NATIVE_W * 0.5f + jx, NATIVE_H * 0.5f + jy, w, h};
+
+        DrawRectangle(0, 0, NATIVE_W, NATIVE_H, (std::rand() % 4 == 0) ? Color{85, 0, 0, 230} : Color{6, 2, 4, 230});
+
+        Rectangle dstRed = {dstCenter.x - 9.0f, dstCenter.y - 3.0f, w, h};
+        Rectangle dstCyan = {dstCenter.x + 9.0f, dstCenter.y + 3.0f, w, h};
+        DrawTexturePro(m_screamerTex, srcSc, dstRed, origin, rot - 2.0f, Color{255, 25, 25, 185});
+        DrawTexturePro(m_screamerTex, srcSc, dstCyan, origin, rot + 2.0f, Color{40, 220, 255, 150});
+
+        int strobePhase = static_cast<int>(totalTime * 42.0f) % 5;
+        Color mainTint = (strobePhase == 0) ? Color{255, 50, 50, 255}
+                       : (strobePhase == 2) ? Color{220, 255, 255, 255}
+                                            : WHITE;
+        DrawTexturePro(m_screamerTex, srcSc, dstCenter, origin, rot, mainTint);
+
+        for (int s = 0; s < 7; ++s) {
+            int sliceY = std::rand() % (NATIVE_H - 12);
+            int sliceH = 4 + (std::rand() % 12);
+            float shiftX = static_cast<float>((std::rand() % 33) - 16);
+            float ty = (static_cast<float>(sliceY) / static_cast<float>(NATIVE_H)) * static_cast<float>(m_screamerTex.height);
+            float th = (static_cast<float>(sliceH) / static_cast<float>(NATIVE_H)) * static_cast<float>(m_screamerTex.height);
+            DrawTexturePro(m_screamerTex,
+                           Rectangle{0.0f, ty, static_cast<float>(m_screamerTex.width), th},
+                           Rectangle{shiftX, static_cast<float>(sliceY), static_cast<float>(NATIVE_W), static_cast<float>(sliceH)},
+                           Vector2{0.0f, 0.0f}, 0.0f, Color{255, 70, 70, 230});
         }
-        DrawRectangleLinesEx(Rectangle{0, 0, NATIVE_W, NATIVE_H}, 6.0f, Color{150, 12, 18, 220});
+
+        for (int g = 0; g < 14; ++g) {
+            int gy = std::rand() % NATIVE_H;
+            Color gc = (g % 2 == 0) ? Color{235, 15, 20, 185} : Color{10, 0, 0, 210};
+            DrawRectangle(0, gy, NATIVE_W, 1 + (std::rand() % 3), gc);
+        }
+
+        for (int b = 0; b < 18; ++b) {
+            int bx = (b * 19 + std::rand() % 9) % NATIVE_W;
+            int bh = 8 + (std::rand() % 32);
+            DrawRectangle(bx, 0, 3, bh, Color{165, 8, 14, 235});
+            DrawRectangle(bx, NATIVE_H - bh, 3, bh, Color{165, 8, 14, 235});
+        }
+
+        DrawRectangleLinesEx(Rectangle{0, 0, NATIVE_W, NATIVE_H}, 8.0f, Color{185, 10, 15, 245});
+        DrawRectangleLinesEx(Rectangle{4, 4, NATIVE_W - 8, NATIVE_H - 8}, 4.0f, Color{95, 0, 5, 210});
+    } else if (m_aftershockTimer > 0.0f) {
+        float aRatio = m_aftershockTimer / 3.0f;
+        unsigned char ba = static_cast<unsigned char>(std::clamp(aRatio * 140.0f * (0.6f + 0.4f * std::sin(totalTime * 16.0f)), 0.0f, 180.0f));
+        DrawRectangleLinesEx(Rectangle{0, 0, NATIVE_W, NATIVE_H}, 7.0f, Color{165, 10, 16, ba});
+        DrawRectangleLinesEx(Rectangle{5, 5, NATIVE_W - 10, NATIVE_H - 10}, 4.0f, Color{110, 5, 10, static_cast<unsigned char>(ba / 2)});
     }
 
     if (m_flashTimer > 0.0f && m_flashDuration > 0.0f && m_shakeAllowed) {
@@ -191,10 +242,11 @@ void Renderer::TriggerFlash(Color color, float durationSec) {
 
 void Renderer::TriggerScreamerOverlay(Texture2D tex, float durationSec, bool invertBrief) {
     m_screamerTex = tex;
-    m_screamerDuration = std::max(0.5f, durationSec);
+    m_screamerDuration = std::max(0.8f, durationSec);
     m_screamerTimer = m_screamerDuration;
+    m_aftershockTimer = 3.0f;
     if (invertBrief) {
-        m_invertTimer = m_screamerDuration * 0.75f;
+        m_invertTimer = m_screamerDuration * 0.90f;
     }
 }
 

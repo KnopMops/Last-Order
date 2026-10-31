@@ -159,6 +159,86 @@
           ]
         }
       ]
+    },
+    {
+      "id": "kurt_n5_talk",
+      "lines": [
+        {
+          "speaker": "Дядя Курт (Стол №7)",
+          "text": "Я прорвался сквозь туман на своём тягаче, дочка! Выпей или подай мне последний стакан чёрного кофе с сахаром — и покончим с этой тварью за шестым столом!"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Подать чёрный кофе с сахаром (+25% рассудка)",
+          "requireHeldItem": "coffee_sugar",
+          "actions": [
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "kurt5_served"
+            },
+            {
+              "type": "add_sanity",
+              "value": 25
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            }
+          ],
+          "nextNode": "kurt_n5_done"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "kurt_n5_done",
+      "lines": [
+        {
+          "speaker": "Дядя Курт",
+          "text": "Держись, Лера! До рассвета осталось совсем немного!"
+        }
+      ]
+    },
+    {
+      "id": "harbinger_n5_talk",
+      "lines": [
+        {
+          "speaker": "Вестник Перекрёстка (Стол №8)",
+          "text": "«Хозяин уже ждёт твою подпись в чеке 1986 года!»"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Сжечь Вестника светом",
+          "actions": [
+            {
+              "type": "screamer",
+              "target": "sc_night14_skull_glitch"
+            },
+            {
+              "type": "add_sanity",
+              "value": 15
+            },
+            {
+              "type": "event",
+              "target": "banish_fake_kurt"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
     }
   ]
 }

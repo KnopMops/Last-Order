@@ -364,6 +364,86 @@
           "nextNode": ""
         }
       ]
+    },
+    {
+      "id": "semen_n2_talk",
+      "lines": [
+        {
+          "speaker": "Радист Семён (Стол №7)",
+          "text": "Я собирал «ОКО-86» для Михаила в лаборатории под радиовышкой. Прибор видит разрывы пространства, которые в обычном зрении кажутся бегущими тенями. Налей мне чёрный кофе с сахаром."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Подать чёрный кофе с сахаром",
+          "requireHeldItem": "coffee_sugar",
+          "actions": [
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "semen_served"
+            },
+            {
+              "type": "add_sanity",
+              "value": 15
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            }
+          ],
+          "nextNode": "semen_n2_done"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "semen_n2_done",
+      "lines": [
+        {
+          "speaker": "Радист Семён",
+          "text": "Береги себя: за восьмым столом сидит что-то, что вылезло из затопленного кювета."
+        }
+      ]
+    },
+    {
+      "id": "wet_stalker_talk",
+      "lines": [
+        {
+          "speaker": "Мокрый Путник (Стол №8)",
+          "text": "Из-под плаща течёт чёрная тина, а голова поворачивается рывками: «Свет в подвале больше не зажжётся... Отдай мне фонарь»."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Выжечь двойника светом",
+          "actions": [
+            {
+              "type": "screamer",
+              "target": "sc_night11_ceiling_crawler"
+            },
+            {
+              "type": "add_sanity",
+              "value": 10
+            },
+            {
+              "type": "event",
+              "target": "banish_fake_kurt"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
     }
   ]
 }
