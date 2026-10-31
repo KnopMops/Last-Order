@@ -1,0 +1,213 @@
+#include "game/ui/InspectionOverlay.h"
+#include "engine/graphics/TextLayout.h"
+#include "raylib.h"
+#include <string>
+
+namespace game::ui {
+
+void InspectionOverlay::Reset() {
+    m_notebookOpen = false;
+    m_rulesSheetOpen = false;
+}
+
+void InspectionOverlay::ToggleNotebook(engine::core::Engine& eng) {
+    m_notebookOpen = !m_notebookOpen;
+    if (m_notebookOpen) m_rulesSheetOpen = false;
+    eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.65f);
+}
+
+void InspectionOverlay::ToggleRulesSheet(engine::core::Engine& eng) {
+    m_rulesSheetOpen = !m_rulesSheetOpen;
+    if (m_rulesSheetOpen) m_notebookOpen = false;
+    eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.65f);
+}
+
+void InspectionOverlay::CloseAll() {
+    m_notebookOpen = false;
+    m_rulesSheetOpen = false;
+}
+
+void InspectionOverlay::Render(engine::core::Engine& eng, int currentNight, const MirrorWorldState& mirrorState) const {
+    if (eng.Dialogue().IsActive() && eng.Dialogue().GetActiveNode()) {
+        const std::string& nid = eng.Dialogue().GetActiveNode()->id;
+        if (nid.find("mirror") != std::string::npos) {
+            RenderLiveMirrorInspector(eng, mirrorState);
+        }
+    }
+
+    if (m_notebookOpen) {
+        RenderNotebook(eng, currentNight);
+    } else if (m_rulesSheetOpen) {
+        RenderRulesSheet(eng, currentNight);
+    }
+}
+
+void InspectionOverlay::RenderLiveMirrorInspector(engine::core::Engine& eng, const MirrorWorldState& ms) const {
+    Font font = eng.Assets().GetMainFont();
+    float bx = 360.0f;
+    float by = 86.0f;
+    float bw = 560.0f;
+    float bh = 250.0f;
+
+    DrawRectangle(static_cast<int>(bx - 8), static_cast<int>(by - 8), static_cast<int>(bw + 16), static_cast<int>(bh + 16), Color{107, 51, 34, 250});
+    DrawRectangle(static_cast<int>(bx), static_cast<int>(by), static_cast<int>(bw), static_cast<int>(bh), Color{18, 28, 48, 245});
+    DrawRectangleLinesEx(Rectangle{bx, by, bw, bh}, 3.0f, Color{143, 169, 196, 255});
+
+    DrawTextEx(font, "ОТРАЖЕНИЕ ЗАЛА В НАСТЕННОМ ЗЕРКАЛЕ", Vector2{bx + 18.0f, by + 10.0f}, 18.0f, 1.0f, Color{244, 184, 96, 255});
+
+    DrawRectangle(static_cast<int>(bx + 36), static_cast<int>(by + 110), 140, 88, Color{42, 23, 21, 230});
+    DrawRectangleLinesEx(Rectangle{bx + 36, by + 110, 140, 88}, 2.0f, Color{196, 122, 59, 200});
+    DrawTextEx(font, "Левый ряд столов", Vector2{bx + 40.0f, by + 84.0f}, 16.0f, 1.0f, Color{188, 178, 162, 240});
+
+    if (ms.guestAtTable2) {
+        if (ms.table2HasReflection) {
+            Texture2D kurtTex = eng.Assets().GetTexture("sprites/characters/spr_kurt.png");
+            DrawTexturePro(kurtTex, Rectangle{0, 0, 32, 32}, Rectangle{bx + 74, by + 118, 64, 64}, Vector2{0, 0}, 0.0f, Color{170, 195, 220, 210});
+            DrawTextEx(font, "Отражение есть", Vector2{bx + 48.0f, by + 204.0f}, 16.0f, 1.0f, Color{130, 214, 130, 255});
+        } else {
+            DrawTextEx(font, "ПУСТО!", Vector2{bx + 76.0f, by + 142.0f}, 21.0f, 1.0f, Color{214, 69, 69, 255});
+            DrawTextEx(font, "НЕТ ОТРАЖЕНИЯ!", Vector2{bx + 40.0f, by + 204.0f}, 16.0f, 1.0f, Color{214, 69, 69, 255});
+        }
+    } else {
+        DrawTextEx(font, "Свободно", Vector2{bx + 68.0f, by + 145.0f}, 16.0f, 1.0f, Color{143, 169, 196, 160});
+    }
+
+    if (ms.showVeraSilhouette) {
+        Texture2D veraTex = eng.Assets().GetTexture("sprites/characters/spr_vera.png");
+        DrawTexturePro(veraTex, Rectangle{0, 0, 32, 32}, Rectangle{bx + 278, by + 72, 76, 76}, Vector2{0, 0}, 0.0f, Color{214, 69, 69, 145});
+    }
+
+    Texture2D leraTex = eng.Assets().GetTexture("sprites/characters/spr_lera.png");
+    Rectangle leraSrc = {ms.eyelessLera ? 64.0f : 0.0f, ms.eyelessLera ? 96.0f : 0.0f, 32.0f, 32.0f};
+    DrawTexturePro(leraTex, leraSrc, Rectangle{bx + 236, by + 104, 88, 88}, Vector2{0, 0}, 0.0f, Color{185, 208, 232, 230});
+    DrawTextEx(font, ms.eyelessLera ? "БЕЗ ГЛАЗ!" : "Лера",
+               Vector2{bx + 245.0f, by + 204.0f}, 16.5f, 1.0f,
+               ms.eyelessLera ? Color{214, 69, 69, 255} : Color{232, 227, 217, 220});
+
+    DrawRectangle(static_cast<int>(bx + 384), static_cast<int>(by + 110), 140, 88, Color{42, 23, 21, 230});
+    DrawRectangleLinesEx(Rectangle{bx + 384, by + 110, 140, 88}, 2.0f, Color{196, 122, 59, 200});
+    DrawTextEx(font, "Правый ряд столов", Vector2{bx + 388.0f, by + 84.0f}, 16.0f, 1.0f, Color{188, 178, 162, 240});
+
+    if (ms.guestAtTable1) {
+        if (ms.table1HasReflection) {
+            DrawTextEx(font, "Отражение есть", Vector2{bx + 396.0f, by + 204.0f}, 16.0f, 1.0f, Color{130, 214, 130, 255});
+        } else {
+            DrawTextEx(font, "ПУСТО!", Vector2{bx + 422.0f, by + 142.0f}, 21.0f, 1.0f, Color{214, 69, 69, 255});
+            DrawTextEx(font, "НЕТ В ЗЕРКАЛЕ!", Vector2{bx + 396.0f, by + 204.0f}, 16.0f, 1.0f, Color{214, 69, 69, 255});
+        }
+    } else {
+        DrawTextEx(font, "Свободно", Vector2{bx + 416.0f, by + 145.0f}, 16.0f, 1.0f, Color{143, 169, 196, 160});
+    }
+}
+
+void InspectionOverlay::RenderRulesSheet(engine::core::Engine& eng, int currentNight) const {
+    Font font = eng.Assets().GetMainFont();
+    DrawRectangle(0, 0, 1280, 720, Color{10, 13, 26, 212});
+
+    float px = 250.0f;
+    float py = 66.0f;
+    float pw = 780.0f;
+    float ph = 580.0f;
+    DrawRectangle(static_cast<int>(px), static_cast<int>(py), static_cast<int>(pw), static_cast<int>(ph), Color{232, 227, 217, 252});
+    DrawRectangleLinesEx(Rectangle{px, py, pw, ph}, 4.0f, Color{107, 51, 34, 255});
+    DrawRectangleLinesEx(Rectangle{px + 8, py + 8, pw - 16, ph - 16}, 1.5f, Color{196, 122, 59, 180});
+
+    engine::graphics::TextLayout::DrawCentered(
+        font, "УСТАВ НОЧНОЙ СМЕНЫ КАФЕ «ТЁПЛЫЙ УГОЛ»",
+        640.0f, py + 24.0f, 24.0f, Color{42, 23, 21, 255}, 1.0f);
+
+    bool rulesCorrupted = eng.Time().GetShiftElapsedMinutes() >= 240.0f || eng.State().GetSanity() < 55 || currentNight >= 2;
+
+    float curY = py + 74.0f;
+    auto drawRule = [&](const std::string& text, Color col) {
+        float h = engine::graphics::TextLayout::DrawWrapped(
+            font, text, {px + 34.0f, curY, pw - 68.0f, 95.0f}, 19.5f, 1.0f, col);
+        curY += h + 16.0f;
+    };
+
+    drawRule("1. ПОСТОЯННЫЕ ГОСТИ: Дядя Курт и Следователь Глеб пьют чёрный кофе с сахаром. Тётя Валя — вишнёвый пирог. Студентка Катя — чай с сахаром. Механик Архип и Офицер Борис — крепкий эспрессо без сахара.", Color{42, 23, 21, 255});
+    drawRule("2. 3D-ВИЗОР «ОКО-86» [V] И ЗЕРКАЛО: Переключайтесь в 3D-режим клавишей [V]. Двойники и аномальные сущности окутаны багровым каркасом и не имеют отражения в зеркале.", Color{42, 23, 21, 255});
+
+    if (rulesCorrupted) {
+        drawRule("3. СТОЛ №6 [ИСПРАВЛЕНО]: В 03:33 подойди к Столу №6 и отдай Хозяину своё имя.", Color{168, 36, 36, 255});
+        drawRule("   [Приписка Михаила]: НЕ ВЕРЬ КРАСНЫМ ЧЕРНИЛАМ! Отказывай Столу №6, пока не соберёшь Ключ Веры и Реликвию!", Color{60, 88, 130, 255});
+    } else {
+        drawRule("3. СТОЛ №6: Стол №6 в правом нижнем углу зала закрыт. Никогда не принимайте «Последний заказ».", Color{42, 23, 21, 255});
+    }
+
+    drawRule("4. ЭЛЕКТРОЩИТОК И СВЕТ: При мигании ламп в 03:00 скажите «Доброй ночи!». При аварии питания используйте фонарик [F] и перезапустите узлы в подвале.", Color{42, 23, 21, 255});
+
+    engine::graphics::TextLayout::DrawCentered(
+        font, "[R / ESC] Закрыть памятку | [TAB] Тетрадь задач | [V] 3D-Визор",
+        640.0f, py + ph - 38.0f, 18.5f, Color{107, 51, 34, 255}, 1.0f);
+}
+
+void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNight) const {
+    Font font = eng.Assets().GetMainFont();
+    DrawRectangle(0, 0, 1280, 720, Color{10, 13, 26, 205});
+    Texture2D nbTex = eng.Assets().GetTexture("sprites/ui/ui_notebook.png");
+    DrawTextureEx(nbTex, Vector2{130.0f, 80.0f}, 0.0f, 4.0f, WHITE);
+
+    DrawRectangle(540, 76, 590, 554, Color{42, 23, 21, 248});
+    DrawRectangleLinesEx(Rectangle{540, 76, 590, 554}, 2.0f, Color{244, 184, 96, 255});
+
+    const char* nbHeader =
+        (currentNight == 1) ? "ТЕТРАДЬ ЛЕРЫ — НОЧЬ 1" :
+        (currentNight == 2) ? "ТЕТРАДЬ ЛЕРЫ — НОЧЬ 2" :
+        (currentNight == 3) ? "ТЕТРАДЬ ЛЕРЫ — НОЧЬ 3" :
+        (currentNight == 4) ? "ТЕТРАДЬ ЛЕРЫ — НОЧЬ 4" :
+                              "ТЕТРАДЬ ЛЕРЫ — НОЧЬ 5";
+    DrawTextEx(font, nbHeader, Vector2{564, 96}, 22.0f, 1.0f, Color{244, 184, 96, 255});
+
+    float curY = 140.0f;
+    auto drawTask = [&](const char* label, bool done) {
+        std::string line = std::string(done ? "[X] " : "[ ] ") + label;
+        Color c = done ? Color{143, 169, 196, 255} : Color{232, 227, 217, 255};
+        float h = engine::graphics::TextLayout::DrawWrapped(
+            font, line, {564.0f, curY, 540.0f, 52.0f}, 18.0f, 1.0f, c);
+        curY += h + 10.0f;
+    };
+
+    if (currentNight == 1) {
+        drawTask("Прочитать письмо на кассе", eng.State().HasFlag("read_mikhail_note"));
+        drawTask("Обслужить Дядю Курта (Стол №1)", eng.State().HasFlag("kurt_served"));
+        drawTask("Обслужить Студентку Катю (Стол №3)", eng.State().HasFlag("katya_served"));
+        drawTask("Обслужить Тётю Валю (Стол №2)", eng.State().HasFlag("valya_served"));
+        drawTask("Настроить радиоприёмник (Мини-игра осциллографа)", eng.State().HasFlag("heard_radio_0214"));
+        drawTask("Разобраться с Человеком в шляпе (Стол №5)", eng.State().HasFlag("hatman_served_safe") || eng.State().HasFlag("hatman_served_anomaly"));
+        drawTask("Вынести мусор к уличному баку на юге", eng.State().HasFlag("trash_taken_out"));
+        drawTask("04:00 — Закрыть смену у кассы", eng.State().HasFlag("night1_completed"));
+    } else if (currentNight == 2) {
+        drawTask("Прочитать дневник на кассе", eng.State().HasFlag("n2_read_diary"));
+        drawTask("Обслужить Механика Архипа (Стол №3)", eng.State().HasFlag("n2_arkhip_served"));
+        drawTask("Обслужить Тётю Валю (Стол №2)", eng.State().HasFlag("n2_valya_served"));
+        drawTask("Включить 3 рубильника в 3D-Подвале у щитка", eng.State().HasFlag("n2_power_restored"));
+        drawTask("Разоблачить двойника за Столом №1", eng.State().HasFlag("n2_fake_kurt_resolved"));
+        drawTask("Отказать Гостю за Столом №6", eng.State().HasFlag("n2_guest_survived"));
+        drawTask("04:00 — Закрыть смену у кассы", eng.State().HasFlag("night2_completed"));
+    } else if (currentNight == 3) {
+        drawTask("Прочитать запись на кассе", eng.State().HasFlag("n3_read_diary"));
+        drawTask("Обслужить Следователя Глеба (Стол №4)", eng.State().HasFlag("n3_gleb_served"));
+        drawTask("Собрать 3 улики в 3D-Морозильнике на кухне", eng.State().HasFlag("n3_fridge_checked"));
+        drawTask("Отогнать тени от южного окна", eng.State().HasFlag("n3_window_hands_cleared"));
+        drawTask("Забрать серебряный ключ Веры у зеркала", eng.State().HasFlag("n3_mirror_key_found"));
+        drawTask("Дать отпор сущности за Столом №6", eng.State().HasFlag("n3_boss_resolved"));
+        drawTask("04:00 — Закрыть смену у кассы", eng.State().HasFlag("night3_completed"));
+    } else if (currentNight == 4) {
+        drawTask("Прочитать запись на кассе", eng.State().HasFlag("n4_read_diary"));
+        drawTask("Ответить на звонок телефона у стойки", eng.State().HasFlag("n4_phone_answered"));
+        drawTask("Обслужить Офицера Бориса (Стол №3)", eng.State().HasFlag("n4_officer_served"));
+        drawTask("Выжечь 5 двойников в 3D-Зазеркалье (Джукбокс)", eng.State().HasFlag("n4_jukebox_cleared"));
+        drawTask("04:00 — Закрыть смену у кассы", eng.State().HasFlag("night4_completed"));
+    } else {
+        drawTask("Прочитать финальную записку на кассе", eng.State().HasFlag("n5_read_diary"));
+        drawTask("Собрать 3 Осколка Реликвии в 3D-Погоне на шоссе", eng.State().HasFlag("n5_relic_collected"));
+        drawTask("Изгнать Хозяина Перекрёстка за Столом №6", eng.State().HasFlag("n5_boss_banished"));
+        drawTask("04:00 — Встретить рассвет у кассы", eng.State().HasFlag("night5_completed"));
+    }
+
+    DrawTextEx(font, "[TAB] Закрыть | [R] Правила | [V] 3D-Визор | [F3] Debug-режим",
+               Vector2{564, 592}, 17.5f, 1.0f, Color{244, 184, 96, 255});
+}
+
+}
