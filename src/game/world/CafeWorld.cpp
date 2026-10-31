@@ -388,12 +388,37 @@ void CafeWorld::Render3DVisor(engine::core::Engine& eng,
     float recoilBack = gunRecoilTimer * 0.35f;
     float bobGun = std::cos(walkBobTimer * 2.2f) * 0.025f;
     Vector3 gunPos = {
-        camPos.x + forward.x * (0.52f - recoilBack) + right.x * 0.24f,
-        camPos.y - 0.22f + bobGun + forward.y * 0.45f,
-        camPos.z + forward.z * (0.52f - recoilBack) + right.z * 0.24f
+        camPos.x + forward.x * (0.46f - recoilBack) + right.x * 0.20f,
+        camPos.y - 0.20f + bobGun + forward.y * (0.46f - recoilBack),
+        camPos.z + forward.z * (0.46f - recoilBack) + right.z * 0.20f
     };
-    DrawCubeV(gunPos, Vector3{0.12f, 0.11f, 0.32f}, Color{38, 48, 58, 255});
-    DrawCubeWiresV(gunPos, Vector3{0.125f, 0.115f, 0.325f}, Color{90, 245, 200, 255});
+    Vector3 barrelBack = {
+        gunPos.x - forward.x * 0.12f,
+        gunPos.y - forward.y * 0.12f,
+        gunPos.z - forward.z * 0.12f
+    };
+    Vector3 barrelMid = {
+        gunPos.x + forward.x * 0.08f,
+        gunPos.y + forward.y * 0.08f,
+        gunPos.z + forward.z * 0.08f
+    };
+    Vector3 barrelMuzzle = {
+        gunPos.x + forward.x * 0.28f - right.x * 0.03f,
+        gunPos.y + forward.y * 0.28f,
+        gunPos.z + forward.z * 0.28f - right.z * 0.03f
+    };
+    Vector3 gripBottom = {
+        barrelBack.x - forward.x * 0.03f,
+        barrelBack.y - 0.12f,
+        barrelBack.z - forward.z * 0.03f
+    };
+
+    DrawCylinderEx(barrelBack, gripBottom, 0.038f, 0.030f, 6, Color{58, 34, 28, 255});
+    DrawCylinderEx(barrelBack, barrelMid, 0.062f, 0.052f, 8, Color{38, 48, 58, 255});
+    DrawCylinderWiresEx(barrelBack, barrelMid, 0.065f, 0.055f, 8, Color{90, 245, 200, 255});
+    DrawCylinderEx(barrelMid, barrelMuzzle, 0.040f, 0.028f, 8, Color{24, 34, 44, 255});
+    DrawCylinderWiresEx(barrelMid, barrelMuzzle, 0.043f, 0.031f, 8, Color{110, 255, 220, 255});
+    DrawSphere(barrelMuzzle, 0.026f, Color{90, 255, 215, 255});
 
     if (gunRecoilTimer > 0.06f) {
         Vector3 beamEnd = {
@@ -401,8 +426,8 @@ void CafeWorld::Render3DVisor(engine::core::Engine& eng,
             camPos.y + forward.y * 16.0f,
             camPos.z + forward.z * 16.0f
         };
-        DrawLine3D(gunPos, beamEnd, Color{110, 255, 225, 255});
-        DrawSphere(gunPos, 0.09f, Color{255, 230, 120, 255});
+        DrawCylinderEx(barrelMuzzle, beamEnd, 0.018f, 0.008f, 6, Color{110, 255, 225, 255});
+        DrawSphere(barrelMuzzle, 0.075f, Color{255, 230, 120, 255});
     }
 
     EndMode3D();

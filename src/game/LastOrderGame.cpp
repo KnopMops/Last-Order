@@ -51,13 +51,11 @@ void LastOrderGame::SetVisor3DActive(engine::core::Engine& eng, bool active) {
 void LastOrderGame::SpawnInitial3DAnomalies(int nightNumber) {
     m_anomalies3D.clear();
     m_nextAnomalyId = 1;
-    m_anomalySpawnTimer = 11.0f;
+    m_anomalySpawnTimer = 55.0f;
     m_scannerTargetText.clear();
 
     m_anomalies3D.push_back({m_nextAnomalyId++, 0, "Кровавый Разлом",  {34.0f,  98.0f},  1.15f, 2, 2, 0.0f, true});
-    m_anomalies3D.push_back({m_nextAnomalyId++, 1, "Теневой Сталкер",  {282.0f, 64.0f},  1.05f, 3, 3, 0.0f, true});
-    m_anomalies3D.push_back({m_nextAnomalyId++, 2, "Череп-Фантом",     {154.0f, 152.0f}, 1.25f, 2, 2, 0.0f, true});
-    m_anomalies3D.push_back({m_nextAnomalyId++, 0, "Узел Искажения",   {284.0f, 146.0f}, 1.20f, 2 + nightNumber / 2, 2 + nightNumber / 2, 0.0f, true});
+    m_anomalies3D.push_back({m_nextAnomalyId++, 1, "Теневой Сталкер",  {282.0f, 146.0f}, 1.05f, 2 + nightNumber / 3, 2 + nightNumber / 3, 0.0f, true});
 }
 
 void LastOrderGame::Spawn3DShooterWave(engine::core::Engine& eng, int count) {
@@ -71,6 +69,12 @@ void LastOrderGame::Spawn3DShooterWave(engine::core::Engine& eng, int count) {
         {284.0f, 148.0f},
         {156.0f, 154.0f}
     };
+
+    m_anomalies3D.erase(
+        std::remove_if(m_anomalies3D.begin(), m_anomalies3D.end(),
+                       [](const world::VisorAnomaly3D& a) { return !a.active; }),
+        m_anomalies3D.end());
+    if (static_cast<int>(m_anomalies3D.size()) >= 6) return;
 
     for (int i = 0; i < count; ++i) {
         const auto& sp = spawnSpots[(std::rand() + i) % 8];
@@ -434,10 +438,12 @@ void LastOrderGame::Update3DVisorShooter(engine::core::Engine& eng, float dt) {
         }
     }
 
-    m_anomalySpawnTimer -= dt;
-    if (m_anomalySpawnTimer <= 0.0f || activeCount == 0) {
-        m_anomalySpawnTimer = m_visor3DActive ? 8.5f : 15.0f;
-        Spawn3DShooterWave(eng, (activeCount == 0) ? 3 : 2);
+    if (activeCount < 2) {
+        m_anomalySpawnTimer -= dt;
+        if (m_anomalySpawnTimer <= 0.0f) {
+            m_anomalySpawnTimer = 55.0f;
+            Spawn3DShooterWave(eng, 1);
+        }
     }
 
     if (m_visor3DActive) {
@@ -482,7 +488,7 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
     m_ambientScreamerTimer -= fixedDt;
     if (m_ambientScreamerTimer <= 0.0f) {
         float nightFactor = static_cast<float>(std::max(1, m_currentNight));
-        m_ambientScreamerTimer = std::max(12.0f, 28.0f - nightFactor * 2.5f);
+        m_ambientScreamerTimer = std::max(38.0f, 62.0f - nightFactor * 4.0f);
         int roll = std::rand() % 100;
         if (roll < 42 + m_currentNight * 7) {
             TriggerScreamer(eng, SCREAMER_IDS[std::rand() % 14]);
