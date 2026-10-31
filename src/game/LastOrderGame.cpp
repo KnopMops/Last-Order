@@ -35,7 +35,7 @@ void LastOrderGame::SetVisor3DActive(engine::core::Engine& eng, bool active) {
         DisableCursor();
         eng.Audio().PlaySfx("audio/sfx/sfx_visor_toggle.wav", 0.85f);
     } else {
-        EnableCursor();
+        if (IsCursorHidden()) EnableCursor();
         eng.Audio().PlaySfx("audio/sfx/sfx_visor_toggle.wav", 0.70f);
     }
 }
@@ -585,13 +585,13 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
     }
 
     if (m_settingsUI.IsOpen()) {
-        EnableCursor();
+        if (IsCursorHidden()) EnableCursor();
         m_settingsUI.Update(eng);
         return;
     }
 
     if (m_screen == GameScreen::MainMenu) {
-        EnableCursor();
+        if (IsCursorHidden()) EnableCursor();
         eng.Renderer().SetSanityStress(0.0f);
         eng.Renderer().SetSkip2DLightmap(false);
         ui::MenuCommand cmd = m_mainMenu.Update(eng, dt);
@@ -630,7 +630,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
     }
 
     if (m_screen == GameScreen::NightmareChase) {
-        EnableCursor();
+        if (IsCursorHidden()) EnableCursor();
         if (m_chaseMinigame.GetState() == systems::ChaseState::Victory) {
             if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_E)) {
                 CompleteActiveMinigame(eng);
@@ -645,7 +645,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
     }
 
     if (m_screen == GameScreen::Paused) {
-        EnableCursor();
+        if (IsCursorHidden()) EnableCursor();
         UpdatePauseMenu(eng);
         return;
     }
@@ -689,7 +689,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         }
 
         if (m_endlessDirector.IsGameOver()) {
-            EnableCursor();
+            if (IsCursorHidden()) EnableCursor();
             if (IsKeyPressed(KEY_R)) {
                 StartEndlessShift(eng);
             } else if (IsKeyPressed(KEY_ESCAPE)) {
@@ -766,7 +766,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
 
     m_sanity.Update(eng, dt, m_playerBody.position);
     if (m_sanity.IsGameOver()) {
-        EnableCursor();
+        if (IsCursorHidden()) EnableCursor();
         systems::GameOverCommand goCmd = m_sanity.UpdateGameOverInput(eng);
         if (goCmd == systems::GameOverCommand::RestoreCheckpoint) {
             m_sanity.RestoreCheckpointTo(eng, m_playerBody.position);
@@ -1245,7 +1245,7 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
 }
 
 void LastOrderGame::OnShutdown(engine::core::Engine& ) {
-    EnableCursor();
+    if (IsCursorHidden()) EnableCursor();
 }
 
 }
