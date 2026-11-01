@@ -56,8 +56,8 @@ void LastOrderGame::SetVisor3DActive(engine::core::Engine& eng, bool active) {
 
         m_playerBody.velocity = {0.0f, 0.0f};
         m_isMoving = false;
-        m_playerBody.position.x = std::clamp(m_playerBody.position.x, 14.0f, 296.0f);
-        m_playerBody.position.y = std::clamp(m_playerBody.position.y, 16.0f, 156.0f);
+        m_playerBody.position.x = std::clamp(m_playerBody.position.x, 12.0f, 296.0f);
+        m_playerBody.position.y = std::clamp(m_playerBody.position.y, 4.0f, 156.0f);
         m_nearestTrigger = eng.Physics().FindNearestTrigger(m_playerBody.Center(), 26.0f);
     }
 }
@@ -180,7 +180,7 @@ void LastOrderGame::StartEndlessShift(engine::core::Engine& eng) {
     eng.State().Reset();
     eng.Time().Reset(23, 0, 1.80f);
 
-    m_playerBody.position = {112.0f, 46.0f};
+    m_playerBody.position = {112.0f, 48.0f};
     m_playerBody.colliderOffset = {9.0f, 18.0f};
     m_playerBody.colliderSize = {14.0f, 11.0f};
     m_playerBody.velocity = {0.0f, 0.0f};
@@ -260,7 +260,7 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
 
     eng.Time().Reset(22, 0, 1.80f);
 
-    m_playerBody.position = {112.0f, 46.0f};
+    m_playerBody.position = {112.0f, 48.0f};
     m_playerBody.colliderOffset = {9.0f, 18.0f};
     m_playerBody.colliderSize = {14.0f, 11.0f};
     m_playerBody.velocity = {0.0f, 0.0f};
@@ -376,8 +376,8 @@ void LastOrderGame::UpdatePlayerMovement(engine::core::Engine& eng, float dt) {
     } else {
         eng.Physics().MoveAndSlide(m_playerBody, dt);
     }
-    m_playerBody.position.x = std::clamp(m_playerBody.position.x, 14.0f, 296.0f);
-    m_playerBody.position.y = std::clamp(m_playerBody.position.y, 16.0f, 156.0f);
+    m_playerBody.position.x = std::clamp(m_playerBody.position.x, 12.0f, 296.0f);
+    m_playerBody.position.y = std::clamp(m_playerBody.position.y, 4.0f, 156.0f);
     m_distMovedThisFrame += (m_playerBody.position - prevPos).Length();
 
     auto& fl = eng.Lighting().GetFlashlight();

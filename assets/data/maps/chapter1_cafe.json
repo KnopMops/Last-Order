@@ -38,10 +38,10 @@
     },
     {
       "id": "bar_counter",
-      "x": 82.0,
-      "y": 42.0,
-      "w": 112.0,
-      "h": 12.0
+      "x": 88.0,
+      "y": 44.0,
+      "w": 104.0,
+      "h": 10.0
     },
     {
       "id": "prop_jukebox",
@@ -119,40 +119,40 @@
       "id": "trig_note",
       "name": "Касса",
       "dialogue": "note_mikhail_intro",
-      "x": 82.0,
-      "y": 32.0,
-      "w": 26.0,
-      "h": 26.0,
+      "x": 84.0,
+      "y": 24.0,
+      "w": 32.0,
+      "h": 46.0,
       "enabled": true
     },
     {
       "id": "trig_visor",
       "name": "Комплекс «ОКО-86»",
       "dialogue": "visor_inspect",
-      "x": 110.0,
-      "y": 32.0,
+      "x": 118.0,
+      "y": 24.0,
       "w": 24.0,
-      "h": 26.0,
+      "h": 46.0,
       "enabled": true
     },
     {
       "id": "trig_coffee",
       "name": "Кофемашина",
       "dialogue": "coffee_machine_use",
-      "x": 136.0,
-      "y": 32.0,
+      "x": 142.0,
+      "y": 24.0,
       "w": 28.0,
-      "h": 26.0,
+      "h": 46.0,
       "enabled": true
     },
     {
       "id": "trig_radio",
       "name": "Радиоприёмник",
       "dialogue": "radio_turned_off",
-      "x": 166.0,
-      "y": 32.0,
+      "x": 168.0,
+      "y": 24.0,
       "w": 28.0,
-      "h": 26.0,
+      "h": 46.0,
       "enabled": true
     },
     {
@@ -169,10 +169,10 @@
       "id": "trig_rules",
       "name": "Устав смены",
       "dialogue": "wall_rules_night1",
-      "x": 104.0,
-      "y": 18.0,
-      "w": 32.0,
-      "h": 32.0,
+      "x": 106.0,
+      "y": 20.0,
+      "w": 34.0,
+      "h": 50.0,
       "enabled": true
     },
     {

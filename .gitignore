@@ -5,3 +5,5 @@ build/
 *.tmp
 release/
 *.zip
+settings.json
+save_profile.json

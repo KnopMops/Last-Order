@@ -97,7 +97,7 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
         phys.AddStaticCollider("wall_left",      {0.0f,   0.0f,   10.0f,  180.0f});
         phys.AddStaticCollider("wall_right",     {310.0f, 0.0f,   10.0f,  180.0f});
 
-        phys.AddStaticCollider("bar_counter",    {82.0f,  42.0f,  112.0f, 12.0f});
+        phys.AddStaticCollider("bar_counter",    {88.0f,  44.0f,  104.0f, 10.0f});
         phys.AddStaticCollider("prop_jukebox",   {52.0f,  22.0f,  16.0f,  18.0f});
 
         phys.AddStaticCollider("kitchen_oven",   {236.0f, 22.0f,  30.0f,  16.0f});
@@ -111,13 +111,13 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
         phys.AddStaticCollider("booth_5",        {228.0f, 84.0f,  20.0f,  12.0f});
         phys.AddStaticCollider("booth_table6",   {228.0f, 126.0f, 20.0f,  12.0f});
 
-        phys.AddTrigger({"trig_note",     "Касса",               noteDlg,               {82.0f,  32.0f,  26.0f, 26.0f}, true});
-        phys.AddTrigger({"trig_visor",    "Комплекс «ОКО-86»",   "visor_inspect",       {110.0f, 32.0f,  24.0f, 26.0f}, true});
-        phys.AddTrigger({"trig_coffee",   "Кофемашина",          "coffee_machine_use",  {136.0f, 32.0f,  28.0f, 26.0f}, true});
-        phys.AddTrigger({"trig_radio",    "Радиоприёмник",       radioDlg,              {166.0f, 32.0f,  28.0f, 26.0f}, true});
+        phys.AddTrigger({"trig_note",     "Касса",               noteDlg,               {84.0f,  24.0f,  32.0f, 46.0f}, true});
+        phys.AddTrigger({"trig_visor",    "Комплекс «ОКО-86»",   "visor_inspect",       {118.0f, 24.0f,  24.0f, 46.0f}, true});
+        phys.AddTrigger({"trig_coffee",   "Кофемашина",          "coffee_machine_use",  {142.0f, 24.0f,  28.0f, 46.0f}, true});
+        phys.AddTrigger({"trig_radio",    "Радиоприёмник",       radioDlg,              {168.0f, 24.0f,  28.0f, 46.0f}, true});
 
         phys.AddTrigger({"trig_jukebox",  "Музыкальный автомат", jukeDlg,               {48.0f,  18.0f,  24.0f, 28.0f}, true});
-        phys.AddTrigger({"trig_rules",    "Устав смены",         "wall_rules_night1",   {104.0f, 18.0f,  32.0f, 32.0f}, true});
+        phys.AddTrigger({"trig_rules",    "Устав смены",         "wall_rules_night1",   {106.0f, 20.0f,  34.0f, 50.0f}, true});
         phys.AddTrigger({"trig_phone",    "Телефон на стене",    phoneDlg,              {140.0f, 10.0f,  22.0f, 20.0f}, true});
         phys.AddTrigger({"trig_cat",      "Кот Уголёк",          "cat_ugolyok_talk",    {196.0f, 34.0f,  24.0f, 24.0f}, true});
 
@@ -265,16 +265,16 @@ void CafeWorld::Render(engine::core::Engine& eng,
     DrawRectangle(144, 8, 12, 12, Color{180, 42, 42, 255});
     DrawRectangleLines(144, 8, 12, 12, Color{244, 184, 96, 255});
 
-    DrawRectangle(82, 42, 112, 12, Color{107, 51, 34, 255});
-    DrawRectangle(82, 40, 112, 3,  Color{196, 122, 59, 255});
-    DrawRectangle(88, 38, 14,  10, Color{216, 194, 162, 255});
+    DrawRectangle(88, 44, 104, 10, Color{107, 51, 34, 255});
+    DrawRectangle(88, 42, 104, 3,  Color{196, 122, 59, 255});
+    DrawRectangle(92, 40, 14,  10, Color{216, 194, 162, 255});
 
-    DrawRectangle(116, 39, 12, 8, Color{40, 180, 130, 255});
-    DrawRectangleLines(116, 39, 12, 8, Color{244, 184, 96, 255});
+    DrawRectangle(118, 41, 12, 8, Color{40, 180, 130, 255});
+    DrawRectangleLines(118, 41, 12, 8, Color{244, 184, 96, 255});
 
-    DrawTexture(texCoffee, 140, 32, WHITE);
-    DrawRectangle(170, 39, 16, 9, Color{52, 34, 28, 255});
-    DrawRectangleLines(170, 39, 16, 9, Color{214, 69, 69, 255});
+    DrawTexture(texCoffee, 142, 34, WHITE);
+    DrawRectangle(170, 41, 16, 9, Color{52, 34, 28, 255});
+    DrawRectangleLines(170, 41, 16, 9, Color{214, 69, 69, 255});
 
     int catFrame = (lightsFlickering || blackoutMode || nightNumber >= 3) ? 1 : 0;
     DrawTextureRec(texCat, Rectangle{static_cast<float>(catFrame * 16), 0.0f, 16.0f, 16.0f}, Vector2{200.0f, 40.0f}, WHITE);
