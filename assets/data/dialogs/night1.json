@@ -699,28 +699,6 @@
       ],
       "choices": [
         {
-          "text": "Изгнать аномалию лучом фонарика",
-          "actions": [
-            {
-              "type": "set_flag",
-              "target": "bride_n1_banished"
-            },
-            {
-              "type": "screamer",
-              "target": "sc_night13_grinning_face"
-            },
-            {
-              "type": "add_sanity",
-              "value": 10
-            },
-            {
-              "type": "event",
-              "target": "banish_fake_kurt"
-            }
-          ],
-          "nextNode": "bride_n1_gone"
-        },
-        {
           "text": "Подать пустой чай без сахара",
           "requireHeldItem": "tea_nosugar",
           "actions": [
@@ -729,15 +707,15 @@
               "target": ""
             },
             {
-              "type": "screamer",
-              "target": "sc_night12_corridor_rush"
+              "type": "set_flag",
+              "target": "bride_n1_served"
             },
             {
               "type": "add_sanity",
-              "value": -25
+              "value": 15
             }
           ],
-          "nextNode": "bride_n1_attack"
+          "nextNode": "bride_n1_done"
         },
         {
           "text": "Отойти",
@@ -872,6 +850,45 @@
           ],
           "nextNode": ""
         },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "bride_n1_done",
+      "lines": [
+        {
+          "speaker": "Невеста с обочины",
+          "text": "Фигура медленно берёт кружку ледяными пальцами: «Автобус уже на перекрёстке... Спасибо, сестрёнка». Тень растворяется в воздухе."
+        }
+      ]
+    },
+    {
+      "id": "radio_turned_off",
+      "lines": [
+        {
+          "speaker": "Радиоприёмник",
+          "text": "Приёмник отключён от сети. В динамике тишина. По радиовещанию пока нет сигнала."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "radio_tuned",
+      "lines": [
+        {
+          "speaker": "Радиоприёмник",
+          "text": "Приёмник настроен на 94.5 FM. Передача зафиксирована, эфир чист."
+        }
+      ],
+      "choices": [
         {
           "text": "Отойти",
           "nextNode": ""

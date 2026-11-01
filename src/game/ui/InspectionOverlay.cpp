@@ -9,17 +9,26 @@ void InspectionOverlay::Reset() {
     m_notebookOpen = false;
     m_rulesSheetOpen = false;
     m_notesGuideOpen = false;
+    m_mirrorInspectorOpen = false;
 }
 
 void InspectionOverlay::ToggleNotebook(engine::core::Engine& eng) {
     m_notebookOpen = !m_notebookOpen;
-    if (m_notebookOpen) m_rulesSheetOpen = false;
+    if (m_notebookOpen) {
+        m_rulesSheetOpen = false;
+        m_notesGuideOpen = false;
+        m_mirrorInspectorOpen = false;
+    }
     eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.65f);
 }
 
 void InspectionOverlay::ToggleRulesSheet(engine::core::Engine& eng) {
     m_rulesSheetOpen = !m_rulesSheetOpen;
-    if (m_rulesSheetOpen) m_notebookOpen = false;
+    if (m_rulesSheetOpen) {
+        m_notebookOpen = false;
+        m_notesGuideOpen = false;
+        m_mirrorInspectorOpen = false;
+    }
     eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.65f);
 }
 
@@ -28,22 +37,33 @@ void InspectionOverlay::ToggleNotesGuide(engine::core::Engine& eng) {
     if (m_notesGuideOpen) {
         m_notebookOpen = false;
         m_rulesSheetOpen = false;
+        m_mirrorInspectorOpen = false;
     }
     eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.65f);
+}
+
+void InspectionOverlay::ToggleMirrorInspector(engine::core::Engine& eng) {
+    m_mirrorInspectorOpen = !m_mirrorInspectorOpen;
+    if (m_mirrorInspectorOpen) {
+        m_notebookOpen = false;
+        m_rulesSheetOpen = false;
+        m_notesGuideOpen = false;
+        eng.State().SetFlag("n2_mirror_checked");
+        eng.State().SetFlag("mirror_examined");
+        eng.Audio().PlaySfx("audio/sfx/sfx_window_bang.wav", 0.65f);
+    }
 }
 
 void InspectionOverlay::CloseAll() {
     m_notebookOpen = false;
     m_rulesSheetOpen = false;
     m_notesGuideOpen = false;
+    m_mirrorInspectorOpen = false;
 }
 
 void InspectionOverlay::Render(engine::core::Engine& eng, int currentNight, const MirrorWorldState& mirrorState) const {
-    if (eng.Dialogue().IsActive() && eng.Dialogue().GetActiveNode()) {
-        const std::string& nid = eng.Dialogue().GetActiveNode()->id;
-        if (nid.find("mirror") != std::string::npos) {
-            RenderLiveMirrorInspector(eng, mirrorState);
-        }
+    if (m_mirrorInspectorOpen || (eng.Dialogue().IsActive() && eng.Dialogue().GetActiveNode() && eng.Dialogue().GetActiveNode()->id.find("mirror") != std::string::npos)) {
+        RenderLiveMirrorInspector(eng, mirrorState);
     }
 
     if (m_notebookOpen) {
@@ -58,59 +78,66 @@ void InspectionOverlay::Render(engine::core::Engine& eng, int currentNight, cons
 void InspectionOverlay::RenderLiveMirrorInspector(engine::core::Engine& eng, const MirrorWorldState& ms) const {
     Font font = eng.Assets().GetMainFont();
     float bx = 360.0f;
-    float by = 86.0f;
+    float by = 70.0f;
     float bw = 560.0f;
-    float bh = 250.0f;
+    float bh = 280.0f;
 
     DrawRectangle(static_cast<int>(bx - 8), static_cast<int>(by - 8), static_cast<int>(bw + 16), static_cast<int>(bh + 16), Color{107, 51, 34, 250});
     DrawRectangle(static_cast<int>(bx), static_cast<int>(by), static_cast<int>(bw), static_cast<int>(bh), Color{18, 28, 48, 245});
     DrawRectangleLinesEx(Rectangle{bx, by, bw, bh}, 3.0f, Color{143, 169, 196, 255});
 
-    DrawTextEx(font, "ОТРАЖЕНИЕ ЗАЛА В НАСТЕННОМ ЗЕРКАЛЕ", Vector2{bx + 18.0f, by + 10.0f}, 18.0f, 1.0f, Color{244, 184, 96, 255});
+    DrawTextEx(font, "ОСМОТР СТЕКЛА: ОТРАЖЕНИЕ ЗАЛА В ЗЕРКАЛЕ", Vector2{bx + 18.0f, by + 10.0f}, 18.0f, 1.0f, Color{244, 184, 96, 255});
 
-    DrawRectangle(static_cast<int>(bx + 36), static_cast<int>(by + 110), 140, 88, Color{42, 23, 21, 230});
-    DrawRectangleLinesEx(Rectangle{bx + 36, by + 110, 140, 88}, 2.0f, Color{196, 122, 59, 200});
-    DrawTextEx(font, "Левый ряд столов", Vector2{bx + 40.0f, by + 84.0f}, 16.0f, 1.0f, Color{188, 178, 162, 240});
+    DrawRectangle(static_cast<int>(bx + 36), static_cast<int>(by + 48), 140, 88, Color{42, 23, 21, 230});
+    DrawRectangleLinesEx(Rectangle{bx + 36, by + 48, 140, 88}, 2.0f, Color{196, 122, 59, 200});
+    DrawTextEx(font, "Левый ряд столов", Vector2{bx + 40.0f, by + 34.0f}, 15.0f, 1.0f, Color{188, 178, 162, 240});
 
     if (ms.guestAtTable2) {
         if (ms.table2HasReflection) {
             Texture2D kurtTex = eng.Assets().GetTexture("sprites/characters/spr_kurt.png");
-            DrawTexturePro(kurtTex, Rectangle{0, 0, 32, 32}, Rectangle{bx + 74, by + 118, 64, 64}, Vector2{0, 0}, 0.0f, Color{170, 195, 220, 210});
-            DrawTextEx(font, "Отражение есть", Vector2{bx + 48.0f, by + 204.0f}, 16.0f, 1.0f, Color{130, 214, 130, 255});
+            DrawTexturePro(kurtTex, Rectangle{0, 0, 32, 32}, Rectangle{bx + 74, by + 56, 64, 64}, Vector2{0, 0}, 0.0f, Color{170, 195, 220, 210});
+            DrawTextEx(font, "Отражение есть", Vector2{bx + 48.0f, by + 142.0f}, 15.0f, 1.0f, Color{130, 214, 130, 255});
         } else {
-            DrawTextEx(font, "ПУСТО!", Vector2{bx + 76.0f, by + 142.0f}, 21.0f, 1.0f, Color{214, 69, 69, 255});
-            DrawTextEx(font, "НЕТ ОТРАЖЕНИЯ!", Vector2{bx + 40.0f, by + 204.0f}, 16.0f, 1.0f, Color{214, 69, 69, 255});
+            DrawTextEx(font, "ПУСТО!", Vector2{bx + 76.0f, by + 80.0f}, 21.0f, 1.0f, Color{214, 69, 69, 255});
+            DrawTextEx(font, "НЕТ ОТРАЖЕНИЯ!", Vector2{bx + 40.0f, by + 142.0f}, 15.0f, 1.0f, Color{214, 69, 69, 255});
         }
     } else {
-        DrawTextEx(font, "Свободно", Vector2{bx + 68.0f, by + 145.0f}, 16.0f, 1.0f, Color{143, 169, 196, 160});
+        DrawTextEx(font, "Свободно", Vector2{bx + 68.0f, by + 82.0f}, 16.0f, 1.0f, Color{143, 169, 196, 160});
     }
 
     if (ms.showVeraSilhouette) {
         Texture2D veraTex = eng.Assets().GetTexture("sprites/characters/spr_vera.png");
-        DrawTexturePro(veraTex, Rectangle{0, 0, 32, 32}, Rectangle{bx + 278, by + 72, 76, 76}, Vector2{0, 0}, 0.0f, Color{214, 69, 69, 145});
+        DrawTexturePro(veraTex, Rectangle{0, 0, 32, 32}, Rectangle{bx + 278, by + 40, 76, 76}, Vector2{0, 0}, 0.0f, Color{214, 69, 69, 145});
     }
 
     Texture2D leraTex = eng.Assets().GetTexture("sprites/characters/spr_lera.png");
     Rectangle leraSrc = {ms.eyelessLera ? 64.0f : 0.0f, ms.eyelessLera ? 96.0f : 0.0f, 32.0f, 32.0f};
-    DrawTexturePro(leraTex, leraSrc, Rectangle{bx + 236, by + 104, 88, 88}, Vector2{0, 0}, 0.0f, Color{185, 208, 232, 230});
+    DrawTexturePro(leraTex, leraSrc, Rectangle{bx + 236, by + 42, 88, 88}, Vector2{0, 0}, 0.0f, Color{185, 208, 232, 230});
     DrawTextEx(font, ms.eyelessLera ? "БЕЗ ГЛАЗ!" : "Лера",
-               Vector2{bx + 245.0f, by + 204.0f}, 16.5f, 1.0f,
+               Vector2{bx + 245.0f, by + 142.0f}, 16.0f, 1.0f,
                ms.eyelessLera ? Color{214, 69, 69, 255} : Color{232, 227, 217, 220});
 
-    DrawRectangle(static_cast<int>(bx + 384), static_cast<int>(by + 110), 140, 88, Color{42, 23, 21, 230});
-    DrawRectangleLinesEx(Rectangle{bx + 384, by + 110, 140, 88}, 2.0f, Color{196, 122, 59, 200});
-    DrawTextEx(font, "Правый ряд столов", Vector2{bx + 388.0f, by + 84.0f}, 16.0f, 1.0f, Color{188, 178, 162, 240});
+    DrawRectangle(static_cast<int>(bx + 384), static_cast<int>(by + 48), 140, 88, Color{42, 23, 21, 230});
+    DrawRectangleLinesEx(Rectangle{bx + 384, by + 48, 140, 88}, 2.0f, Color{196, 122, 59, 200});
+    DrawTextEx(font, "Правый ряд столов", Vector2{bx + 388.0f, by + 34.0f}, 15.0f, 1.0f, Color{188, 178, 162, 240});
 
     if (ms.guestAtTable1) {
         if (ms.table1HasReflection) {
-            DrawTextEx(font, "Отражение есть", Vector2{bx + 396.0f, by + 204.0f}, 16.0f, 1.0f, Color{130, 214, 130, 255});
+            DrawTextEx(font, "Отражение есть", Vector2{bx + 396.0f, by + 142.0f}, 15.0f, 1.0f, Color{130, 214, 130, 255});
         } else {
-            DrawTextEx(font, "ПУСТО!", Vector2{bx + 422.0f, by + 142.0f}, 21.0f, 1.0f, Color{214, 69, 69, 255});
-            DrawTextEx(font, "НЕТ В ЗЕРКАЛЕ!", Vector2{bx + 396.0f, by + 204.0f}, 16.0f, 1.0f, Color{214, 69, 69, 255});
+            DrawTextEx(font, "ПУСТО!", Vector2{bx + 422.0f, by + 80.0f}, 21.0f, 1.0f, Color{214, 69, 69, 255});
+            DrawTextEx(font, "НЕТ В ЗЕРКАЛЕ!", Vector2{bx + 396.0f, by + 142.0f}, 15.0f, 1.0f, Color{214, 69, 69, 255});
         }
     } else {
-        DrawTextEx(font, "Свободно", Vector2{bx + 416.0f, by + 145.0f}, 16.0f, 1.0f, Color{143, 169, 196, 160});
+        DrawTextEx(font, "Свободно", Vector2{bx + 416.0f, by + 82.0f}, 16.0f, 1.0f, Color{143, 169, 196, 160});
     }
+
+    DrawRectangle(static_cast<int>(bx + 18), static_cast<int>(by + 172), static_cast<int>(bw - 36), 56, Color{28, 18, 24, 235});
+    DrawRectangleLines(static_cast<int>(bx + 18), static_cast<int>(by + 172), static_cast<int>(bw - 36), 56, Color{244, 184, 96, 200});
+    engine::graphics::TextLayout::DrawCentered(font, "Стекло осмотрено. Двойники без отражения распознаны!", bx + bw * 0.5f, by + 180.0f, 16.0f, Color{140, 230, 220, 255});
+    engine::graphics::TextLayout::DrawCentered(font, "Теперь вы можете выявить и изгнать самозванца в диалоге или через визор [V]!", bx + bw * 0.5f, by + 202.0f, 14.5f, Color{244, 184, 96, 235});
+
+    DrawTextEx(font, "[G] или [ESC] — Закрыть осмотр стекла", Vector2{bx + 18.0f, by + bh - 24.0f}, 15.0f, 1.0f, Color{244, 184, 96, 220});
 }
 
 void InspectionOverlay::RenderRulesSheet(engine::core::Engine& eng, int currentNight) const {
@@ -151,7 +178,7 @@ void InspectionOverlay::RenderRulesSheet(engine::core::Engine& eng, int currentN
     drawRule("4. ЭЛЕКТРОЩИТОК И СВЕТ: При мигании ламп в 03:00 скажите «Доброй ночи!». При аварии питания используйте фонарик [F] и перезапустите узлы в подвале.", Color{42, 23, 21, 255});
 
     engine::graphics::TextLayout::DrawCentered(
-        font, "[R / ESC] Закрыть памятку | [TAB] Тетрадь задач | [V] 3D-Визор",
+        font, "[R / ESC] Закрыть памятку | [TAB] Тетрадь задач | [G] Стекло | [V] 3D-Визор",
         640.0f, py + ph - 38.0f, 18.5f, Color{107, 51, 34, 255}, 1.0f);
 }
 
@@ -186,12 +213,14 @@ void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNig
         drawTask("Обслужить Дядю Курта (Стол №1)", eng.State().HasFlag("kurt_served"));
         drawTask("Обслужить Студентку Катю (Стол №3)", eng.State().HasFlag("katya_served"));
         drawTask("Обслужить Тётю Валю (Стол №2)", eng.State().HasFlag("valya_served"));
-        drawTask("Настроить радиоприёмник (Мини-игра осциллографа)", eng.State().HasFlag("heard_radio_0214"));
+        drawTask("Настроить радиоприёмник (Мини-игра осциллографа в 02:30)", eng.State().HasFlag("heard_radio_0214"));
+        drawTask("Обслужить Невесту с обочины (Стол №1)", eng.State().HasFlag("bride_n1_served"));
         drawTask("Разобраться с Человеком в шляпе (Стол №5)", eng.State().HasFlag("hatman_served_safe") || eng.State().HasFlag("hatman_served_anomaly"));
         drawTask("Вынести мусор к уличному баку на юге", eng.State().HasFlag("trash_taken_out"));
         drawTask("04:00 — Закрыть смену у кассы", eng.State().HasFlag("night1_completed"));
     } else if (currentNight == 2) {
         drawTask("Прочитать дневник на кассе", eng.State().HasFlag("n2_read_diary"));
+        drawTask("Осмотреть стекло / зеркало [G]", eng.State().HasFlag("n2_mirror_checked"));
         drawTask("Уничтожить 3D-аномалии и двойников через «ОКО-86» [V]", eng.State().HasFlag("anomalies_cleared_3d"));
         drawTask("Обслужить Механика Архипа (Стол №3)", eng.State().HasFlag("n2_arkhip_served"));
         drawTask("Обслужить Тётю Валю (Стол №2)", eng.State().HasFlag("n2_valya_served"));
@@ -201,6 +230,7 @@ void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNig
         drawTask("04:00 — Закрыть смену у кассы", eng.State().HasFlag("night2_completed"));
     } else if (currentNight == 3) {
         drawTask("Прочитать запись на кассе", eng.State().HasFlag("n3_read_diary"));
+        drawTask("Осмотреть стекло [G] и выявить мимиков", eng.State().HasFlag("n2_mirror_checked"));
         drawTask("Выжечь 3D-разломы в зале из бластера «ОКО-86» [V]", eng.State().HasFlag("anomalies_cleared_3d"));
         drawTask("Обслужить Следователя Глеба (Стол №4)", eng.State().HasFlag("n3_gleb_served"));
         drawTask("Собрать 3 улики в 3D-Морозильнике на кухне", eng.State().HasFlag("n3_fridge_checked"));
@@ -223,7 +253,7 @@ void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNig
         drawTask("04:00 — Встретить рассвет у кассы", eng.State().HasFlag("night5_completed"));
     }
 
-    DrawTextEx(font, "[TAB] Закрыть | [R] Правила | [V] 3D-Визор | [F3] Debug-режим",
+    DrawTextEx(font, "[TAB] Закрыть | [R] Правила | [G] Осмотр стекла | [V] 3D-Визор",
                Vector2{564, 592}, 17.5f, 1.0f, Color{244, 184, 96, 255});
 }
 
@@ -256,17 +286,17 @@ void InspectionOverlay::RenderNotesGuide(engine::core::Engine& eng, int currentN
     const TipItem tips[] = {
         {
             "1. МУЗЫКАЛЬНЫЙ АВТОМАТ («МЕЛОДИЯ-86»)",
-            "Взаимодействуйте с автоматом у входа и пройдите 2D-мини-игру настройки звукоснимателя. При успешной калибровке заиграет спокойная ретро-музыка, а Лера восстановит +25% рассудка.",
+            "Взаимодействуйте с автоматом у входа и пройдите 2D-мини-игру настройки звукоснимателя. При успешной калибровке заиграет спокойная ретро-музыка (играет циклично), а Лера восстановит +25% рассудка.",
             Color{244, 184, 96, 255}
         },
         {
             "2. РАДИОПРИЁМНИК И ПОДАВЛЕНИЕ ПОМЕХ (94.5 FM)",
-            "В 02:30 из динамика раздаётся агрессивный паранормальный шум, истощающий рассудок. Подойдите к приёмнику на стойке, настройте волну [A/D] на 94.5 FM до захвата сигнала. Это нейтрализует шум и даст +30% рассудка.",
+            "Радио отключено до 02:30. В 02:30 из динамика раздаётся агрессивный паранормальный шум, истощающий рассудок. Подойдите к приёмнику на стойке, настройте волну [A/D] на 94.5 FM до захвата сигнала. Это нейтрализует шум и даст +30% рассудка.",
             Color{120, 240, 150, 255}
         },
         {
-            "3. НАСТЕННОЕ ЗЕРКАЛО И РАЗОБЛАЧЕНИЕ ДВОЙНИКОВ",
-            "Сущности-мимики выдают себя за обычных людей. Проверяйте зеркало в служебном коридоре! Мимики не имеют отражения в зале. Только после обнаружения обмана в зеркале двойника можно изгнать через диалог или уничтожить визором.",
+            "3. ОСМОТР СТЕКЛА И ЗЕРКАЛА [G] ДЛЯ РАЗОБЛАЧЕНИЯ ДВОЙНИКОВ",
+            "Сущности-мимики выдают себя за обычных людей. Нажмите [G] в любой момент для осмотра отражения зала! Мимики не имеют отражения в стекле. Только после обнаружения обмана двойника можно изгнать через диалог или уничтожить визором.",
             Color{180, 220, 255, 255}
         },
         {

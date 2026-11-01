@@ -95,7 +95,8 @@
               "target": "banish_fake_kurt"
             }
           ],
-          "nextNode": "n3_mimic_gone"
+          "nextNode": "n3_mimic_gone",
+          "requireFlag": "n2_mirror_checked"
         },
         {
           "text": "Отойти",
@@ -454,7 +455,8 @@
               "target": "banish_fake_kurt"
             }
           ],
-          "nextNode": ""
+          "nextNode": "",
+          "requireFlag": "n2_mirror_checked"
         },
         {
           "text": "Отойти",

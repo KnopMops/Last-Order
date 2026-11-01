@@ -56,8 +56,8 @@ void LastOrderGame::SetVisor3DActive(engine::core::Engine& eng, bool active) {
 
         m_playerBody.velocity = {0.0f, 0.0f};
         m_isMoving = false;
-        m_playerBody.position.x = std::clamp(m_playerBody.position.x, 14.0f, 282.0f);
-        m_playerBody.position.y = std::clamp(m_playerBody.position.y, 24.0f, 140.0f);
+        m_playerBody.position.x = std::clamp(m_playerBody.position.x, 14.0f, 296.0f);
+        m_playerBody.position.y = std::clamp(m_playerBody.position.y, 16.0f, 156.0f);
         m_nearestTrigger = eng.Physics().FindNearestTrigger(m_playerBody.Center(), 26.0f);
     }
 }
@@ -221,6 +221,7 @@ void LastOrderGame::CompleteActiveMinigame(engine::core::Engine& eng) {
     systems::MinigameType t = m_chaseMinigame.GetType();
     if (t == systems::MinigameType::Night1_RadioTuner2D) {
         eng.State().SetFlag("heard_radio_0214");
+        eng.Physics().UpdateTriggerDialogue("trig_radio", "radio_tuned", "Радиоприёмник [94.5 FM]");
     } else if (t == systems::MinigameType::Night2_BasementFuse3D) {
         eng.State().SetFlag("n2_power_restored");
         m_lightsFlickering = false;
@@ -284,8 +285,8 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
             {"katya",    "Студентка Катя",     "sprites/characters/spr_vera.png",  "trig_booth3", "katya_talk",    {144.0f, 68.0f},  25,  false, false, true, 0, "katya_served",       false, -1.0f},
             {"valya",    "Тётя Валя",          "sprites/characters/spr_valya.png", "trig_booth2", "valya_talk",    {64.0f,  110.0f}, 55,  false, false, true, 0, "valya_served",       false, -1.0f},
             {"danila",   "Водитель Данила",    "sprites/characters/spr_kurt.png",  "trig_booth4", "danila_talk",   {144.0f, 110.0f}, 95,  false, false, true, 0, "danila_served",      false, -1.0f},
-            {"hatman",   "Человек в шляпе",    "sprites/characters/spr_guest.png", "trig_booth5", "hatman_talk",   {224.0f, 68.0f},  140, false, true,  false,0, "hatman_served_safe", false, -1.0f},
-            {"bride_n1", "Невеста с обочины",  "sprites/characters/spr_vera.png",  "trig_booth1", "bride_n1_talk", {64.0f,  68.0f},  185, false, true,  false,0, "bride_n1_banished",  false, -1.0f}
+            {"hatman",   "Человек в шляпе",    "sprites/characters/spr_guest.png", "trig_booth5", "hatman_talk",   {224.0f, 68.0f},  140, false, false, true, 0, "hatman_served_safe", false, -1.0f},
+            {"bride_n1", "Невеста с обочины",  "sprites/characters/spr_vera.png",  "trig_booth1", "bride_n1_talk", {64.0f,  68.0f},  185, false, false, true, 0, "bride_n1_served",       false, -1.0f}
         };
     } else if (nightNumber == 2) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.75f);
@@ -375,8 +376,8 @@ void LastOrderGame::UpdatePlayerMovement(engine::core::Engine& eng, float dt) {
     } else {
         eng.Physics().MoveAndSlide(m_playerBody, dt);
     }
-    m_playerBody.position.x = std::clamp(m_playerBody.position.x, 14.0f, 282.0f);
-    m_playerBody.position.y = std::clamp(m_playerBody.position.y, 24.0f, 140.0f);
+    m_playerBody.position.x = std::clamp(m_playerBody.position.x, 14.0f, 296.0f);
+    m_playerBody.position.y = std::clamp(m_playerBody.position.y, 16.0f, 156.0f);
     m_distMovedThisFrame += (m_playerBody.position - prevPos).Length();
 
     auto& fl = eng.Lighting().GetFlashlight();
@@ -656,7 +657,8 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
     if (m_currentNight == 1) {
         if (elapsedMins >= 150.0f && !eng.State().HasFlag("radio_0214_ringing")) {
             eng.State().SetFlag("radio_0214_ringing");
-            eng.Audio().PlaySfx("audio/sfx/sfx_radio_static.wav", 0.75f);
+            eng.Audio().PlaySfx("audio/sfx/sfx_radio_static.wav", 0.85f);
+            eng.Physics().UpdateTriggerDialogue("trig_radio", "radio_0214", "Радиоприёмник [ПОМЕХИ!]");
         }
 
         if (elapsedMins >= 300.0f && !eng.State().HasFlag("event_0300_triggered")) {
@@ -946,7 +948,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
             }
         }
 
-        if (IsKeyPressed(KEY_F8) || IsKeyPressed(KEY_G)) {
+        if (IsKeyPressed(KEY_F8)) {
             TriggerScreamer(eng, SCREAMER_IDS[m_demoScreamerIdx % 14]);
             m_demoScreamerIdx++;
         }
@@ -1010,10 +1012,21 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
             m_inspectionUI.ToggleRulesSheet(eng);
             eng.State().SetFlag("read_wall_rules");
         }
+        if (IsKeyPressed(KEY_G)) {
+            if (m_visor3DActive) SetVisor3DActive(eng, false);
+            m_inspectionUI.ToggleMirrorInspector(eng);
+            eng.State().SetFlag("n2_mirror_checked");
+            eng.State().SetFlag("mirror_examined");
+        }
     }
 
     if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && IsKeyPressed(KEY_E)) {
         if (m_nearestTrigger.has_value() && !m_nearestTrigger->dialogueId.empty()) {
+            std::string tid = m_nearestTrigger->id;
+            if (tid == "trig_mirror" || tid == "trig_window") {
+                eng.State().SetFlag("n2_mirror_checked");
+                eng.State().SetFlag("mirror_examined");
+            }
             eng.Dialogue().StartDialogue(m_nearestTrigger->dialogueId);
             eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.45f);
         }
@@ -1044,7 +1057,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.7f);
     }
 
-    if ((IsKeyPressed(KEY_G) || IsKeyPressed(KEY_F8)) && !eng.Dialogue().IsActive()) {
+    if (IsKeyPressed(KEY_F8) && !eng.Dialogue().IsActive()) {
         TriggerScreamer(eng, SCREAMER_IDS[m_demoScreamerIdx % 14]);
         m_demoScreamerIdx++;
     }
@@ -1405,7 +1418,7 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     }
 
     if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && !m_sanity.IsGameOver()) {
-        DrawTextEx(font, "[I] Советы и памятка  |  [F5] Сохранить", Vector2{24, 692}, 16.0f, 1.0f, Color{188, 178, 162, 210});
+        DrawTextEx(font, "[G] Стекло (Зеркало)  |  [I] Памятка  |  [TAB] Задачи  |  [F5] Сохранить", Vector2{24, 692}, 16.0f, 1.0f, Color{188, 178, 162, 220});
     }
 
     if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && !m_sanity.IsGameOver() && m_nearestTrigger.has_value()) {

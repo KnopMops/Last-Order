@@ -443,7 +443,8 @@
               "target": "banish_fake_kurt"
             }
           ],
-          "nextNode": ""
+          "nextNode": "",
+          "requireFlag": "n2_mirror_checked"
         },
         {
           "text": "Отойти",

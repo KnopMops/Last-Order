@@ -25,7 +25,11 @@ void AudioBus::Update(float dt, const core::GameSettings& settings) {
     }
 
     if (m_ambientStream.stream.buffer != nullptr) {
+        m_ambientStream.looping = true;
         UpdateMusicStream(m_ambientStream);
+        if (!IsMusicStreamPlaying(m_ambientStream)) {
+            PlayMusicStream(m_ambientStream);
+        }
         float targetVol = (m_postScareSilenceTimer > 0.0f) ? 0.0f : (m_ambientBaseVolume * m_ambientVol);
         SetMusicVolume(m_ambientStream, targetVol);
     }
@@ -41,6 +45,7 @@ void AudioBus::PlayAmbient(const std::string& relativeOggPath, float baseVolume)
     std::string fullPath = m_assets->GetBaseDir() + "/" + relativeOggPath;
     m_ambientStream = LoadMusicStream(fullPath.c_str());
     if (m_ambientStream.stream.buffer != nullptr) {
+        m_ambientStream.looping = true;
         m_currentAmbientPath = relativeOggPath;
         SetMusicVolume(m_ambientStream, m_ambientBaseVolume * m_ambientVol);
         PlayMusicStream(m_ambientStream);

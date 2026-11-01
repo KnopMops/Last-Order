@@ -21,12 +21,14 @@ public:
     void ToggleNotebook(engine::core::Engine& eng);
     void ToggleRulesSheet(engine::core::Engine& eng);
     void ToggleNotesGuide(engine::core::Engine& eng);
+    void ToggleMirrorInspector(engine::core::Engine& eng);
     void CloseAll();
 
     bool IsNotebookOpen() const { return m_notebookOpen; }
     bool IsRulesSheetOpen() const { return m_rulesSheetOpen; }
     bool IsNotesGuideOpen() const { return m_notesGuideOpen; }
-    bool IsAnyModalOpen() const { return m_notebookOpen || m_rulesSheetOpen || m_notesGuideOpen; }
+    bool IsMirrorInspectorOpen() const { return m_mirrorInspectorOpen; }
+    bool IsAnyModalOpen() const { return m_notebookOpen || m_rulesSheetOpen || m_notesGuideOpen || m_mirrorInspectorOpen; }
 
     void Render(engine::core::Engine& eng, int currentNight, const MirrorWorldState& mirrorState) const;
 
@@ -39,6 +41,7 @@ private:
     bool m_notebookOpen = false;
     bool m_rulesSheetOpen = false;
     bool m_notesGuideOpen = false;
+    bool m_mirrorInspectorOpen = false;
 };
 
 }
