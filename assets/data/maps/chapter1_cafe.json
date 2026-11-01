@@ -216,16 +216,6 @@
       "enabled": true
     },
     {
-      "id": "trig_mirror",
-      "name": "Настенное зеркало (Стекло)",
-      "dialogue": "mirror_night1",
-      "x": 12.0,
-      "y": 10.0,
-      "w": 36.0,
-      "h": 32.0,
-      "enabled": true
-    },
-    {
       "id": "trig_breaker",
       "name": "Электрощиток",
       "dialogue": "breaker_normal",

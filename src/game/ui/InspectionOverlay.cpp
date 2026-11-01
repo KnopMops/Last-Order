@@ -253,8 +253,13 @@ void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNig
         drawTask("04:00 — Встретить рассвет у кассы", eng.State().HasFlag("night5_completed"));
     }
 
+#if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
+    DrawTextEx(font, "[TAB] Закрыть | [R] Правила | [G] Осмотр стекла | [V] 3D-Визор | [F3] Debug",
+               Vector2{564, 592}, 17.5f, 1.0f, Color{244, 184, 96, 255});
+#else
     DrawTextEx(font, "[TAB] Закрыть | [R] Правила | [G] Осмотр стекла | [V] 3D-Визор",
                Vector2{564, 592}, 17.5f, 1.0f, Color{244, 184, 96, 255});
+#endif
 }
 
 void InspectionOverlay::RenderNotesGuide(engine::core::Engine& eng, int currentNight) const {

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(last_order LANGUAGES C CXX)
+project(last_order VERSION 1.0.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -39,7 +39,7 @@ add_custom_command(
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/app.rc" "${CMAKE_CURRENT_SOURCE_DIR}/app.ico"
     COMMENT "Compiling application icon resource into COFF object..."
 )
-add_executable(last_order
+set(GAME_SOURCES
     src/main.cpp
     "${APP_ICON_OBJ}"
     src/game/LastOrderGame.cpp
@@ -54,13 +54,24 @@ add_executable(last_order
     src/game/systems/EndlessDirector.cpp
     src/game/systems/SaveSystem.cpp
 )
+add_executable(last_order ${GAME_SOURCES})
 set_target_properties(last_order PROPERTIES OUTPUT_NAME "Last Order")
 target_link_libraries(last_order PRIVATE lo_engine)
-target_link_options(last_order PRIVATE -static -static-libgcc -static-libstdc++)
-target_compile_definitions(last_order PRIVATE LO_ASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
+target_link_options(last_order PRIVATE -mwindows -static -static-libgcc -static-libstdc++)
+target_compile_definitions(last_order PRIVATE LO_ENABLE_DEBUG=0 LO_ASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
+add_executable(last_order_debug ${GAME_SOURCES})
+set_target_properties(last_order_debug PROPERTIES OUTPUT_NAME "Last Order_debug")
+target_link_libraries(last_order_debug PRIVATE lo_engine)
+target_link_options(last_order_debug PRIVATE -static -static-libgcc -static-libstdc++)
+target_compile_definitions(last_order_debug PRIVATE LO_ENABLE_DEBUG=1 LO_ASSET_DIR="${CMAKE_SOURCE_DIR}/assets")
 add_custom_command(TARGET last_order POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/release"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:last_order>" "${CMAKE_SOURCE_DIR}/release/"
     COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/assets" "${CMAKE_SOURCE_DIR}/release/assets"
     COMMENT "Deploying last_order executable and assets to release/ directory..."
+)
+add_custom_command(TARGET last_order_debug POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/release"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:last_order_debug>" "${CMAKE_SOURCE_DIR}/release/"
+    COMMENT "Deploying last_order_debug executable to release/ directory..."
 )

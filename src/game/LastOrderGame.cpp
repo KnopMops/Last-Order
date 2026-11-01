@@ -756,6 +756,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         SaveCurrentGame(eng);
     }
 
+#if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
     if (IsKeyPressed(KEY_F3) || IsKeyPressed(KEY_F4)) {
         m_debugMode = !m_debugMode;
         eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.6f);
@@ -774,6 +775,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         if (IsKeyPressed(KEY_F9))  StartMinigame(eng, systems::MinigameType::Night4_MirrorHunt3D);
         if (IsKeyPressed(KEY_F10)) StartMinigame(eng, systems::MinigameType::Night5_HighwayChase3D);
     }
+#endif
 
     if (m_settingsUI.IsOpen()) {
         if (IsCursorHidden()) EnableCursor();
@@ -1023,7 +1025,7 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
     if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && IsKeyPressed(KEY_E)) {
         if (m_nearestTrigger.has_value() && !m_nearestTrigger->dialogueId.empty()) {
             std::string tid = m_nearestTrigger->id;
-            if (tid == "trig_mirror" || tid == "trig_window") {
+            if (tid == "trig_window") {
                 eng.State().SetFlag("n2_mirror_checked");
                 eng.State().SetFlag("mirror_examined");
             }
@@ -1050,12 +1052,14 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         }
     }
 
+#if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
     if (IsKeyPressed(KEY_F2)) {
         int h = eng.Time().GetHours24();
         int m = eng.Time().GetMinutes() + 30;
         eng.Time().SetTimeHHMM((h + m / 60) % 24, m % 60);
         eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.7f);
     }
+#endif
 
     if (IsKeyPressed(KEY_F8) && !eng.Dialogue().IsActive()) {
         TriggerScreamer(eng, SCREAMER_IDS[m_demoScreamerIdx % 14]);
@@ -1307,6 +1311,7 @@ void LastOrderGame::OnRenderWorld(engine::core::Engine& eng) {
 }
 
 void LastOrderGame::RenderDebugOverlay(engine::core::Engine& eng) const {
+#if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
     if (!m_debugMode) return;
     Font font = eng.Assets().GetMainFont();
 
@@ -1330,6 +1335,9 @@ void LastOrderGame::RenderDebugOverlay(engine::core::Engine& eng) const {
                   m_nearestTrigger.has_value() ? m_nearestTrigger->dialogueId.c_str() : "-");
 
     DrawTextEx(font, buf, Vector2{24, 116}, 16.5f, 1.0f, Color{110, 255, 140, 255});
+#else
+    (void)eng;
+#endif
 }
 
 void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
@@ -1418,7 +1426,7 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     }
 
     if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && !m_sanity.IsGameOver()) {
-        DrawTextEx(font, "[G] Стекло (Зеркало)  |  [I] Памятка  |  [TAB] Задачи  |  [F5] Сохранить", Vector2{24, 692}, 16.0f, 1.0f, Color{188, 178, 162, 220});
+        DrawTextEx(font, "[G] Осмотр стекла  |  [I] Памятка  |  [TAB] Задачи  |  [F5] Сохранить", Vector2{24, 692}, 16.0f, 1.0f, Color{188, 178, 162, 220});
     }
 
     if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && !m_sanity.IsGameOver() && m_nearestTrigger.has_value()) {

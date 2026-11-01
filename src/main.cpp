@@ -24,8 +24,13 @@ int main(int argc, char** argv) {
         }
     }
 
+    std::string title = "Последний заказ (Last Order) v1.0.0";
+#if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
+    title += " [DEBUG BUILD]";
+#endif
+
     engine::core::Engine engine;
-    if (!engine.Init(1280, 720, "Последний заказ — Кафе «Тёплый угол»", assetDir)) {
+    if (!engine.Init(1280, 720, title.c_str(), assetDir)) {
         return 1;
     }
 

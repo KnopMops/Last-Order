@@ -445,6 +445,7 @@ void MainMenuScene::RenderUI(engine::core::Engine& eng) const {
     DrawRectangle(0, 686, 1280, 34, Color{10, 13, 26, 238});
     DrawTextEx(font, "[W/S, ENTER / ЛКМ] Выбор | [TAB] Сменить сцену | [F11] Полный экран",
                Vector2{24, 694}, 17.5f, 1.0f, Color{188, 178, 162, 230});
+    DrawTextEx(font, "Версия 1.0.0", Vector2{1130, 694}, 17.5f, 1.0f, Color{143, 169, 196, 220});
 }
 
 }

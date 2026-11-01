@@ -20,6 +20,9 @@ xcopy "assets" "release\assets" /e /i /y /q >nul
 if exist "build\debug\Last Order.exe" (
     copy /y "build\debug\Last Order.exe" "release\Last Order.exe" >nul
 )
+if exist "build\debug\Last Order_debug.exe" (
+    copy /y "build\debug\Last Order_debug.exe" "release\Last Order_debug.exe" >nul
+)
 
 if exist "release\last_order.exe" (
     del /q "release\last_order.exe" >nul 2>&1

@@ -36,7 +36,6 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
 
     auto resolveDlg = [&](const std::string& tid, const std::string& def) -> std::string {
         if (tid == "trig_note") return noteDlg;
-        if (tid == "trig_mirror") return mirrorDlg;
         if (tid == "trig_window") return windowDlg;
         if (tid == "trig_basement") return basementDlg;
         if (tid == "trig_fridge") return fridgeDlg;
@@ -125,7 +124,6 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
         phys.AddTrigger({"trig_oven",     "Печь и Хозблок",      "pie_oven_use",        {232.0f, 18.0f,  36.0f, 26.0f}, true});
         phys.AddTrigger({"trig_fridge",   "Морозильная камера",  fridgeDlg,             {270.0f, 18.0f,  36.0f, 28.0f}, true});
 
-        phys.AddTrigger({"trig_mirror",   "Настенное зеркало (Стекло)", mirrorDlg,     {12.0f,  10.0f,  36.0f, 32.0f}, true});
         phys.AddTrigger({"trig_breaker",  "Электрощиток",        breakerDlg,            {10.0f,  58.0f,  28.0f, 28.0f}, true});
         phys.AddTrigger({"trig_basement", "Люк в подвал",        basementDlg,           {10.0f,  132.0f, 28.0f, 28.0f}, true});
 
@@ -237,7 +235,6 @@ void CafeWorld::Render(engine::core::Engine& eng,
     DrawRectangle(0,   0,   10,  180, Color{42, 23, 21, 255});
     DrawRectangle(310, 0,   10,  180, Color{42, 23, 21, 255});
 
-    Texture2D texMirror = assets.GetTexture("sprites/props/prop_mirror_wall.png");
     Texture2D texGen    = assets.GetTexture("sprites/props/prop_generator.png");
     Texture2D texJuke   = assets.GetTexture("sprites/props/prop_jukebox.png");
     Texture2D texCoffee = assets.GetTexture("sprites/props/prop_coffee_machine.png");
@@ -246,12 +243,7 @@ void CafeWorld::Render(engine::core::Engine& eng,
     Texture2D texCat    = assets.GetTexture("sprites/characters/spr_cat_ugolyok.png");
 
     float tNow = static_cast<float>(GetTime());
-    DrawRectangle(14, 6, 26, 28, Color{50, 56, 70, 255});
-    DrawRectangleLines(14, 6, 26, 28, Color{196, 122, 59, 255});
-    DrawRectangle(16, 8, 22, 24, Color{120, 180, 210, 230});
-    DrawTexture(texMirror, 18, 8, WHITE);
-    float mirrorShine = 0.5f + 0.5f * std::sin(tNow * 3.5f);
-    DrawLine(17, 28, 33, 12, Color{255, 255, 255, static_cast<unsigned char>(60 + 80 * mirrorShine)});
+
     DrawTexture(texGen,    12, 62, WHITE);
     DrawRectangle(14, 136, 20, 20, Color{32, 20, 18, 255});
     DrawRectangleLines(14, 136, 20, 20, Color{196, 122, 59, 255});
