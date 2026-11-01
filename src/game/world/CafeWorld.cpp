@@ -40,7 +40,7 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
 
     auto resolveDlg = [&](const std::string& tid, const std::string& def) -> std::string {
         if (tid == "trig_note") return noteDlg;
-        if (tid == "trig_window") return windowDlg;
+        if (tid == "trig_window" || tid == "trig_window_south") return windowDlg;
         if (tid == "trig_basement") return basementDlg;
         if (tid == "trig_fridge") return fridgeDlg;
         if (tid == "trig_breaker") return breakerDlg;
@@ -128,11 +128,12 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
         phys.AddTrigger({"trig_oven",     "Печь и Хозблок",      "pie_oven_use",        {232.0f, 18.0f,  36.0f, 26.0f}, true});
         phys.AddTrigger({"trig_fridge",   "Морозильная камера",  fridgeDlg,             {270.0f, 18.0f,  36.0f, 28.0f}, true});
 
-        phys.AddTrigger({"trig_breaker",  "Электрощиток",        breakerDlg,            {10.0f,  58.0f,  28.0f, 28.0f}, true});
+        phys.AddTrigger({"trig_breaker",  "Электрощиток",        breakerDlg,            {8.0f,   84.0f,  30.0f, 32.0f}, true});
         phys.AddTrigger({"trig_basement", "Люк в подвал",        basementDlg,           {10.0f,  132.0f, 28.0f, 28.0f}, true});
 
         phys.AddTrigger({"trig_backdoor", "Уличный контейнер",   "backdoor_window_inspect", {114.0f, 138.0f, 40.0f, 34.0f}, true});
-        phys.AddTrigger({"trig_window",   "Окно на шоссе (Стекло)", windowDlg,         {156.0f, 138.0f, 60.0f, 34.0f}, true});
+        phys.AddTrigger({"trig_window",   "Окно на шоссе (Стекло)", windowDlg,         {8.0f,   24.0f,  32.0f, 46.0f}, true});
+        phys.AddTrigger({"trig_window_south", "Окно у входа (Стекло)", windowDlg,     {154.0f, 140.0f, 64.0f, 32.0f}, true});
 
         phys.AddTrigger({"trig_booth1",   "Стол №1",             "",                    {56.0f,  70.0f,  42.0f, 36.0f}, false});
         phys.AddTrigger({"trig_booth2",   "Стол №2",             "",                    {56.0f,  112.0f, 42.0f, 36.0f}, false});
@@ -248,7 +249,20 @@ void CafeWorld::Render(engine::core::Engine& eng,
 
     float tNow = static_cast<float>(GetTime());
 
-    DrawTexture(texGen,    12, 62, WHITE);
+    DrawRectangle(10, 24, 20, 36, Color{16, 26, 42, 255});
+    DrawRectangle(12, 26, 7, 14, Color{45, 88, 130, 220});
+    DrawRectangle(21, 26, 7, 14, Color{45, 88, 130, 220});
+    DrawRectangle(12, 43, 7, 14, Color{35, 72, 110, 220});
+    DrawRectangle(21, 43, 7, 14, Color{35, 72, 110, 220});
+    DrawRectangleLinesEx(Rectangle{10, 24, 20, 36}, 1.5f, Color{107, 51, 34, 255});
+    DrawLine(20, 24, 20, 60, Color{107, 51, 34, 255});
+    DrawLine(10, 41, 30, 41, Color{107, 51, 34, 255});
+    DrawRectangle(9, 60, 22, 3, Color{196, 122, 59, 255});
+    float rainW1 = std::fmod(tNow * 16.0f, 28.0f);
+    DrawLine(14, 26 + static_cast<int>(rainW1), 13, 30 + static_cast<int>(rainW1), Color{195, 225, 255, 210});
+    DrawLine(24, 28 + static_cast<int>(std::fmod(tNow * 20.0f, 26.0f)), 23, 32 + static_cast<int>(std::fmod(tNow * 20.0f, 26.0f)), Color{195, 225, 255, 210});
+
+    DrawTexture(texGen,    12, 88, WHITE);
     DrawRectangle(14, 136, 20, 20, Color{32, 20, 18, 255});
     DrawRectangleLines(14, 136, 20, 20, Color{196, 122, 59, 255});
 
@@ -301,15 +315,16 @@ void CafeWorld::Render(engine::core::Engine& eng,
 
     DrawRectangle(122, 162, 28, 10, Color{46, 68, 52, 255});
     DrawRectangleLines(122, 162, 28, 10, Color{143, 169, 196, 255});
-    DrawRectangle(156, 162, 60, 10, Color{24, 30, 42, 255});
-    DrawRectangleLines(156, 162, 60, 10, Color{107, 51, 34, 255});
-    DrawRectangle(158, 164, 56, 6, Color{75, 135, 175, 195});
+    DrawRectangle(154, 154, 64, 18, Color{16, 26, 42, 255});
+    DrawRectangleLinesEx(Rectangle{154, 154, 64, 18}, 1.5f, Color{107, 51, 34, 255});
+    DrawRectangle(156, 156, 18, 14, Color{45, 88, 130, 200});
+    DrawRectangle(177, 156, 18, 14, Color{45, 88, 130, 200});
+    DrawRectangle(198, 156, 18, 14, Color{45, 88, 130, 200});
     float rainAnim = std::fmod(tNow * 16.0f, 56.0f);
     for (int rw = 0; rw < 4; rw++) {
         int rx = 159 + static_cast<int>(std::fmod(rainAnim + rw * 14.0f, 54.0f));
-        DrawLine(rx, 164, rx - 2, 169, Color{195, 225, 255, 210});
+        DrawLine(rx, 156, rx - 2, 168, Color{195, 225, 255, 210});
     }
-    DrawLine(160, 169, 212, 164, Color{255, 255, 255, 110});
 
     DrawTexture(texBooth,  64,  80,  WHITE);
     DrawTexture(texBooth,  64,  122, WHITE);

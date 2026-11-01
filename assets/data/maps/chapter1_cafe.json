@@ -66,8 +66,8 @@
     },
     {
       "id": "corr_generator",
-      "x": 12.0,
-      "y": 64.0,
+      "x": 10.0,
+      "y": 90.0,
       "w": 18.0,
       "h": 18.0
     },
@@ -219,10 +219,10 @@
       "id": "trig_breaker",
       "name": "Электрощиток",
       "dialogue": "breaker_normal",
-      "x": 10.0,
-      "y": 58.0,
-      "w": 28.0,
-      "h": 28.0,
+      "x": 8.0,
+      "y": 84.0,
+      "w": 30.0,
+      "h": 32.0,
       "enabled": true
     },
     {
@@ -249,10 +249,10 @@
       "id": "trig_window",
       "name": "Окно на шоссе (Стекло)",
       "dialogue": "backdoor_window_inspect",
-      "x": 156.0,
-      "y": 138.0,
-      "w": 60.0,
-      "h": 34.0,
+      "x": 8.0,
+      "y": 24.0,
+      "w": 32.0,
+      "h": 46.0,
       "enabled": true
     },
     {
@@ -313,6 +313,16 @@
       "y": 112.0,
       "w": 42.0,
       "h": 36.0,
+      "enabled": true
+    },
+    {
+      "id": "trig_window_south",
+      "name": "Окно у входа (Стекло)",
+      "dialogue": "backdoor_window_inspect",
+      "x": 154.0,
+      "y": 140.0,
+      "w": 64.0,
+      "h": 32.0,
       "enabled": true
     }
   ],

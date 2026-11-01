@@ -1160,9 +1160,24 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
     if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && IsKeyPressed(KEY_E)) {
         if (m_nearestTrigger.has_value() && !m_nearestTrigger->dialogueId.empty()) {
             std::string tid = m_nearestTrigger->id;
-            if (tid == "trig_window") {
+            if (tid == "trig_window" || tid == "trig_window_south") {
                 eng.State().SetFlag("n2_mirror_checked");
                 eng.State().SetFlag("mirror_examined");
+                if (m_currentNight == 3 && eng.State().HasFlag("n3_path_listened_owner") && !eng.State().HasFlag("n3_mirror_key_found")) {
+                    eng.State().SetFlag("n3_mirror_key_found");
+                    eng.State().GiveItem("vera_key", "Серебряный ключ Веры");
+                    eng.Audio().PlaySfx("audio/sfx/sfx_cash_register.wav", 0.85f);
+                    m_saveBannerText = "СЕРЕБРЯНЫЙ КЛЮЧ ВЕРЫ ПОЛУЧЕН ЧЕРЕЗ СТЕКЛО ОКНА!";
+                    m_saveBannerTimer = 3.5f;
+                    SaveKeyMoment(eng, "Ключ Веры получен");
+                    if (eng.State().HasFlag("n3_fridge_checked")) {
+                        eng.State().SetFlag("n3_artifacts_ready");
+                    }
+                }
+            } else if (tid == "trig_breaker") {
+                m_blackoutMode = false;
+                eng.Lighting().SetAmbientColor(Color{135, 112, 98, 255});
+                eng.Lighting().SetAllPointLightsFlicker(2.0f, 0.03f);
             }
             std::string dlgId = m_nearestTrigger->dialogueId;
             if (tid == "trig_table6" && m_currentNight == 3) {

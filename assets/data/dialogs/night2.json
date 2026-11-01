@@ -451,6 +451,334 @@
           "nextNode": ""
         }
       ]
+    },
+    {
+      "id": "visor_inspect",
+      "lines": [
+        {
+          "speaker": "Комплекс «ОКО-86» (Сканер + Плазменный излучатель)",
+          "text": "Секретная разработка НИИ «Спектр-86», оставленная Михаилом. Нажмите [V], чтобы перейти в 3D-режим от первого лица: сканер обнаруживает невидимые в 2D Кровавые Разломы, Теневых Сталкеров и подсвечивает гостей-двойников."
+        },
+        {
+          "speaker": "Комплекс «ОКО-86»",
+          "text": "В 3D-режиме нажимайте [ЛКМ] или [ПРОБЕЛ] для стрельбы плазмой по аномалиям и двойникам (+рассудок и очки). В свободное время между гостями нажимайте [X], чтобы призывать волны 3D-монстров и зачищать зал!"
+        }
+      ],
+      "onEnd": [
+        {
+          "type": "set_flag",
+          "target": "visor_checked"
+        }
+      ]
+    },
+    {
+      "id": "wall_rules_night1",
+      "lines": [
+        {
+          "speaker": "Памятка правил",
+          "text": "1. Постоянные гости: Дядя Курт и Глеб пьют чёрный кофе с сахаром. Тётя Валя берёт вишнёвый пирог. Студентка Катя — сладкий чай. Механик Архип и Офицер Борис — крепкий эспрессо без сахара."
+        },
+        {
+          "speaker": "Памятка правил",
+          "text": "2. Включайте 3D-режим «ОКО-86» клавишей [V]: сканер показывает скрытые 3D-аномалии и багровый каркас двойников. Уничтожайте их выстрелами плазмы [ЛКМ / ПРОБЕЛ] или вызывайте волны монстров [X] в свободную минуту.\n3. При мигании света в 03:00 скажите: «Доброй ночи!»."
+        }
+      ],
+      "onEnd": [
+        {
+          "type": "set_flag",
+          "target": "read_wall_rules"
+        }
+      ]
+    },
+    {
+      "id": "cat_ugolyok_talk",
+      "lines": [
+        {
+          "speaker": "Кот Уголёк",
+          "text": "Чёрный кот настороженно смотрит в сторону входных дверей и тихо мурлычет."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Погладить Уголька (+15% рассудка) [1 раз за смену]",
+          "forbidFlag": "shift_sanity_restored",
+          "actions": [
+            {
+              "type": "add_sanity",
+              "value": 15
+            },
+            {
+              "type": "set_flag",
+              "target": "shift_sanity_restored"
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cat_purr.wav"
+            }
+          ],
+          "nextNode": "cat_pet_thanks"
+        },
+        {
+          "text": "Погладить Уголька (Лимит 1 раз за смену исчерпан)",
+          "requireFlag": "shift_sanity_restored",
+          "nextNode": "cat_sleeping_node"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "coffee_machine_use",
+      "lines": [
+        {
+          "speaker": "Кофемашина и Чайник",
+          "text": "Выберите напиток для приготовления:"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Чёрный кофе с сахаром",
+          "actions": [
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_coffee_pour.wav"
+            },
+            {
+              "type": "give_item",
+              "target": "coffee_sugar"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Крепкий эспрессо без сахара",
+          "actions": [
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_coffee_pour.wav"
+            },
+            {
+              "type": "give_item",
+              "target": "coffee_black"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Чай с сахаром",
+          "actions": [
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_coffee_pour.wav"
+            },
+            {
+              "type": "give_item",
+              "target": "tea_sugar"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Пустой чай без сахара",
+          "actions": [
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_coffee_pour.wav"
+            },
+            {
+              "type": "give_item",
+              "target": "tea_nosugar"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Выпить чашку эспрессо самому (+20% рассудка) [1 раз за смену]",
+          "forbidFlag": "shift_sanity_restored",
+          "actions": [
+            {
+              "type": "add_sanity",
+              "value": 20
+            },
+            {
+              "type": "set_flag",
+              "target": "shift_sanity_restored"
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_coffee_sip.wav"
+            }
+          ],
+          "nextNode": "coffee_drank_thanks"
+        },
+        {
+          "text": "Выпить чашку эспрессо (Лимит 1 раз за смену исчерпан)",
+          "requireFlag": "shift_sanity_restored",
+          "nextNode": "coffee_limit_node"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "pie_oven_use",
+      "lines": [
+        {
+          "speaker": "Кухонная печь и Хозблок",
+          "text": "В печи стоят формы с выпечкой, у стены — плотный мешок для мусора."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Разогреть вишнёвый пирог",
+          "actions": [
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_pie_microwave_bell.wav"
+            },
+            {
+              "type": "give_item",
+              "target": "cherry_pie"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Взять пакет с мусором",
+          "actions": [
+            {
+              "type": "give_item",
+              "target": "trash_bag"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Перекусить горячим тостом (+15% рассудка) [1 раз за смену]",
+          "forbidFlag": "shift_sanity_restored",
+          "actions": [
+            {
+              "type": "add_sanity",
+              "value": 15
+            },
+            {
+              "type": "set_flag",
+              "target": "shift_sanity_restored"
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_pie_microwave_bell.wav"
+            }
+          ],
+          "nextNode": "toast_eaten_thanks"
+        },
+        {
+          "text": "Перекусить тостом (Лимит 1 раз за смену исчерпан)",
+          "requireFlag": "shift_sanity_restored",
+          "nextNode": "toast_limit_node"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "backdoor_window_inspect",
+      "lines": [
+        {
+          "speaker": "Уличный бак и Выход на шоссе",
+          "text": "Под проливным дождём у крыльца стоит металлический контейнер для мусора."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Выбросить пакет с мусором",
+          "requireHeldItem": "trash_bag",
+          "actions": [
+            {
+              "type": "clear_item",
+              "target": ""
+            },
+            {
+              "type": "set_flag",
+              "target": "trash_taken_out"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night1_window"
+            },
+            {
+              "type": "add_sanity",
+              "value": -10
+            }
+          ],
+          "nextNode": "after_screamer_1"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "breaker_normal",
+      "lines": [
+        {
+          "speaker": "Электрощиток",
+          "text": "Все автоматы включены, сетевое напряжение стабильно. Нет необходимости трогать силовые тумблеры."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "phone_silent",
+      "lines": [
+        {
+          "speaker": "Телефон на стене",
+          "text": "В трубке старого дискового аппарата слышны лишь редкие щелчки и глухие короткие гудки."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Повесить трубку",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "jukebox_use",
+      "lines": [
+        {
+          "speaker": "Музыкальный автомат «Мелодия-86»",
+          "text": "Винтажный музыкальный автомат с тёплыми неоновыми лампами. Внутри виден механизм звукоснимателя и подборка пластинок."
+        }
+      ],
+      "choices": [
+        {
+          "text": "[Мини-игра] Настроить звукосниматель и запустить пластинку",
+          "actions": [
+            {
+              "type": "event",
+              "target": "start_minigame_jukebox"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
     }
   ]
 }
