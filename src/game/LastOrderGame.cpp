@@ -266,6 +266,12 @@ void LastOrderGame::CompleteActiveMinigame(engine::core::Engine& eng) {
         eng.State().SetFlag("heard_radio_0214");
         eng.Physics().UpdateTriggerDialogue("trig_radio", "radio_tuned", "Радиоприёмник [94.5 FM]");
         SaveKeyMoment(eng, "Радио 94.5 FM настроено");
+        if (m_currentNight == 3) {
+            eng.State().SetFlag("n3_radio_tuned_mikhail");
+            eng.State().ClearFlag("n3_radio_urgent_tune");
+            m_lightsFlickering = false;
+            eng.Dialogue().StartDialogue("n3_mikhail_radio_instructions");
+        }
     } else if (t == systems::MinigameType::Night2_BasementFuse3D) {
         eng.State().SetFlag("n2_power_restored");
         m_lightsFlickering = false;
@@ -276,6 +282,9 @@ void LastOrderGame::CompleteActiveMinigame(engine::core::Engine& eng) {
     } else if (t == systems::MinigameType::Night3_FreezerMaze3D) {
         eng.State().SetFlag("n3_fridge_checked");
         eng.State().SetFlag("n3_basement_checked");
+        if (eng.State().HasFlag("n3_mirror_key_found")) {
+            eng.State().SetFlag("n3_artifacts_ready");
+        }
         SaveKeyMoment(eng, "Чек 1986 года найден");
     } else if (t == systems::MinigameType::Night4_MirrorHunt3D) {
         eng.State().SetFlag("n4_jukebox_cleared");
@@ -351,11 +360,11 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
     } else if (nightNumber == 3) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.85f);
         m_guests = {
-            {"gleb",        "Следователь Глеб",   "sprites/characters/spr_kurt.png",  "trig_booth4", "gleb_talk",            {144.0f, 110.0f}, 5,   false, false, true, 0, "n3_gleb_served",    false, -1.0f},
-            {"korsakov_n3", "Доктор Корсаков",    "sprites/characters/spr_guest.png", "trig_booth2", "korsakov_n3_talk",     {64.0f,  110.0f}, 45,  false, false, true, 0, "korsakov_served",   false, -1.0f},
-            {"katya_n3",    "Попутчица (?)",      "sprites/characters/spr_vera.png",  "trig_booth5", "katya_mimic_talk",     {224.0f, 68.0f},  90,  false, true,  false,0, "n3_mimic_banished", false, -1.0f},
-            {"faceless_n3", "Официантка 1986",    "sprites/characters/spr_lera.png",  "trig_booth1", "faceless_n3_talk",     {64.0f,  68.0f},  140, false, true,  false,0, "n3_mimic_banished", false, -1.0f},
-            {"boss_n3",     "Сущность Стола №6",  "sprites/characters/spr_guest.png", "trig_table6", "n3_guest_table6_talk", {224.0f, 110.0f}, 210, false, true,  false,0, "n3_boss_resolved",  false, -1.0f}
+            {"boss_n3",     "Клиент за Столом №6", "sprites/characters/spr_guest.png", "trig_table6", "n3_guest_table6_talk", {224.0f, 110.0f}, 0,   false, false, true, 0, "n3_boss_resolved",  false, -1.0f},
+            {"gleb",        "Следователь Глеб",   "sprites/characters/spr_kurt.png",  "trig_booth4", "gleb_talk",            {144.0f, 110.0f}, 15,  false, false, true, 0, "n3_gleb_served",    false, -1.0f},
+            {"korsakov_n3", "Доктор Корсаков",    "sprites/characters/spr_guest.png", "trig_booth2", "korsakov_n3_talk",     {64.0f,  110.0f}, 55,  false, false, true, 0, "korsakov_served",   false, -1.0f},
+            {"katya_n3",    "Попутчица (?)",      "sprites/characters/spr_vera.png",  "trig_booth5", "katya_mimic_talk",     {224.0f, 68.0f},  100, false, true,  false,0, "n3_mimic_banished", false, -1.0f},
+            {"faceless_n3", "Официантка 1986",    "sprites/characters/spr_lera.png",  "trig_booth1", "faceless_n3_talk",     {64.0f,  68.0f},  150, false, true,  false,0, "n3_mimic_banished", false, -1.0f}
         };
     } else if (nightNumber == 4) {
         eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.90f);
@@ -805,6 +814,10 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
 }
 
 void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
+    if (m_currentNight == 3 && eng.State().HasFlag("n3_fridge_checked") && eng.State().HasFlag("n3_mirror_key_found")) {
+        eng.State().SetFlag("n3_artifacts_ready");
+    }
+
     if (m_saveBannerTimer > 0.0f) {
         m_saveBannerTimer = std::max(0.0f, m_saveBannerTimer - dt);
     }
@@ -1130,6 +1143,17 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
             m_inspectionUI.ToggleMirrorInspector(eng);
             eng.State().SetFlag("n2_mirror_checked");
             eng.State().SetFlag("mirror_examined");
+            if (m_currentNight == 3 && eng.State().HasFlag("n3_path_listened_owner") && !eng.State().HasFlag("n3_mirror_key_found")) {
+                eng.State().SetFlag("n3_mirror_key_found");
+                eng.State().GiveItem("vera_key", "Серебряный ключ Веры");
+                eng.Audio().PlaySfx("audio/sfx/sfx_cash_register.wav", 0.85f);
+                m_saveBannerText = "СЕРЕБРЯНЫЙ КЛЮЧ ВЕРЫ ПОЛУЧЕН ИЗ ЗАЗЕРКАЛЬЯ!";
+                m_saveBannerTimer = 3.5f;
+                SaveKeyMoment(eng, "Ключ Веры получен");
+                if (eng.State().HasFlag("n3_fridge_checked")) {
+                    eng.State().SetFlag("n3_artifacts_ready");
+                }
+            }
         }
     }
 
@@ -1140,7 +1164,27 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
                 eng.State().SetFlag("n2_mirror_checked");
                 eng.State().SetFlag("mirror_examined");
             }
-            eng.Dialogue().StartDialogue(m_nearestTrigger->dialogueId);
+            std::string dlgId = m_nearestTrigger->dialogueId;
+            if (tid == "trig_table6" && m_currentNight == 3) {
+                if (!eng.State().HasFlag("n3_radio_tuned_mikhail")) {
+                    if (eng.State().HasFlag("n3_radio_urgent_tune")) {
+                        dlgId = "n3_guest_table6_static";
+                    } else {
+                        dlgId = "n3_guest_table6_talk";
+                    }
+                } else if (eng.State().HasFlag("n3_path_defied_owner")) {
+                    dlgId = "n3_table6_defied";
+                } else if (eng.State().HasFlag("n3_artifacts_ready")) {
+                    dlgId = "n3_table6_banish";
+                } else {
+                    dlgId = "n3_table6_waiting";
+                }
+            } else if (tid == "trig_radio" && m_currentNight == 3) {
+                if (eng.State().HasFlag("n3_radio_urgent_tune") && !eng.State().HasFlag("n3_radio_tuned_mikhail")) {
+                    dlgId = "n3_radio_tune_prompt";
+                }
+            }
+            eng.Dialogue().StartDialogue(dlgId);
             eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.45f);
         }
     }
@@ -1389,6 +1433,31 @@ void LastOrderGame::OnAction(engine::core::Engine& eng, const engine::core::Engi
             SaveKeyMoment(eng, "Ночь 3: Выбор Михаила (Хороший путь)");
         } else if (action.target == "key_moment_n3_choice_defy") {
             SaveKeyMoment(eng, "Ночь 3: Выбор Разлома (Плохой путь)");
+        } else if (action.target == "n3_radio_alarm") {
+            eng.State().SetFlag("n3_radio_urgent_tune");
+            eng.Physics().UpdateTriggerDialogue("trig_radio", "n3_radio_tune_prompt", "⚠ Срочно настроить радио [Шипение эфира]");
+            m_lightsFlickering = true;
+            eng.Renderer().TriggerFlash(Color{80, 255, 120, 160}, 0.5f);
+            eng.Audio().PlaySfx("audio/sfx/sfx_radio_static.wav", 0.95f);
+            m_saveBannerText = "РАДИО НА БАРНОЙ СТОЙКЕ ПРИНИМАЕТ СИГНАЛ БЕДСТВИЯ!";
+            m_saveBannerTimer = 4.0f;
+        } else if (action.target == "n3_banish_mimic") {
+            eng.Renderer().TriggerFlash(Color{255, 245, 200, 240}, 0.8f);
+            eng.Audio().PlaySfx("audio/sfx/sfx_cash_register.wav", 0.95f);
+            m_lightsFlickering = false;
+            m_blackoutMode = false;
+            eng.Lighting().SetAmbientColor(Color{112, 96, 92, 255});
+            m_saveBannerText = "СУЩНОСТЬ СТОЛА №6 ИЗГНАНА! РАЗЛОМ ЗАПЕЧАТАН!";
+            m_saveBannerTimer = 4.0f;
+            SaveKeyMoment(eng, "Ночь 3: Разлом запечатан (Хорошая концовка)");
+        } else if (action.target == "n3_rift_consume") {
+            eng.Renderer().TriggerFlash(Color{180, 20, 25, 230}, 0.9f);
+            eng.Audio().PlaySfx("audio/sfx/sfx_cat_hiss.wav", 0.95f);
+            m_blackoutMode = true;
+            m_lightsFlickering = true;
+            m_saveBannerText = "РАЗЛОМ ПОГЛОТИЛ КАФЕ! ПЛОХАЯ КОНЦОВКА!";
+            m_saveBannerTimer = 4.0f;
+            SaveKeyMoment(eng, "Ночь 3: Поглощение Разломом (Плохая концовка)");
         } else if (action.target == "return_main_menu") {
             m_mainMenu.Init(eng);
             m_screen = GameScreen::MainMenu;

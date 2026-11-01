@@ -134,8 +134,13 @@ void InspectionOverlay::RenderLiveMirrorInspector(engine::core::Engine& eng, con
 
     DrawRectangle(static_cast<int>(bx + 18), static_cast<int>(by + 172), static_cast<int>(bw - 36), 56, Color{28, 18, 24, 235});
     DrawRectangleLines(static_cast<int>(bx + 18), static_cast<int>(by + 172), static_cast<int>(bw - 36), 56, Color{244, 184, 96, 200});
-    engine::graphics::TextLayout::DrawCentered(font, "Стекло осмотрено. Двойники без отражения распознаны!", bx + bw * 0.5f, by + 180.0f, 16.0f, Color{140, 230, 220, 255});
-    engine::graphics::TextLayout::DrawCentered(font, "Теперь вы можете выявить и изгнать самозванца в диалоге или через визор [V]!", bx + bw * 0.5f, by + 202.0f, 14.5f, Color{244, 184, 96, 235});
+    if (eng.State().HasFlag("n3_path_listened_owner")) {
+        engine::graphics::TextLayout::DrawCentered(font, "Тень Веры протянула вам сквозь стекло Серебряный ключ!", bx + bw * 0.5f, by + 180.0f, 16.0f, Color{255, 230, 130, 255});
+        engine::graphics::TextLayout::DrawCentered(font, "Ключ в руках. Теперь найдите 3 части чека 1986 в морозилке кухни!", bx + bw * 0.5f, by + 202.0f, 14.5f, Color{140, 230, 220, 235});
+    } else {
+        engine::graphics::TextLayout::DrawCentered(font, "Стекло осмотрено. Двойники без отражения распознаны!", bx + bw * 0.5f, by + 180.0f, 16.0f, Color{140, 230, 220, 255});
+        engine::graphics::TextLayout::DrawCentered(font, "Теперь вы можете выявить и изгнать самозванца в диалоге или через визор [V]!", bx + bw * 0.5f, by + 202.0f, 14.5f, Color{140, 230, 220, 235});
+    }
 
     DrawTextEx(font, "[G] или [ESC] — Закрыть осмотр стекла", Vector2{bx + 18.0f, by + bh - 24.0f}, 15.0f, 1.0f, Color{244, 184, 96, 220});
 }
@@ -229,15 +234,12 @@ void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNig
         drawTask("Отказать Гостю за Столом №6", eng.State().HasFlag("n2_guest_survived"));
         drawTask("04:00 — Закрыть смену у кассы", eng.State().HasFlag("night2_completed"));
     } else if (currentNight == 3) {
-        drawTask("Прочитать запись на кассе", eng.State().HasFlag("n3_read_diary"));
-        drawTask("Осмотреть стекло [G] и выявить мимиков", eng.State().HasFlag("n2_mirror_checked"));
-        drawTask("Выжечь 3D-разломы в зале из бластера «ОКО-86» [V]", eng.State().HasFlag("anomalies_cleared_3d"));
-        drawTask("Обслужить Следователя Глеба (Стол №4)", eng.State().HasFlag("n3_gleb_served"));
-        drawTask("Собрать 3 улики в 3D-Морозильнике на кухне", eng.State().HasFlag("n3_fridge_checked"));
-        drawTask("Отогнать тени от южного окна", eng.State().HasFlag("n3_window_hands_cleared"));
-        drawTask("Забрать серебряный ключ Веры у зеркала", eng.State().HasFlag("n3_mirror_key_found"));
-        drawTask("Дать отпор сущности за Столом №6", eng.State().HasFlag("n3_boss_resolved"));
-        drawTask("04:00 — Закрыть смену у кассы", eng.State().HasFlag("night3_completed"));
+        drawTask("Поговорить с клиентом за Столом №6", eng.State().HasFlag("n3_radio_urgent_tune") || eng.State().HasFlag("n3_radio_tuned_mikhail"));
+        drawTask("Настроить радио [94.5 FM] и выслушать Михаила", eng.State().HasFlag("n3_radio_tuned_mikhail"));
+        drawTask("Собрать 3 части чека 1986 в 3D-Морозильнике", eng.State().HasFlag("n3_fridge_checked"));
+        drawTask("Забрать серебряный ключ Веры у стекла [G]", eng.State().HasFlag("n3_mirror_key_found"));
+        drawTask("Сделать выбор и разрешить судьбу Стола №6", eng.State().HasFlag("n3_boss_resolved"));
+        drawTask("Завершить Ночь 3 (Концовка Разлома)", eng.State().HasFlag("night3_completed") || eng.State().HasFlag("n3_bad_ending_triggered"));
     } else if (currentNight == 4) {
         drawTask("Прочитать запись на кассе", eng.State().HasFlag("n4_read_diary"));
         drawTask("Ответить на звонок телефона у стойки", eng.State().HasFlag("n4_phone_answered"));

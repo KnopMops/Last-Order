@@ -30,9 +30,13 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
     std::string breakerDlg = (nightNumber == 2) ? "n2_fusebox_use" : "breaker_normal";
     std::string phoneDlg = (nightNumber == 4) ? "n4_phone_ring_talk" : "phone_silent";
     std::string jukeDlg = "jukebox_use";
-    std::string table6Dlg = (nightNumber == 1) ? "table6_closed" : "";
-    std::string radioDlg = eng.State().HasFlag("heard_radio_0214") ? "radio_tuned" :
-                           (eng.State().HasFlag("radio_0214_ringing") ? "radio_0214" : "radio_turned_off");
+    std::string table6Dlg = (nightNumber == 1) ? "table6_closed" :
+                            (nightNumber == 2) ? "n2_guest_table6_talk" :
+                            (nightNumber == 3) ? "n3_guest_table6_talk" :
+                            (nightNumber == 5) ? "n5_boss_table6_talk" : "";
+    std::string radioDlg = (nightNumber == 3 && eng.State().HasFlag("n3_radio_urgent_tune") && !eng.State().HasFlag("n3_radio_tuned_mikhail")) ? "n3_radio_tune_prompt" :
+                           (eng.State().HasFlag("heard_radio_0214") ? "radio_tuned" :
+                           (eng.State().HasFlag("radio_0214_ringing") ? "radio_0214" : "radio_turned_off"));
 
     auto resolveDlg = [&](const std::string& tid, const std::string& def) -> std::string {
         if (tid == "trig_note") return noteDlg;
@@ -135,7 +139,7 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
         phys.AddTrigger({"trig_booth3",   "Стол №3",             "",                    {136.0f, 70.0f,  42.0f, 36.0f}, false});
         phys.AddTrigger({"trig_booth4",   "Стол №4",             "",                    {136.0f, 112.0f, 42.0f, 36.0f}, false});
         phys.AddTrigger({"trig_booth5",   "Стол №5",             "",                    {216.0f, 70.0f,  42.0f, 36.0f}, false});
-        phys.AddTrigger({"trig_table6",   "Стол №6",             table6Dlg,             {216.0f, 112.0f, 42.0f, 36.0f}, (nightNumber == 1)});
+        phys.AddTrigger({"trig_table6",   "Стол №6",             table6Dlg,             {216.0f, 112.0f, 42.0f, 36.0f}, (nightNumber == 1 || nightNumber == 2 || nightNumber == 3 || nightNumber == 5)});
     }
 }
 
@@ -275,6 +279,17 @@ void CafeWorld::Render(engine::core::Engine& eng,
     DrawTexture(texCoffee, 142, 34, WHITE);
     DrawRectangle(170, 41, 16, 9, Color{52, 34, 28, 255});
     DrawRectangleLines(170, 41, 16, 9, Color{214, 69, 69, 255});
+
+    if (eng.State().HasFlag("n3_radio_urgent_tune") && !eng.State().HasFlag("n3_radio_tuned_mikhail")) {
+        float rPulse = 0.5f + 0.5f * std::sin(tNow * 8.0f);
+        Color radioGlow = Color{ static_cast<unsigned char>(50 + 205 * rPulse),
+                                 static_cast<unsigned char>(220 + 35 * rPulse),
+                                 90, 245 };
+        DrawRectangle(166, 38, 24, 15, Color{20, 80, 40, static_cast<unsigned char>(100 + 120 * rPulse)});
+        DrawRectangleLinesEx(Rectangle{166.0f, 38.0f, 24.0f, 15.0f}, 1.5f, radioGlow);
+        DrawCircle(178, 30, 4.0f + 3.0f * rPulse, Color{90, 255, 130, static_cast<unsigned char>(160 * (1.0f - rPulse))});
+        DrawLine(178, 28, 178, 38, radioGlow);
+    }
 
     int catFrame = (lightsFlickering || blackoutMode || nightNumber >= 3) ? 1 : 0;
     DrawTextureRec(texCat, Rectangle{static_cast<float>(catFrame * 16), 0.0f, 16.0f, 16.0f}, Vector2{200.0f, 40.0f}, WHITE);
