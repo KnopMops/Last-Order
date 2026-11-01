@@ -52,6 +52,7 @@ add_executable(last_order
     src/game/systems/SanitySystem.cpp
     src/game/systems/ChaseMinigame.cpp
     src/game/systems/EndlessDirector.cpp
+    src/game/systems/SaveSystem.cpp
 )
 set_target_properties(last_order PROPERTIES OUTPUT_NAME "Last Order")
 target_link_libraries(last_order PRIVATE lo_engine)

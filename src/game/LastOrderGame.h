@@ -49,6 +49,8 @@ private:
     void Update3DVisorShooter(engine::core::Engine& eng, float dt);
     void Fire3DVisorWeapon(engine::core::Engine& eng);
     void SetVisor3DActive(engine::core::Engine& eng, bool active);
+    void SaveCurrentGame(engine::core::Engine& eng);
+    void LoadSavedGame(engine::core::Engine& eng);
 
     void UpdatePauseMenu(engine::core::Engine& eng);
     void RenderPauseMenu(engine::core::Engine& eng) const;
@@ -67,6 +69,9 @@ private:
     ui::MainMenuScene m_mainMenu{};
     ui::SettingsOverlay m_settingsUI{};
     int m_pauseSelectedBtn = 0;
+    std::string m_saveBannerText;
+    float m_saveBannerTimer = 0.0f;
+    int m_maxUnlockedNight = 1;
 
     engine::physics::KinematicBody m_playerBody{};
     int m_playerFacing = 0;

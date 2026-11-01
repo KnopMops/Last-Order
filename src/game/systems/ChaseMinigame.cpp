@@ -18,6 +18,7 @@ void ChaseMinigame::Reset() {
     m_progress = 0.0f;
     m_radioTargetFreq = 0.5f;
     m_radioPlayerFreq = 0.5f;
+    m_vinylRotation = 0.0f;
 
     m_camX = 0.0f;
     m_camZ = 0.0f;
@@ -41,7 +42,11 @@ void ChaseMinigame::Reset() {
     m_roadScroll = 0.0f;
     m_pantTimer = 0.0f;
 
-    if (m_type == MinigameType::Night2_BasementFuse3D || m_type == MinigameType::Night3_FreezerMaze3D) {
+    if (m_type == MinigameType::Night_JukeboxTuner2D) {
+        m_shardsTotal = 1;
+        m_radioPlayerFreq = 0.2f;
+        m_radioTargetFreq = 0.65f;
+    } else if (m_type == MinigameType::Night2_BasementFuse3D || m_type == MinigameType::Night3_FreezerMaze3D) {
         m_nodes3D.push_back({ 6.5f,  4.0f, true, false});
         m_nodes3D.push_back({-5.5f,  7.5f, true, false});
         m_nodes3D.push_back({ 3.0f, -7.0f, true, false});
@@ -103,6 +108,9 @@ void ChaseMinigame::Update(engine::core::Engine& eng, float dt) {
         case MinigameType::Night1_RadioTuner2D:
             UpdateRadio2D(eng, dt);
             break;
+        case MinigameType::Night_JukeboxTuner2D:
+            UpdateJukebox2D(eng, dt);
+            break;
         case MinigameType::Night2_BasementFuse3D:
         case MinigameType::Night3_FreezerMaze3D:
             UpdateExploration3D(eng, dt);
@@ -137,6 +145,28 @@ void ChaseMinigame::UpdateRadio2D(engine::core::Engine& eng, float dt) {
     }
 }
 
+void ChaseMinigame::UpdateJukebox2D(engine::core::Engine& eng, float dt) {
+    m_vinylRotation += dt * 4.2f;
+    m_radioTargetFreq = 0.55f + 0.25f * std::sin(m_timer * 1.4f) + 0.08f * std::cos(m_timer * 2.8f);
+    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  m_radioPlayerFreq -= dt * 0.65f;
+    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) m_radioPlayerFreq += dt * 0.65f;
+    m_radioPlayerFreq = std::clamp(m_radioPlayerFreq, 0.05f, 0.95f);
+
+    float diff = std::abs(m_radioTargetFreq - m_radioPlayerFreq);
+    if (diff < 0.13f) {
+        m_progress += dt * 32.0f;
+    } else {
+        m_progress = std::max(0.0f, m_progress - dt * 12.0f);
+    }
+
+    if (m_progress >= 100.0f) {
+        m_progress = 100.0f;
+        m_shardsCollected = 1;
+        m_state = ChaseState::Victory;
+        eng.Audio().PlaySfx("audio/sfx/sfx_chase_gate_escape.wav", 1.0f);
+    }
+}
+
 void ChaseMinigame::UpdateExploration3D(engine::core::Engine& eng, float dt) {
     if (m_flashlightCooldown > 0.0f) m_flashlightCooldown = std::max(0.0f, m_flashlightCooldown - dt);
     if (m_flashlightActive > 0.0f)   m_flashlightActive   = std::max(0.0f, m_flashlightActive - dt);
@@ -158,45 +188,41 @@ void ChaseMinigame::UpdateExploration3D(engine::core::Engine& eng, float dt) {
     m_camX = std::clamp(m_camX, -9.5f, 9.5f);
     m_camZ = std::clamp(m_camZ, -9.5f, 9.5f);
 
+    float toPlayerX = m_camX - m_stalkerX;
+    float toPlayerZ = m_camZ - m_stalkerZ;
+    float distToPlayer = std::sqrt(toPlayerX * toPlayerX + toPlayerZ * toPlayerZ);
+
+    if (distToPlayer > 0.01f) {
+        float stalkerSpd = (m_flashlightActive > 0.0f) ? -2.2f : 2.1f;
+        m_stalkerX += (toPlayerX / distToPlayer) * stalkerSpd * dt;
+        m_stalkerZ += (toPlayerZ / distToPlayer) * stalkerSpd * dt;
+    }
+
     if (IsKeyPressed(KEY_F) && m_flashlightCooldown <= 0.0f) {
-        m_flashlightActive = 0.6f;
-        m_flashlightCooldown = 1.8f;
+        m_flashlightActive = 1.0f;
+        m_flashlightCooldown = 2.4f;
         eng.Audio().PlaySfx("audio/sfx/sfx_chase_flash_burn.wav", 0.9f);
-        eng.Renderer().TriggerFlash(Color{244, 184, 96, 170}, 0.2f);
-        float dx = m_stalkerX - m_camX;
-        float dz = m_stalkerZ - m_camZ;
-        float dist = std::sqrt(dx * dx + dz * dz);
-        if (dist > 0.1f) {
-            m_stalkerX += (dx / dist) * 5.5f;
-            m_stalkerZ += (dz / dist) * 5.5f;
-        }
+        eng.Renderer().TriggerFlash(Color{244, 184, 96, 210}, 0.25f);
     }
 
-    float sdx = m_camX - m_stalkerX;
-    float sdz = m_camZ - m_stalkerZ;
-    float sdist = std::sqrt(sdx * sdx + sdz * sdz);
-    if (sdist > 0.05f) {
-        float stalkSpd = (m_type == MinigameType::Night3_FreezerMaze3D) ? 2.15f : 1.85f;
-        m_stalkerX += (sdx / sdist) * stalkSpd * dt;
-        m_stalkerZ += (sdz / sdist) * stalkSpd * dt;
-    }
-
-    if (sdist < 1.1f) {
+    if (distToPlayer < 1.35f) {
         m_state = ChaseState::Caught;
-        eng.Audio().PlayScreamerStinger("sfx_sc_11_crawler_snap.wav");
-        eng.Renderer().TriggerShake(6.0f, 1.2f);
+        eng.Audio().PlayScreamerStinger("sfx_sc_03_string_screech.wav");
+        eng.Renderer().TriggerFlash(Color{180, 20, 30, 240}, 0.8f);
+        eng.Renderer().TriggerShake(7.0f, 0.9f);
         return;
     }
 
     for (auto& node : m_nodes3D) {
         if (!node.active) continue;
-        float ndx = node.x - m_camX;
-        float ndz = node.z - m_camZ;
-        if (ndx * ndx + ndz * ndz < 2.2f) {
+        float dx = m_camX - node.x;
+        float dz = m_camZ - node.z;
+        if (std::sqrt(dx * dx + dz * dz) < 1.55f) {
             node.active = false;
             m_shardsCollected++;
             eng.Audio().PlaySfx("audio/sfx/sfx_chase_relic_pickup.wav", 0.95f);
-            eng.Renderer().TriggerFlash(Color{244, 184, 96, 200}, 0.25f);
+            eng.Renderer().TriggerFlash(Color{244, 184, 96, 220}, 0.25f);
+            break;
         }
     }
 
@@ -207,25 +233,37 @@ void ChaseMinigame::UpdateExploration3D(engine::core::Engine& eng, float dt) {
 }
 
 void ChaseMinigame::UpdateMirrorHunt3D(engine::core::Engine& eng, float dt) {
-    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  m_camYaw -= dt * 2.2f;
-    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) m_camYaw += dt * 2.2f;
+    if (m_flashlightCooldown > 0.0f) m_flashlightCooldown = std::max(0.0f, m_flashlightCooldown - dt);
+    if (m_flashlightActive > 0.0f)   m_flashlightActive   = std::max(0.0f, m_flashlightActive - dt);
 
-    float fx = std::cos(m_camYaw);
-    float fz = std::sin(m_camYaw);
+    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  m_camYaw -= dt * 2.8f;
+    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) m_camYaw += dt * 2.8f;
 
-    if (IsKeyPressed(KEY_F) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_E)) {
+    if ((IsKeyPressed(KEY_F) || IsKeyPressed(KEY_SPACE)) && m_flashlightCooldown <= 0.0f) {
+        m_flashlightActive = 0.55f;
+        m_flashlightCooldown = 1.1f;
         eng.Audio().PlaySfx("audio/sfx/sfx_chase_flash_burn.wav", 0.85f);
-        eng.Renderer().TriggerFlash(Color{216, 230, 242, 160}, 0.15f);
+        eng.Renderer().TriggerFlash(Color{244, 184, 96, 175}, 0.20f);
+
+        float fx = std::cos(m_camYaw);
+        float fz = std::sin(m_camYaw);
 
         for (auto& node : m_nodes3D) {
             if (!node.active) continue;
-            float len = std::sqrt(node.x * node.x + node.z * node.z);
-            if (len < 0.1f) continue;
-            float dot = (node.x / len) * fx + (node.z / len) * fz;
-            if (dot > 0.92f) {
+            float nx = node.x;
+            float nz = node.z;
+            float dist = std::sqrt(nx * nx + nz * nz);
+            if (dist < 0.1f) continue;
+            float dirX = nx / dist;
+            float dirZ = nz / dist;
+            float dot = dirX * fx + dirZ * fz;
+
+            if (dot >= 0.88f) {
                 if (node.isFriendly) {
-                    eng.State().AddSanity(-15);
-                    eng.Audio().PlaySfx("audio/sfx/sfx_sc_06_mirror_crack.wav", 0.8f);
+                    m_state = ChaseState::Caught;
+                    eng.Audio().PlayScreamerStinger("sfx_sc_06_mirror_crack.wav");
+                    eng.Renderer().TriggerFlash(Color{214, 69, 69, 255}, 0.7f);
+                    return;
                 } else {
                     node.active = false;
                     m_shardsCollected++;
@@ -333,6 +371,9 @@ void ChaseMinigame::RenderWorld(engine::core::Engine& eng) {
         case MinigameType::Night1_RadioTuner2D:
             RenderRadio2D(eng);
             break;
+        case MinigameType::Night_JukeboxTuner2D:
+            RenderJukebox2D(eng);
+            break;
         case MinigameType::Night2_BasementFuse3D:
         case MinigameType::Night3_FreezerMaze3D:
             RenderExploration3D(eng);
@@ -361,6 +402,63 @@ void ChaseMinigame::RenderRadio2D(engine::core::Engine&) const {
         DrawPixel(x, static_cast<int>(yTarget), Color{214, 69, 69, 230});
         DrawPixel(x, static_cast<int>(yPlayer), Color{90, 240, 130, 255});
     }
+}
+
+void ChaseMinigame::RenderJukebox2D(engine::core::Engine&) const {
+    DrawRectangle(0, 0, 320, 180, Color{12, 10, 18, 255});
+    DrawRectangle(14, 14, 292, 152, Color{28, 18, 24, 255});
+    DrawRectangleLinesEx(Rectangle{14, 14, 292, 152}, 3.0f, Color{244, 184, 96, 255});
+
+    DrawRectangle(22, 22, 170, 136, Color{18, 12, 16, 255});
+    DrawRectangleLines(22, 22, 170, 136, Color{107, 51, 34, 255});
+
+    Vector2 center = {107.0f, 90.0f};
+    DrawCircleV(center, 58.0f, Color{14, 14, 16, 255});
+    DrawCircleLines(static_cast<int>(center.x), static_cast<int>(center.y), 58.0f, Color{45, 45, 55, 255});
+    DrawCircleLines(static_cast<int>(center.x), static_cast<int>(center.y), 48.0f, Color{25, 25, 32, 255});
+    DrawCircleLines(static_cast<int>(center.x), static_cast<int>(center.y), 38.0f, Color{35, 35, 42, 255});
+    DrawCircleLines(static_cast<int>(center.x), static_cast<int>(center.y), 28.0f, Color{25, 25, 32, 255});
+
+    DrawCircleV(center, 18.0f, Color{180, 36, 42, 255});
+    DrawCircleLines(static_cast<int>(center.x), static_cast<int>(center.y), 18.0f, Color{244, 184, 96, 255});
+    DrawCircleV(center, 3.5f, BLACK);
+
+    float nx = center.x + std::cos(m_vinylRotation) * 12.0f;
+    float ny = center.y + std::sin(m_vinylRotation) * 12.0f;
+    DrawCircle(static_cast<int>(nx), static_cast<int>(ny), 2.0f, Color{244, 184, 96, 200});
+
+    float armAngle = -0.35f + m_radioPlayerFreq * 0.70f;
+    Vector2 pivot = {165.0f, 40.0f};
+    Vector2 armEnd = {pivot.x - std::cos(armAngle) * 62.0f, pivot.y + std::sin(armAngle) * 62.0f};
+    DrawLineEx(pivot, armEnd, 3.0f, Color{180, 190, 205, 255});
+    DrawCircleV(pivot, 5.0f, Color{120, 130, 145, 255});
+    DrawCircleV(armEnd, 3.5f, Color{244, 184, 96, 255});
+
+    DrawRectangle(200, 22, 100, 136, Color{18, 22, 28, 255});
+    DrawRectangleLines(200, 22, 100, 136, Color{143, 169, 196, 255});
+
+    DrawRectangle(208, 30, 84, 18, Color{10, 12, 16, 255});
+    float targetX = 208.0f + m_radioTargetFreq * 80.0f;
+    float playerX = 208.0f + m_radioPlayerFreq * 80.0f;
+    DrawLine(static_cast<int>(targetX), 30, static_cast<int>(targetX), 48, Color{244, 60, 60, 255});
+    DrawLine(static_cast<int>(playerX), 30, static_cast<int>(playerX), 48, Color{80, 240, 120, 255});
+
+    float diff = std::abs(m_radioTargetFreq - m_radioPlayerFreq);
+    Color meterCol = (diff < 0.13f) ? Color{80, 240, 120, 255} : Color{220, 60, 60, 255};
+    DrawRectangle(208, 56, 84, 60, Color{14, 16, 22, 255});
+    DrawRectangleLines(208, 56, 84, 60, meterCol);
+
+    for (int x = 212; x < 288; x += 2) {
+        float waveT = (x - 212) * 0.15f + m_timer * 10.0f;
+        float amp = (diff < 0.13f) ? 18.0f : 6.0f;
+        float y = 86.0f + std::sin(waveT) * amp;
+        DrawPixel(x, static_cast<int>(y), meterCol);
+    }
+
+    DrawRectangle(208, 126, 84, 16, Color{10, 12, 16, 255});
+    DrawRectangleLines(208, 126, 84, 16, Color{244, 184, 96, 255});
+    int fillW = static_cast<int>((m_progress / 100.0f) * 82.0f);
+    DrawRectangle(209, 127, fillW, 14, Color{244, 184, 96, 230});
 }
 
 void ChaseMinigame::RenderExploration3D(engine::core::Engine&) const {
@@ -393,59 +491,74 @@ void ChaseMinigame::RenderExploration3D(engine::core::Engine&) const {
 
     for (const auto& node : m_nodes3D) {
         if (!node.active) continue;
-        float bob = 0.8f + 0.2f * std::sin(m_timer * 5.0f);
-        DrawCube(Vector3{node.x, bob, node.z}, 0.55f, 0.55f, 0.55f, Color{244, 184, 96, 255});
-        DrawSphereWires(Vector3{node.x, bob, node.z}, 0.5f, 6, 6, Color{255, 240, 180, 255});
+        Color c = isFreezer ? Color{180, 230, 255, 255} : Color{244, 184, 96, 255};
+        DrawSphere(Vector3{node.x, 1.1f, node.z}, 0.35f, c);
+        DrawSphereWires(Vector3{node.x, 1.1f, node.z}, 0.50f, 6, 6, WHITE);
     }
 
-    DrawCube(Vector3{m_stalkerX, 1.1f, m_stalkerZ}, 0.9f, 2.2f, 0.9f, Color{16, 10, 18, 255});
-    DrawSphere(Vector3{m_stalkerX, 1.75f, m_stalkerZ}, 0.22f, Color{230, 35, 35, 255});
+    float tNow = static_cast<float>(GetTime());
+    float pulse = 0.55f + 0.15f * std::sin(tNow * 6.0f);
+    DrawSphere(Vector3{m_stalkerX, 1.2f, m_stalkerZ}, pulse, Color{195, 20, 28, 240});
+    DrawCubeWires(Vector3{m_stalkerX, 1.2f, m_stalkerZ}, 0.8f, 1.8f, 0.8f, RED);
+
+    if (m_flashlightActive > 0.0f) {
+        Vector3 flashTgt = {m_camX + std::cos(m_camYaw) * 12.0f, 1.0f, m_camZ + std::sin(m_camYaw) * 12.0f};
+        DrawLine3D(cam.position, flashTgt, Color{255, 245, 200, 220});
+    }
+
     EndMode3D();
 }
 
 void ChaseMinigame::RenderMirrorHunt3D(engine::core::Engine&) const {
-    ClearBackground(Color{10, 12, 24, 255});
+    ClearBackground(Color{16, 12, 18, 255});
+
     Camera3D cam{};
-    cam.position = {0.0f, 1.3f, 0.0f};
-    cam.target = {std::cos(m_camYaw), 1.3f, std::sin(m_camYaw)};
+    cam.position = {0.0f, 1.15f, 0.0f};
+    cam.target = {std::cos(m_camYaw), 1.15f, std::sin(m_camYaw)};
     cam.up = {0.0f, 1.0f, 0.0f};
     cam.fovy = 65.0f;
     cam.projection = CAMERA_PERSPECTIVE;
 
     BeginMode3D(cam);
-    DrawPlane(Vector3{0.0f, 0.0f, 0.0f}, Vector2{18.0f, 18.0f}, Color{20, 24, 38, 255});
+    DrawPlane(Vector3{0.0f, 0.0f, 0.0f}, Vector2{16.0f, 16.0f}, Color{32, 22, 28, 255});
+
     for (const auto& node : m_nodes3D) {
         if (!node.active) continue;
-        Color c = node.isFriendly ? Color{143, 195, 235, 255} : Color{214, 45, 55, 255};
-        DrawCube(Vector3{node.x, 1.2f, node.z}, 0.9f, 2.3f, 0.2f, Color{110, 130, 155, 255});
-        DrawSphere(Vector3{node.x, 1.45f, node.z}, 0.35f, c);
-        DrawCubeWires(Vector3{node.x, 1.2f, node.z}, 1.0f, 2.4f, 0.3f, c);
+        Vector3 pos = {node.x, 1.1f, node.z};
+        if (node.isFriendly) {
+            DrawSphere(pos, 0.40f, Color{140, 200, 255, 255});
+            DrawCubeWires(pos, 0.7f, 1.6f, 0.7f, Color{180, 230, 255, 220});
+        } else {
+            DrawSphere(pos, 0.42f, Color{214, 45, 45, 255});
+            DrawCubeWires(pos, 0.8f, 1.7f, 0.8f, RED);
+        }
     }
-    EndMode3D();
 
-    DrawCircleLines(160, 90, 8.0f, Color{244, 184, 96, 220});
-    DrawPixel(160, 90, Color{214, 69, 69, 255});
+    if (m_flashlightActive > 0.0f) {
+        Vector3 flashTgt = {std::cos(m_camYaw) * 10.0f, 1.15f, std::sin(m_camYaw) * 10.0f};
+        DrawLine3D(cam.position, flashTgt, Color{244, 184, 96, 220});
+    }
+
+    EndMode3D();
 }
 
 void ChaseMinigame::RenderHighwayChase3D(engine::core::Engine&) const {
-    ClearBackground(Color{8, 6, 14, 255});
+    ClearBackground(Color{8, 10, 16, 255});
 
+    float camX = m_playerLane * 2.2f;
     Camera3D cam{};
-    float bobY = std::abs(std::sin(m_roadScroll * 0.6f)) * 0.12f;
-    cam.position = {m_playerLane * 2.2f, 1.35f + bobY, 0.0f};
-    cam.target = {m_playerLane * 1.8f, 1.15f, 16.0f};
+    cam.position = {camX, 2.2f, -4.5f};
+    cam.target = {camX * 0.75f, 1.2f, 18.0f};
     cam.up = {0.0f, 1.0f, 0.0f};
-    cam.fovy = m_isSprinting ? 74.0f : 64.0f;
+    cam.fovy = 60.0f;
     cam.projection = CAMERA_PERSPECTIVE;
 
     BeginMode3D(cam);
-    DrawPlane(Vector3{0.0f, 0.0f, 25.0f}, Vector2{9.0f, 65.0f}, Color{28, 24, 34, 255});
-    DrawPlane(Vector3{-10.0f, -0.02f, 25.0f}, Vector2{12.0f, 65.0f}, Color{14, 18, 16, 255});
-    DrawPlane(Vector3{ 10.0f, -0.02f, 25.0f}, Vector2{12.0f, 65.0f}, Color{14, 18, 16, 255});
+    DrawPlane(Vector3{0.0f, 0.0f, 30.0f}, Vector2{12.0f, 90.0f}, Color{28, 24, 28, 255});
 
-    float stripeOffset = std::fmod(m_roadScroll, 6.0f);
-    for (float z = 0.0f; z < 48.0f; z += 6.0f) {
-        float sz = z - stripeOffset;
+    float zOffset = std::fmod(m_roadScroll, 6.0f);
+    for (float z = -6.0f; z < 70.0f; z += 6.0f) {
+        float sz = z - zOffset;
         DrawCube(Vector3{-1.1f, 0.02f, sz}, 0.12f, 0.02f, 2.5f, Color{244, 184, 96, 200});
         DrawCube(Vector3{ 1.1f, 0.02f, sz}, 0.12f, 0.02f, 2.5f, Color{244, 184, 96, 200});
         DrawCube(Vector3{-5.5f, 1.8f,  sz}, 0.5f,  3.6f,  0.5f, Color{22, 16, 28, 255});
@@ -485,6 +598,7 @@ void ChaseMinigame::RenderUI(engine::core::Engine& eng) const {
         (m_type == MinigameType::Night2_BasementFuse3D) ? "НОЧЬ 2: КОТЕЛЬНАЯ И ФАЗЫ (3D)" :
         (m_type == MinigameType::Night3_FreezerMaze3D)  ? "НОЧЬ 3: МОРОЗИЛЬНИК (3D)" :
         (m_type == MinigameType::Night4_MirrorHunt3D)   ? "НОЧЬ 4: ЗАЗЕРКАЛЬЕ (3D)" :
+        (m_type == MinigameType::Night_JukeboxTuner2D)  ? "МУЗЫКАЛЬНЫЙ АВТОМАТ «МЕЛОДИЯ-86»" :
                                                           "НОЧЬ 5: ПОГОНЯ ПО ШОССЕ (3D)";
 
     const char* rules =
@@ -492,6 +606,7 @@ void ChaseMinigame::RenderUI(engine::core::Engine& eng) const {
         (m_type == MinigameType::Night2_BasementFuse3D) ? "В 3D-подвале найдите 3 золотых узла питания [WASD]. Вспышка [F] отгоняет тень." :
         (m_type == MinigameType::Night3_FreezerMaze3D)  ? "В 3D-морозильнике соберите 3 замёрзших улики [WASD]. Свет [F] слепит Краулера." :
         (m_type == MinigameType::Night4_MirrorHunt3D)   ? "Поворачивайтесь [A / D] и сжигайте вспышкой [F / ПРОБЕЛ] 5 красных двойников." :
+        (m_type == MinigameType::Night_JukeboxTuner2D)  ? "Удерживайте иглу звукоснимателя [A / D] на дорожке пластинки до 100%." :
                                                           "Бегите в 3D по шоссе: [A / D] полоса, [ПРОБЕЛ] спринт, [F] сжечь тень. Соберите 3 осколка!";
 
     if (m_state == ChaseState::Briefing) {
@@ -522,7 +637,7 @@ void ChaseMinigame::RenderUI(engine::core::Engine& eng) const {
     DrawTextEx(font, title, Vector2{24, 14}, 20.0f, 1.0f, Color{244, 184, 96, 255});
 
     char statBuf[128];
-    if (m_type == MinigameType::Night1_RadioTuner2D) {
+    if (m_type == MinigameType::Night1_RadioTuner2D || m_type == MinigameType::Night_JukeboxTuner2D) {
         std::snprintf(statBuf, sizeof(statBuf), "СИГНАЛ: %.0f%%", m_progress);
     } else if (m_type == MinigameType::Night5_HighwayChase3D) {
         std::snprintf(statBuf, sizeof(statBuf), "ДИСТАНЦИЯ: %.0f / 250м  |  КЛЮЧ: %d/3  |  СИЛЫ: %.0f%%", m_playerDist, m_shardsCollected, m_stamina);

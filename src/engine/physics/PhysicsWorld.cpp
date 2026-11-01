@@ -63,9 +63,11 @@ void PhysicsWorld::MoveAndSlide(KinematicBody& body, float dt) const {
             float minX = std::min(overlapLeft, overlapRight);
             float minY = std::min(overlapTop, overlapBottom);
             if (minX < minY) {
-                body.position.x += (overlapLeft < overlapRight) ? -(overlapLeft + 0.5f) : (overlapRight + 0.5f);
+                float pushX = (overlapLeft < overlapRight) ? -overlapLeft : overlapRight;
+                body.position.x += std::clamp(pushX, -2.5f, 2.5f);
             } else {
-                body.position.y += (overlapTop < overlapBottom) ? -(overlapTop + 0.5f) : (overlapBottom + 0.5f);
+                float pushY = (overlapTop < overlapBottom) ? -overlapTop : overlapBottom;
+                body.position.y += std::clamp(pushY, -2.5f, 2.5f);
             }
             pushed = true;
             break;

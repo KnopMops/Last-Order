@@ -40,25 +40,31 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
         (nightNumber == 4) ? "n4_intro_diary" :
                              "n5_intro_diary";
 
-    std::string mirrorDlg = (nightNumber >= 3) ? "n3_mirror_inspect" : "n2_mirror_inspect";
+    std::string mirrorDlg = (nightNumber == 1) ? "mirror_night1" : ((nightNumber == 2) ? "n2_mirror_inspect" : "n3_mirror_inspect");
     std::string windowDlg = (nightNumber >= 3) ? "n3_window_hands_inspect" : "backdoor_window_inspect";
+    std::string basementDlg = (nightNumber < 3) ? "basement_locked" : ((nightNumber == 3) ? "n3_basement_inspect" : "basement_locked");
+    std::string fridgeDlg = (nightNumber < 3) ? "fridge_locked" : ((nightNumber == 3) ? "n3_fridge_inspect" : "fridge_locked");
+    std::string breakerDlg = (nightNumber == 2) ? "n2_fusebox_use" : "breaker_normal";
+    std::string phoneDlg = (nightNumber == 4) ? "n4_phone_ring_talk" : "phone_silent";
+    std::string jukeDlg = (nightNumber == 4 && !eng.State().HasFlag("n4_jukebox_cleared")) ? "n4_jukebox_haunted" : "jukebox_use";
+    std::string table6Dlg = (nightNumber == 1) ? "table6_closed" : "";
 
     phys.AddTrigger({"trig_note",     "Касса",               noteDlg,               {82.0f,  32.0f,  26.0f, 26.0f}, true});
     phys.AddTrigger({"trig_visor",    "Комплекс «ОКО-86»",   "visor_inspect",       {110.0f, 32.0f,  24.0f, 26.0f}, true});
     phys.AddTrigger({"trig_coffee",   "Кофемашина",          "coffee_machine_use",  {136.0f, 32.0f,  28.0f, 26.0f}, true});
     phys.AddTrigger({"trig_radio",    "Радиоприёмник",       "radio_0214",          {166.0f, 32.0f,  28.0f, 26.0f}, true});
 
-    phys.AddTrigger({"trig_jukebox",  "Музыкальный автомат", "n4_jukebox_haunted",  {48.0f,  18.0f,  24.0f, 28.0f}, true});
+    phys.AddTrigger({"trig_jukebox",  "Музыкальный автомат", jukeDlg,               {48.0f,  18.0f,  24.0f, 28.0f}, true});
     phys.AddTrigger({"trig_rules",    "Устав смены",         "wall_rules_night1",   {106.0f, 10.0f,  22.0f, 20.0f}, true});
-    phys.AddTrigger({"trig_phone",    "Телефон на стене",    "n4_phone_ring_talk",  {140.0f, 10.0f,  22.0f, 20.0f}, true});
+    phys.AddTrigger({"trig_phone",    "Телефон на стене",    phoneDlg,              {140.0f, 10.0f,  22.0f, 20.0f}, true});
     phys.AddTrigger({"trig_cat",      "Кот Уголёк",          "cat_ugolyok_talk",    {196.0f, 34.0f,  24.0f, 24.0f}, true});
 
     phys.AddTrigger({"trig_oven",     "Печь и Хозблок",      "pie_oven_use",        {232.0f, 18.0f,  36.0f, 26.0f}, true});
-    phys.AddTrigger({"trig_fridge",   "Морозильная камера",  "n3_fridge_inspect",   {270.0f, 18.0f,  36.0f, 28.0f}, true});
+    phys.AddTrigger({"trig_fridge",   "Морозильная камера",  fridgeDlg,             {270.0f, 18.0f,  36.0f, 28.0f}, true});
 
     phys.AddTrigger({"trig_mirror",   "Настенное зеркало",   mirrorDlg,             {16.0f,  12.0f,  28.0f, 24.0f}, true});
-    phys.AddTrigger({"trig_breaker",  "Электрощиток",        "n2_fusebox_use",      {10.0f,  58.0f,  28.0f, 28.0f}, true});
-    phys.AddTrigger({"trig_basement", "Люк в подвал",        "n3_basement_inspect", {10.0f,  132.0f, 28.0f, 28.0f}, true});
+    phys.AddTrigger({"trig_breaker",  "Электрощиток",        breakerDlg,            {10.0f,  58.0f,  28.0f, 28.0f}, true});
+    phys.AddTrigger({"trig_basement", "Люк в подвал",        basementDlg,           {10.0f,  132.0f, 28.0f, 28.0f}, true});
 
     phys.AddTrigger({"trig_backdoor", "Уличный контейнер",   "backdoor_window_inspect", {118.0f, 150.0f, 38.0f, 22.0f}, true});
     phys.AddTrigger({"trig_window",   "Окно на шоссе",       windowDlg,             {168.0f, 150.0f, 40.0f, 22.0f}, true});
@@ -68,7 +74,7 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
     phys.AddTrigger({"trig_booth3",   "Стол №3",             "",                    {136.0f, 70.0f,  42.0f, 36.0f}, false});
     phys.AddTrigger({"trig_booth4",   "Стол №4",             "",                    {136.0f, 112.0f, 42.0f, 36.0f}, false});
     phys.AddTrigger({"trig_booth5",   "Стол №5",             "",                    {216.0f, 70.0f,  42.0f, 36.0f}, false});
-    phys.AddTrigger({"trig_table6",   "Стол №6",             "",                    {216.0f, 112.0f, 42.0f, 36.0f}, false});
+    phys.AddTrigger({"trig_table6",   "Стол №6",             table6Dlg,             {216.0f, 112.0f, 42.0f, 36.0f}, (nightNumber == 1)});
 }
 
 void CafeWorld::BuildLighting(engine::core::Engine& eng, int nightNumber) {
@@ -145,12 +151,23 @@ void CafeWorld::Render(engine::core::Engine& eng,
     Texture2D texTable6 = assets.GetTexture("sprites/props/prop_table_06.png");
     Texture2D texCat    = assets.GetTexture("sprites/characters/spr_cat_ugolyok.png");
 
+    float tNow = static_cast<float>(GetTime());
     DrawTexture(texMirror, 18, 8, WHITE);
     DrawTexture(texGen,    12, 62, WHITE);
     DrawRectangle(14, 136, 20, 20, Color{32, 20, 18, 255});
     DrawRectangleLines(14, 136, 20, 20, Color{196, 122, 59, 255});
 
     DrawTexture(texJuke, 52, 18, WHITE);
+
+    if (eng.State().HasFlag("jukebox_playing")) {
+
+        float jPulse = 0.5f + 0.5f * std::sin(tNow * 6.0f);
+
+        Color jukeNeon = Color{static_cast<unsigned char>(180 + 75 * jPulse), 40, static_cast<unsigned char>(220 - 60 * jPulse), 230};
+
+        DrawRectangleLinesEx(Rectangle{50, 16, 20, 22}, 1.5f, jukeNeon);
+
+    }
     DrawRectangle(110, 8, 14, 12, Color{232, 227, 217, 255});
     DrawRectangleLines(110, 8, 14, 12, Color{107, 51, 34, 255});
 
@@ -187,8 +204,7 @@ void CafeWorld::Render(engine::core::Engine& eng,
     DrawTexture(texBooth,  224, 80,  WHITE);
     DrawTexture(texTable6, 224, 122, WHITE);
 
-    float tNow = static_cast<float>(GetTime());
-    for (const auto& a : anomalies) {
+        for (const auto& a : anomalies) {
         if (!a.active) continue;
         int ax = static_cast<int>(a.pos.x);
         int ay = static_cast<int>(a.pos.y);
@@ -292,6 +308,7 @@ void CafeWorld::Render3DVisor(engine::core::Engine& eng,
     cam.projection = CAMERA_PERSPECTIVE;
 
     ClearBackground(Color{10, 12, 22, 255});
+    float tNow = static_cast<float>(GetTime());
     BeginMode3D(cam);
 
     DrawPlane(Vector3{8.0f, 0.0f, 4.5f}, Vector2{16.0f, 9.0f}, Color{42, 24, 22, 255});
@@ -331,8 +348,7 @@ void CafeWorld::Render3DVisor(engine::core::Engine& eng,
     drawBlock(274, 22,  28,  18,  2.1f, Color{120, 150, 180, 255}, Color{180, 220, 255, 220});
     drawBlock(12,  64,  18,  18,  1.5f, Color{70, 95, 75, 255},   Color{120, 240, 150, 220});
 
-    float tNow = static_cast<float>(GetTime());
-    for (const auto& g : guests) {
+        for (const auto& g : guests) {
         if (!g.spawned) continue;
         Texture2D gTex = eng.Assets().GetTexture(g.spritePath);
         Rectangle src = {0.0f, 0.0f, 32.0f, 32.0f};

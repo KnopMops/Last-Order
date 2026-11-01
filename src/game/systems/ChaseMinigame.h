@@ -11,7 +11,8 @@ enum class MinigameType {
     Night2_BasementFuse3D = 2,
     Night3_FreezerMaze3D = 3,
     Night4_MirrorHunt3D = 4,
-    Night5_HighwayChase3D = 5
+    Night5_HighwayChase3D = 5,
+    Night_JukeboxTuner2D = 6
 };
 
 enum class ChaseState {
@@ -53,11 +54,13 @@ public:
 private:
     void SpawnObstacles();
     void UpdateRadio2D(engine::core::Engine& eng, float dt);
+    void UpdateJukebox2D(engine::core::Engine& eng, float dt);
     void UpdateExploration3D(engine::core::Engine& eng, float dt);
     void UpdateMirrorHunt3D(engine::core::Engine& eng, float dt);
     void UpdateHighwayChase3D(engine::core::Engine& eng, float dt);
 
     void RenderRadio2D(engine::core::Engine& eng) const;
+    void RenderJukebox2D(engine::core::Engine& eng) const;
     void RenderExploration3D(engine::core::Engine& eng) const;
     void RenderMirrorHunt3D(engine::core::Engine& eng) const;
     void RenderHighwayChase3D(engine::core::Engine& eng) const;
@@ -69,6 +72,7 @@ private:
     float m_progress = 0.0f;
     float m_radioTargetFreq = 0.5f;
     float m_radioPlayerFreq = 0.5f;
+    float m_vinylRotation = 0.0f;
 
     float m_camX = 0.0f;
     float m_camZ = 0.0f;

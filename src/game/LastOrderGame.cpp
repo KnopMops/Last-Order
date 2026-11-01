@@ -1,3 +1,4 @@
+#include "game/systems/SaveSystem.h"
 #include "game/LastOrderGame.h"
 #include "engine/core/PathUtils.h"
 #include "engine/graphics/TextLayout.h"
@@ -45,7 +46,76 @@ void LastOrderGame::SetVisor3DActive(engine::core::Engine& eng, bool active) {
     } else {
         if (IsCursorHidden()) EnableCursor();
         eng.Audio().PlaySfx("audio/sfx/sfx_visor_toggle.wav", 0.70f);
+
+        float normYaw = std::fmod(m_visorYaw, 6.2831853f);
+        if (normYaw < 0.0f) normYaw += 6.2831853f;
+        if (normYaw >= 5.4978f || normYaw < 0.7854f)       m_playerFacing = 3;
+        else if (normYaw >= 0.7854f && normYaw < 2.3562f)  m_playerFacing = 0;
+        else if (normYaw >= 2.3562f && normYaw < 3.9270f)  m_playerFacing = 2;
+        else                                               m_playerFacing = 1;
+
+        m_playerBody.velocity = {0.0f, 0.0f};
+        m_isMoving = false;
+        m_playerBody.position.x = std::clamp(m_playerBody.position.x, 14.0f, 282.0f);
+        m_playerBody.position.y = std::clamp(m_playerBody.position.y, 24.0f, 140.0f);
+        m_nearestTrigger = eng.Physics().FindNearestTrigger(m_playerBody.Center(), 26.0f);
     }
+}
+
+void LastOrderGame::SaveCurrentGame(engine::core::Engine& eng) {
+    systems::SaveProfile sp{};
+    sp.currentNight = m_currentNight;
+    sp.hour = eng.Time().GetHours24();
+    sp.minute = eng.Time().GetMinutes();
+    sp.elapsedMinutes = eng.Time().GetShiftElapsedMinutes();
+    sp.sanity = eng.State().GetSanity();
+    sp.heldItem = eng.State().GetHeldItem();
+    sp.heldItemName = eng.State().GetHeldItemName();
+    sp.playerX = m_playerBody.position.x;
+    sp.playerY = m_playerBody.position.y;
+    sp.playerFacing = m_playerFacing;
+    sp.maxUnlockedNight = std::max(m_maxUnlockedNight, m_currentNight);
+    for (const auto& f : eng.State().GetAllFlags()) {
+        sp.flags.push_back(f);
+    }
+    sp.valid = true;
+
+    if (systems::SaveSystem::Save(sp)) {
+        m_saveBannerText = "ИГРА УСПЕШНО СОХРАНЕНА!";
+        m_saveBannerTimer = 2.8f;
+        eng.Audio().PlaySfx("audio/sfx/sfx_cash_register.wav", 0.85f);
+    }
+}
+
+void LastOrderGame::LoadSavedGame(engine::core::Engine& eng) {
+    systems::SaveProfile sp{};
+    if (!systems::SaveSystem::Load(sp) || !sp.valid) {
+        StartNewShift(eng, 1, false);
+        return;
+    }
+
+    StartNewShift(eng, sp.currentNight, false);
+    eng.Time().Reset(sp.hour, sp.minute, 1.80f);
+    m_playerBody.position = {sp.playerX, sp.playerY};
+    m_playerFacing = sp.playerFacing;
+    m_maxUnlockedNight = sp.maxUnlockedNight;
+
+    eng.State().Reset();
+    eng.State().SetSanity(sp.sanity);
+    if (!sp.heldItem.empty()) {
+        eng.State().GiveItem(sp.heldItem, sp.heldItemName);
+    }
+    for (const auto& f : sp.flags) {
+        eng.State().SetFlag(f);
+    }
+
+    if (eng.State().HasFlag("jukebox_playing")) {
+        eng.Audio().PlayAmbient("audio/bgm/mus_jukebox_retro.wav", 0.85f);
+    }
+
+    m_saveBannerText = "СОХРАНЕНИЕ ЗАГРУЖЕНО";
+    m_saveBannerTimer = 2.8f;
+    eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.85f);
 }
 
 void LastOrderGame::SpawnInitial3DAnomalies(int nightNumber) {
@@ -167,6 +237,14 @@ void LastOrderGame::CompleteActiveMinigame(engine::core::Engine& eng) {
     } else if (t == systems::MinigameType::Night5_HighwayChase3D) {
         eng.State().SetFlag("n5_relic_collected");
         eng.State().SetFlag("n3_mirror_key_found");
+    } else if (t == systems::MinigameType::Night_JukeboxTuner2D) {
+        eng.State().SetFlag("jukebox_playing");
+        eng.Audio().PlayAmbient("audio/bgm/mus_jukebox_retro.wav", 0.85f);
+        eng.State().AddSanity(25);
+        eng.Renderer().TriggerFlash(Color{244, 184, 96, 200}, 0.35f);
+        eng.Audio().PlaySfx("audio/sfx/sfx_cash_register.wav", 0.85f);
+        m_saveBannerText = "ПЛАСТИНКА ИГРАЕТ! РАССУДОК +25%";
+        m_saveBannerTimer = 3.0f;
     }
     m_world.BuildLighting(eng, std::max(1, m_currentNight));
     m_screen = (m_currentNight == 0) ? GameScreen::EndlessMode : GameScreen::PlayingShift;
@@ -260,6 +338,7 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
 
 void LastOrderGame::UpdatePlayerMovement(engine::core::Engine& eng, float dt) {
     engine::math::Vec2 moveDir = {0.0f, 0.0f};
+
     if (m_visor3DActive) {
         float rotSpeed = 2.6f;
         if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_Q))  m_visorYaw -= rotSpeed * dt;
@@ -270,8 +349,8 @@ void LastOrderGame::UpdatePlayerMovement(engine::core::Engine& eng, float dt) {
 
         float fwdX = std::cos(m_visorYaw);
         float fwdY = std::sin(m_visorYaw);
-        float rightX = -fwdY;
-        float rightY = fwdX;
+        float rightX = fwdY;
+        float rightY = -fwdX;
 
         if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))   { moveDir.x += fwdX; moveDir.y += fwdY; }
         if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) { moveDir.x -= fwdX; moveDir.y -= fwdY; }
@@ -294,10 +373,13 @@ void LastOrderGame::UpdatePlayerMovement(engine::core::Engine& eng, float dt) {
     } else {
         eng.Physics().MoveAndSlide(m_playerBody, dt);
     }
+    m_playerBody.position.x = std::clamp(m_playerBody.position.x, 14.0f, 282.0f);
+    m_playerBody.position.y = std::clamp(m_playerBody.position.y, 24.0f, 140.0f);
     m_distMovedThisFrame += (m_playerBody.position - prevPos).Length();
 
     auto& fl = eng.Lighting().GetFlashlight();
     fl.position = m_playerBody.Center();
+
     if (m_visor3DActive) {
         fl.directionDeg = m_visorYaw * (180.0f / 3.14159265f);
     } else {
@@ -652,6 +734,14 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
 }
 
 void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
+    if (m_saveBannerTimer > 0.0f) {
+        m_saveBannerTimer = std::max(0.0f, m_saveBannerTimer - dt);
+    }
+
+    if (IsKeyPressed(KEY_F5) && !m_debugMode && !eng.Dialogue().IsActive() && !m_visor3DActive && m_screen == GameScreen::PlayingShift) {
+        SaveCurrentGame(eng);
+    }
+
     if (IsKeyPressed(KEY_F3) || IsKeyPressed(KEY_F4)) {
         m_debugMode = !m_debugMode;
         eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.6f);
@@ -683,6 +773,9 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         eng.Renderer().SetSkip2DLightmap(false);
         ui::MenuCommand cmd = m_mainMenu.Update(eng, dt);
         switch (cmd) {
+            case ui::MenuCommand::ContinueSaveGame:
+                LoadSavedGame(eng);
+                break;
             case ui::MenuCommand::StartNight1_IntroTutorial:
                 StartNewShift(eng, 1, true);
                 break;
@@ -754,7 +847,8 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
 
     if (m_screen == GameScreen::EndlessMode) {
         if (IsKeyPressed(KEY_ESCAPE)) {
-            if (m_visor3DActive) {
+
+    if (m_visor3DActive) {
                 SetVisor3DActive(eng, false);
             } else {
                 m_screen = GameScreen::Paused;
@@ -1115,6 +1209,8 @@ void LastOrderGame::OnAction(engine::core::Engine& eng, const engine::core::Engi
             StartMinigame(eng, systems::MinigameType::Night4_MirrorHunt3D);
         } else if (action.target == "start_minigame_n5") {
             StartMinigame(eng, systems::MinigameType::Night5_HighwayChase3D);
+        } else if (action.target == "start_minigame_jukebox") {
+            StartMinigame(eng, systems::MinigameType::Night_JukeboxTuner2D);
         } else if (action.target == "start_night_2") {
             StartNewShift(eng, 2, false);
         } else if (action.target == "start_night_3") {
@@ -1169,6 +1265,7 @@ void LastOrderGame::OnRenderWorld(engine::core::Engine& eng) {
     }
 
     int nightToRender = (m_screen == GameScreen::EndlessMode) ? 2 : m_currentNight;
+
     if (m_visor3DActive) {
         m_world.Render3DVisor(eng, nightToRender, m_playerBody.Center(),
                               m_visorYaw, m_visorPitch, m_guests,
@@ -1222,6 +1319,12 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     }
 
     Font font = eng.Assets().GetMainFont();
+
+    if (m_saveBannerTimer > 0.0f && !m_saveBannerText.empty()) {
+        DrawRectangle(420, 58, 440, 36, Color{42, 23, 21, 240});
+        DrawRectangleLines(420, 58, 440, 36, Color{244, 184, 96, 255});
+        engine::graphics::TextLayout::DrawCentered(font, m_saveBannerText, 640.0f, 66.0f, 20.0f, Color{244, 184, 96, 255});
+    }
 
     int activeAnomalies = 0;
     for (const auto& a : m_anomalies3D) {

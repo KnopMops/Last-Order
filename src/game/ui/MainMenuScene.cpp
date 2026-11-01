@@ -1,3 +1,4 @@
+#include "game/systems/SaveSystem.h"
 #include "game/ui/MainMenuScene.h"
 #include "engine/graphics/TextLayout.h"
 #include "raylib.h"
@@ -132,7 +133,8 @@ MenuCommand MainMenuScene::Update(engine::core::Engine& eng, float dt) {
         return MenuCommand::None;
     }
 
-    int btnCount = m_inPlaySubMenu ? 7 : 4;
+    bool hasSave = systems::SaveSystem::HasSave();
+    int btnCount = m_inPlaySubMenu ? (hasSave ? 8 : 7) : 4;
     if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) {
         m_selectedBtn = (m_selectedBtn - 1 + btnCount) % btnCount;
         eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.5f);
@@ -145,9 +147,9 @@ MenuCommand MainMenuScene::Update(engine::core::Engine& eng, float dt) {
     bool triggerSelected = (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE));
 
     engine::math::Vec2 mpos = eng.Renderer().GetVirtualMousePos();
-    float startY = m_inPlaySubMenu ? 210.0f : 240.0f;
-    float stepY  = m_inPlaySubMenu ? 56.0f  : 68.0f;
-    float btnH   = m_inPlaySubMenu ? 46.0f  : 54.0f;
+    float startY = m_inPlaySubMenu ? (hasSave ? 180.0f : 210.0f) : 240.0f;
+    float stepY  = m_inPlaySubMenu ? (hasSave ? 50.0f : 56.0f)  : 68.0f;
+    float btnH   = m_inPlaySubMenu ? (hasSave ? 42.0f : 46.0f)  : 54.0f;
 
     for (int i = 0; i < btnCount; ++i) {
         engine::math::Rect btnRect = {58.0f, startY + i * stepY, 460.0f, btnH};
@@ -175,17 +177,33 @@ MenuCommand MainMenuScene::Update(engine::core::Engine& eng, float dt) {
                 case 3: return MenuCommand::QuitGame;
             }
         } else {
-            switch (m_selectedBtn) {
-                case 0: return MenuCommand::StartNight1_IntroTutorial;
-                case 1: return MenuCommand::StartNight1_NoTutorial;
-                case 2: return MenuCommand::StartNight2_Independent;
-                case 3: return MenuCommand::StartNight3_Pipes;
-                case 4: return MenuCommand::StartNight4_Phone;
-                case 5: return MenuCommand::StartNight5_Finale;
-                case 6:
-                    m_inPlaySubMenu = false;
-                    m_selectedBtn = 0;
-                    return MenuCommand::None;
+            if (hasSave) {
+                switch (m_selectedBtn) {
+                    case 0: return MenuCommand::ContinueSaveGame;
+                    case 1: return MenuCommand::StartNight1_IntroTutorial;
+                    case 2: return MenuCommand::StartNight1_NoTutorial;
+                    case 3: return MenuCommand::StartNight2_Independent;
+                    case 4: return MenuCommand::StartNight3_Pipes;
+                    case 5: return MenuCommand::StartNight4_Phone;
+                    case 6: return MenuCommand::StartNight5_Finale;
+                    case 7:
+                        m_inPlaySubMenu = false;
+                        m_selectedBtn = 0;
+                        return MenuCommand::None;
+                }
+            } else {
+                switch (m_selectedBtn) {
+                    case 0: return MenuCommand::StartNight1_IntroTutorial;
+                    case 1: return MenuCommand::StartNight1_NoTutorial;
+                    case 2: return MenuCommand::StartNight2_Independent;
+                    case 3: return MenuCommand::StartNight3_Pipes;
+                    case 4: return MenuCommand::StartNight4_Phone;
+                    case 5: return MenuCommand::StartNight5_Finale;
+                    case 6:
+                        m_inPlaySubMenu = false;
+                        m_selectedBtn = 0;
+                        return MenuCommand::None;
+                }
             }
         }
     }
@@ -382,22 +400,31 @@ void MainMenuScene::RenderUI(engine::core::Engine& eng) const {
                        sel ? Color{244, 184, 96, 255} : Color{232, 227, 217, 230});
         }
     } else {
-        const char* subButtons[7] = {
-            "С обучением (Ночь 1)",
-            "Без обучения (Ночь 1)",
-            "Ночь 2: Дождь и Двойники",
-            "Ночь 3: Голоса в трубах",
-            "Ночь 4: Полночный звонок",
-            "Ночь 5: Последний заказ (Финал)",
-            "Назад"
-        };
+        bool hasSave = systems::SaveSystem::HasSave();
+        std::vector<std::string> subButtons;
+        if (hasSave) {
+            systems::SaveProfile sp = systems::SaveSystem::GetQuickInfo();
+            char cBuf[128];
+            std::snprintf(cBuf, sizeof(cBuf), "Продолжить (Ночь %d, %02d:%02d)", sp.currentNight, sp.hour, sp.minute);
+            subButtons.push_back(cBuf);
+        }
+        subButtons.push_back("С обучением (Ночь 1)");
+        subButtons.push_back("Без обучения (Ночь 1)");
+        subButtons.push_back("Ночь 2: Дождь и Двойники");
+        subButtons.push_back("Ночь 3: Голоса в трубах");
+        subButtons.push_back("Ночь 4: Полночный звонок");
+        subButtons.push_back("Ночь 5: Последний заказ (Финал)");
+        subButtons.push_back("Назад");
 
-        for (int i = 0; i < 7; ++i) {
+        float startY = hasSave ? 180.0f : 210.0f;
+        float stepY  = hasSave ? 50.0f  : 56.0f;
+        float bh     = hasSave ? 42.0f  : 46.0f;
+
+        for (int i = 0; i < static_cast<int>(subButtons.size()); ++i) {
             bool sel = (m_selectedBtn == i);
             float bx = 58.0f;
-            float by = 210.0f + i * 56.0f;
+            float by = startY + i * stepY;
             float bw = 460.0f;
-            float bh = 46.0f;
 
             Color bgCol = sel ? Color{107, 51, 34, 245} : Color{42, 23, 21, 215};
             Color borderCol = sel ? Color{244, 184, 96, 255} : Color{196, 122, 59, 160};
@@ -409,7 +436,7 @@ void MainMenuScene::RenderUI(engine::core::Engine& eng) const {
                 DrawRectangle(static_cast<int>(bx), static_cast<int>(by), 8, static_cast<int>(bh), Color{244, 184, 96, 255});
             }
 
-            DrawTextEx(font, subButtons[i], Vector2{bx + 20.0f, by + 12.0f}, 20.0f, 1.0f,
+            DrawTextEx(font, subButtons[i].c_str(), Vector2{bx + 20.0f, by + (hasSave ? 10.0f : 12.0f)}, hasSave ? 18.5f : 20.0f, 1.0f,
                        sel ? Color{244, 184, 96, 255} : Color{232, 227, 217, 225});
         }
     }

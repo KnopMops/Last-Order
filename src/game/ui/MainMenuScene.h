@@ -6,6 +6,7 @@ namespace game::ui {
 
 enum class MenuCommand {
     None,
+    ContinueSaveGame,
     StartNight1_IntroTutorial,
     StartNight1_NoTutorial,
     StartNight2_Independent,
