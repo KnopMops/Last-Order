@@ -87,18 +87,28 @@
       ],
       "choices": [
         {
-          "text": "Погладить Уголька (+10% рассудка)",
+          "text": "Погладить Уголька (+15% рассудка) [1 раз за смену]",
+          "forbidFlag": "shift_sanity_restored",
           "actions": [
             {
               "type": "add_sanity",
-              "value": 10
+              "value": 15
+            },
+            {
+              "type": "set_flag",
+              "target": "shift_sanity_restored"
             },
             {
               "type": "play_sfx",
               "target": "audio/sfx/sfx_cat_purr.wav"
             }
           ],
-          "nextNode": ""
+          "nextNode": "cat_pet_thanks"
+        },
+        {
+          "text": "Погладить Уголька (Лимит 1 раз за смену исчерпан)",
+          "requireFlag": "shift_sanity_restored",
+          "nextNode": "cat_sleeping_node"
         },
         {
           "text": "Отойти",
@@ -172,18 +182,28 @@
           "nextNode": ""
         },
         {
-          "text": "Выпить чашку эспрессо самому (+20% рассудка)",
+          "text": "Выпить чашку эспрессо самому (+20% рассудка) [1 раз за смену]",
+          "forbidFlag": "shift_sanity_restored",
           "actions": [
             {
               "type": "add_sanity",
               "value": 20
             },
             {
+              "type": "set_flag",
+              "target": "shift_sanity_restored"
+            },
+            {
               "type": "play_sfx",
               "target": "audio/sfx/sfx_coffee_sip.wav"
             }
           ],
-          "nextNode": ""
+          "nextNode": "coffee_drank_thanks"
+        },
+        {
+          "text": "Выпить чашку эспрессо (Лимит 1 раз за смену исчерпан)",
+          "requireFlag": "shift_sanity_restored",
+          "nextNode": "coffee_limit_node"
         },
         {
           "text": "Отойти",
@@ -225,18 +245,28 @@
           "nextNode": ""
         },
         {
-          "text": "Перекусить горячим тостом (+15% рассудка)",
+          "text": "Перекусить горячим тостом (+15% рассудка) [1 раз за смену]",
+          "forbidFlag": "shift_sanity_restored",
           "actions": [
             {
               "type": "add_sanity",
               "value": 15
             },
             {
+              "type": "set_flag",
+              "target": "shift_sanity_restored"
+            },
+            {
               "type": "play_sfx",
               "target": "audio/sfx/sfx_pie_microwave_bell.wav"
             }
           ],
-          "nextNode": ""
+          "nextNode": "toast_eaten_thanks"
+        },
+        {
+          "text": "Перекусить тостом (Лимит 1 раз за смену исчерпан)",
+          "requireFlag": "shift_sanity_restored",
+          "nextNode": "toast_limit_node"
         },
         {
           "text": "Отойти",
@@ -886,6 +916,96 @@
         {
           "speaker": "Радиоприёмник",
           "text": "Приёмник настроен на 94.5 FM. Передача зафиксирована, эфир чист."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "cat_pet_thanks",
+      "lines": [
+        {
+          "speaker": "Кот Уголёк",
+          "text": "Уголёк блаженно прикрывает янтарные глаза и мурлычет. На душе становится спокойнее. (Лимит восстановления на эту смену исчерпан)."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "cat_sleeping_node",
+      "lines": [
+        {
+          "speaker": "Кот Уголёк",
+          "text": "Уголёк свернулся клубком и тихо посапывает. Поглаживание больше не успокаивает нервы этой ночью. (Лимит: 1 раз за смену)."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "coffee_drank_thanks",
+      "lines": [
+        {
+          "speaker": "Лера",
+          "text": "Горячий горький эспрессо обжигает горло. Пульс учащается, туман в голове рассеивается. (Лимит восстановления на эту смену исчерпан)."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Вернуться к смене",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "coffee_limit_node",
+      "lines": [
+        {
+          "speaker": "Лера",
+          "text": "Сердце и так бешено колотится. Очередная чашка кофе только усилит тремор рук и панику. Лимит на эту смену: 1 раз."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "toast_eaten_thanks",
+      "lines": [
+        {
+          "speaker": "Лера",
+          "text": "Хрустящий тёплый тост немного отвлекает от гнетущей тишины кафе. (Лимит восстановления на эту смену исчерпан)."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Вернуться к смене",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "toast_limit_node",
+      "lines": [
+        {
+          "speaker": "Лера",
+          "text": "Кусок в горло не лезет от тревоги. Перекус больше не помогает успокоить нервы. Лимит на эту смену: 1 раз."
         }
       ],
       "choices": [

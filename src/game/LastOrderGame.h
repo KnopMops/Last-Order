@@ -108,6 +108,7 @@ private:
     bool m_debugMode = false;
     bool m_debugNoclip = false;
     int m_demoScreamerIdx = 0;
+    float m_endlessSanityCooldownTimer = 0.0f;
 };
 
 }

@@ -178,6 +178,8 @@ void LastOrderGame::StartEndlessShift(engine::core::Engine& eng) {
     m_currentNight = 0;
     eng.Dialogue().CloseDialogue();
     eng.State().Reset();
+    eng.State().ClearFlag("shift_sanity_restored");
+    m_endlessSanityCooldownTimer = 0.0f;
     eng.Time().Reset(23, 0, 1.80f);
 
     m_playerBody.position = {112.0f, 48.0f};
@@ -217,7 +219,7 @@ void LastOrderGame::StartMinigame(engine::core::Engine& eng, systems::MinigameTy
 
 void LastOrderGame::CompleteActiveMinigame(engine::core::Engine& eng) {
     eng.Renderer().SetSkip2DLightmap(false);
-    eng.State().AddSanity(20);
+    eng.State().AddSanity(10);
     systems::MinigameType t = m_chaseMinigame.GetType();
     if (t == systems::MinigameType::Night1_RadioTuner2D) {
         eng.State().SetFlag("heard_radio_0214");
@@ -243,7 +245,7 @@ void LastOrderGame::CompleteActiveMinigame(engine::core::Engine& eng) {
     } else if (t == systems::MinigameType::Night_JukeboxTuner2D) {
         eng.State().SetFlag("jukebox_playing");
         eng.Audio().PlayAmbient("audio/bgm/mus_jukebox_retro.wav", 0.85f);
-        eng.State().AddSanity(25);
+        eng.State().AddSanity(12);
         eng.Renderer().TriggerFlash(Color{244, 184, 96, 200}, 0.35f);
         eng.Audio().PlaySfx("audio/sfx/sfx_cash_register.wav", 0.85f);
         m_saveBannerText = "ПЛАСТИНКА ИГРАЕТ! РАССУДОК +25%";
@@ -257,6 +259,7 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
     m_currentNight = nightNumber;
     eng.Dialogue().CloseDialogue();
     eng.State().Reset();
+    eng.State().ClearFlag("shift_sanity_restored");
 
     eng.Time().Reset(22, 0, 1.80f);
 
@@ -352,8 +355,14 @@ void LastOrderGame::UpdatePlayerMovement(engine::core::Engine& eng, float dt) {
 
         float fwdX = std::cos(m_visorYaw);
         float fwdY = std::sin(m_visorYaw);
-        float rightX = fwdY;
-        float rightY = -fwdX;
+        float rightX = -fwdY;
+        float rightY = fwdX;
+
+        bool invertStrafe = (eng.State().GetSanity() <= 75);
+        if (invertStrafe) {
+            rightX = -rightX;
+            rightY = -rightY;
+        }
 
         if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))   { moveDir.x += fwdX; moveDir.y += fwdY; }
         if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) { moveDir.x -= fwdX; moveDir.y -= fwdY; }
@@ -432,8 +441,8 @@ void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
             m_anomaliesKilled++;
             m_shooterScore += 150;
             eng.State().SetFlag("anomalies_cleared_3d");
-            eng.State().AddSanity(10);
-            m_endlessDirector.OnSanityRestored(15);
+            eng.State().AddSanity(6);
+            m_endlessDirector.OnSanityRestored(10);
             eng.Audio().PlaySfx("audio/sfx/sfx_chase_relic_pickup.wav", 0.85f);
             m_visorKillBanner = "АНОМАЛИЯ УНИЧТОЖЕНА: " + hitA.label;
             m_visorKillBannerTimer = 2.4f;
@@ -465,7 +474,7 @@ void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
             m_shooterScore += 300;
             eng.State().SetFlag("visor_first_hit");
             eng.State().SetFlag("anomalies_cleared_3d");
-            eng.State().AddSanity(15);
+            eng.State().AddSanity(8);
             if (!g.completedFlag.empty()) eng.State().SetFlag(g.completedFlag);
             eng.Renderer().TriggerFlash(Color{244, 184, 96, 180}, 0.30f);
             eng.Audio().PlaySfx("audio/sfx/sfx_window_bang.wav", 0.85f);
@@ -933,17 +942,41 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
                 eng.Audio().PlaySfx("audio/sfx/sfx_pie_microwave_bell.wav", 0.8f);
             } else if (tid == "trig_coffee") {
                 eng.State().GiveItem("coffee_sugar", "Чёрный кофе с сахаром");
-                m_endlessDirector.OnSanityRestored(10);
-                eng.State().AddSanity(10);
+                if (m_endlessSanityCooldownTimer <= 0.0f) {
+                    m_endlessSanityCooldownTimer = 90.0f;
+                    m_endlessDirector.OnSanityRestored(10);
+                    eng.State().AddSanity(10);
+                    m_saveBannerText = "ГОРЯЧИЙ КОФЕ: РАССУДОК +10% (КУЛДАУН 90 СЕК)";
+                    m_saveBannerTimer = 2.5f;
+                } else {
+                    m_saveBannerText = "КОФЕИН ЕЩЁ ДЕЙСТВУЕТ (ОСТАЛОСЬ: " + std::to_string(static_cast<int>(m_endlessSanityCooldownTimer)) + " СЕК)";
+                    m_saveBannerTimer = 2.0f;
+                }
                 eng.Audio().PlaySfx("audio/sfx/sfx_coffee_sip.wav", 0.85f);
             } else if (tid == "trig_oven") {
                 eng.State().GiveItem("cherry_pie", "Тёплый вишнёвый пирог");
-                m_endlessDirector.OnSanityRestored(10);
-                eng.State().AddSanity(10);
+                if (m_endlessSanityCooldownTimer <= 0.0f) {
+                    m_endlessSanityCooldownTimer = 90.0f;
+                    m_endlessDirector.OnSanityRestored(10);
+                    eng.State().AddSanity(10);
+                    m_saveBannerText = "ГОРЯЧАЯ ВЫПЕЧКА: РАССУДОК +10% (КУЛДАУН 90 СЕК)";
+                    m_saveBannerTimer = 2.5f;
+                } else {
+                    m_saveBannerText = "ВЫ НЕ ГОЛОДНЫ (ОСТАЛОСЬ: " + std::to_string(static_cast<int>(m_endlessSanityCooldownTimer)) + " СЕК)";
+                    m_saveBannerTimer = 2.0f;
+                }
                 eng.Audio().PlaySfx("audio/sfx/sfx_pie_microwave_bell.wav", 0.85f);
             } else if (tid == "trig_cat") {
-                m_endlessDirector.OnSanityRestored(12);
-                eng.State().AddSanity(12);
+                if (m_endlessSanityCooldownTimer <= 0.0f) {
+                    m_endlessSanityCooldownTimer = 90.0f;
+                    m_endlessDirector.OnSanityRestored(12);
+                    eng.State().AddSanity(12);
+                    m_saveBannerText = "УГОЛЁК МУРЛЫЧЕТ: РАССУДОК +12% (КУЛДАУН 90 СЕК)";
+                    m_saveBannerTimer = 2.5f;
+                } else {
+                    m_saveBannerText = "КОТ ЗАДРЕМАЛ (КУЛДАУН: " + std::to_string(static_cast<int>(m_endlessSanityCooldownTimer)) + " СЕК)";
+                    m_saveBannerTimer = 2.0f;
+                }
                 eng.Audio().PlaySfx("audio/sfx/sfx_cat_purr.wav", 0.85f);
             } else {
                 m_endlessDirector.InteractWithBooth(eng, tid, eng.Lighting().GetFlashlight().enabled);
@@ -955,11 +988,30 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
             m_demoScreamerIdx++;
         }
 
+        if (m_endlessSanityCooldownTimer > 0.0f) {
+            m_endlessSanityCooldownTimer = std::max(0.0f, m_endlessSanityCooldownTimer - dt);
+        }
+
         m_cooking.Update(eng, dt, m_playerBody.Center());
         return;
     }
 
-    m_sanity.Update(eng, dt, m_playerBody.position);
+    int activeThreats = 0;
+    for (const auto& a : m_anomalies3D) {
+        if (a.active) activeThreats++;
+    }
+    for (const auto& g : m_guests) {
+        if (g.spawned && g.anomalous && !g.finished) activeThreats++;
+    }
+
+    systems::SanityDrainFactors drainFactors{};
+    drainFactors.isBlackout = m_blackoutMode;
+    drainFactors.isFlickering = m_lightsFlickering;
+    drainFactors.isFlashlightOn = eng.Lighting().GetFlashlight().enabled;
+    drainFactors.isVisor3D = m_visor3DActive;
+    drainFactors.threatCount = activeThreats;
+
+    m_sanity.Update(eng, dt, m_playerBody.position, drainFactors);
     if (m_sanity.IsGameOver()) {
         if (IsCursorHidden()) EnableCursor();
         systems::GameOverCommand goCmd = m_sanity.UpdateGameOverInput(eng);
@@ -1371,6 +1423,12 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
         DrawLine(620, 360, 660, 360, Color{90, 245, 200, 200});
         DrawLine(640, 340, 640, 380, Color{90, 245, 200, 200});
 
+        if (eng.State().GetSanity() <= 75) {
+            DrawRectangle(370, 674, 540, 30, Color{36, 12, 14, 230});
+            DrawRectangleLines(370, 674, 540, 30, Color{245, 70, 70, 240});
+            engine::graphics::TextLayout::DrawCentered(font, "⚠ ДЕЗОРИЕНТАЦИЯ [РАССУДОК <= 75%]: УПРАВЛЕНИЕ [A]/[D] ИНВЕРТИРОВАНО", 640.0f, 680.0f, 15.0f, Color{255, 120, 120, 255});
+        }
+
         if (m_hitMarkerTimer > 0.0f) {
             DrawLineEx(Vector2{624, 344}, Vector2{656, 376}, 3.0f, Color{255, 55, 55, 255});
             DrawLineEx(Vector2{656, 344}, Vector2{624, 376}, 3.0f, Color{255, 55, 55, 255});
@@ -1413,8 +1471,12 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
 
     int san = eng.State().GetSanity();
     char sanBuf[64];
-    std::snprintf(sanBuf, sizeof(sanBuf), "Рассудок: %d%%", san);
-    Color sanCol = (san < 40) ? Color{214, 69, 69, 255} : Color{232, 227, 217, 255};
+    if (san <= 75) {
+        std::snprintf(sanBuf, sizeof(sanBuf), "Рассудок: %d%% [⚠ Срыв]", san);
+    } else {
+        std::snprintf(sanBuf, sizeof(sanBuf), "Рассудок: %d%%", san);
+    }
+    Color sanCol = (san <= 40) ? Color{214, 45, 45, 255} : (san <= 75) ? Color{245, 160, 60, 255} : Color{232, 227, 217, 255};
     DrawTextEx(font, sanBuf, Vector2{1052, 66}, 18.5f, 1.0f, sanCol);
 
     std::string held = eng.State().GetHeldItemName();

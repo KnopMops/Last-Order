@@ -21,9 +21,35 @@ void SanitySystem::ResetForShift(engine::math::Vec2 startPos) {
     m_currentStress = 0.0f;
     m_hallucinationTimer = 14.0f;
     m_clockGlitchTimer = 0.0f;
+    m_drainAccumulator = 0.0f;
 }
 
-void SanitySystem::Update(engine::core::Engine& eng, float dt, engine::math::Vec2 playerPos) {
+void SanitySystem::Update(engine::core::Engine& eng, float dt, engine::math::Vec2 playerPos, const SanityDrainFactors& factors) {
+    if (!m_gameOver && !eng.Dialogue().IsActive()) {
+        float drainRate = 0.16f;
+        if (factors.isBlackout || factors.isFlickering) {
+            drainRate += 0.35f;
+            if (!factors.isFlashlightOn) drainRate += 0.30f;
+        } else if (!factors.isFlashlightOn) {
+            drainRate += 0.10f;
+        }
+
+        if (factors.isVisor3D) {
+            drainRate += 0.45f;
+        }
+
+        if (factors.threatCount > 0) {
+            drainRate += 0.20f * std::min(factors.threatCount, 3);
+        }
+
+        m_drainAccumulator += drainRate * dt;
+        if (m_drainAccumulator >= 1.0f) {
+            int drainPoints = static_cast<int>(m_drainAccumulator);
+            m_drainAccumulator -= static_cast<float>(drainPoints);
+            eng.State().AddSanity(-drainPoints);
+        }
+    }
+
     int sanity = eng.State().GetSanity();
     float targetStress = std::clamp((100.0f - static_cast<float>(sanity)) / 100.0f, 0.0f, 1.0f);
     m_currentStress += (targetStress - m_currentStress) * std::min(1.0f, dt * 3.5f);
@@ -109,6 +135,7 @@ GameOverCommand SanitySystem::UpdateGameOverInput(engine::core::Engine& eng) {
 
 void SanitySystem::RestoreCheckpointTo(engine::core::Engine& eng, engine::math::Vec2& outPlayerPos) {
     eng.State() = m_checkpointState;
+    eng.State().ClearFlag("shift_sanity_restored");
     eng.State().SetSanity(std::max(65, m_checkpointState.GetSanity()));
     eng.Time().SetTimeHHMM(m_checkpointHour, m_checkpointMin);
     outPlayerPos = m_checkpointPos;

@@ -76,7 +76,7 @@
             },
             {
               "type": "add_sanity",
-              "value": 15
+              "value": 8
             },
             {
               "type": "play_sfx",
@@ -100,7 +100,7 @@
             },
             {
               "type": "add_sanity",
-              "value": 10
+              "value": 6
             },
             {
               "type": "play_sfx",
@@ -240,7 +240,7 @@
             },
             {
               "type": "add_sanity",
-              "value": 20
+              "value": 8
             },
             {
               "type": "play_sfx",
@@ -282,7 +282,7 @@
             },
             {
               "type": "add_sanity",
-              "value": 10
+              "value": 6
             },
             {
               "type": "event",

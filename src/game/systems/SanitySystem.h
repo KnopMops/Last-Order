@@ -13,12 +13,20 @@ enum class GameOverCommand {
     ReturnToMainMenu
 };
 
+struct SanityDrainFactors {
+    bool isBlackout = false;
+    bool isFlickering = false;
+    bool isFlashlightOn = false;
+    bool isVisor3D = false;
+    int threatCount = 0;
+};
+
 class SanitySystem {
 public:
     void Init(const std::string& profileSavePath);
     void ResetForShift(engine::math::Vec2 startPos);
 
-    void Update(engine::core::Engine& eng, float dt, engine::math::Vec2 playerPos);
+    void Update(engine::core::Engine& eng, float dt, engine::math::Vec2 playerPos, const SanityDrainFactors& factors = {});
     GameOverCommand UpdateGameOverInput(engine::core::Engine& eng);
     void RenderGameOverModal(engine::core::Engine& eng, int currentNight) const;
 
@@ -51,6 +59,7 @@ private:
     float m_currentStress = 0.0f;
     float m_hallucinationTimer = 14.0f;
     float m_clockGlitchTimer = 0.0f;
+    float m_drainAccumulator = 0.0f;
 };
 
 }
