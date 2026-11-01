@@ -463,6 +463,206 @@
           "nextNode": ""
         }
       ]
+    },
+    {
+      "id": "n3_radio_burst_node",
+      "lines": [
+        {
+          "speaker": "Радиоприёмник «Сигнал-86»",
+          "text": "[ОГЛУШИТЕЛЬНЫЙ ТРЕСК ПОМЕХ И СВИСТ ЭФИРА]\nВдруг старый радиоприёмник на барной стойке сам вспыхивает зелёной шкалой! Диалог со Столом №6 резко обрывается — сквозь шипение на всё кафе звучит голос владельца Михаила!"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Прислушаться к экстренному радиосообщению Михаила",
+          "actions": [
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_radio_static.wav"
+            },
+            {
+              "type": "set_flag",
+              "target": "n3_radio_emergency_heard"
+            },
+            {
+              "type": "set_flag",
+              "target": "heard_radio_0214"
+            }
+          ],
+          "nextNode": "n3_mikhail_radio_instructions"
+        }
+      ]
+    },
+    {
+      "id": "n3_mikhail_radio_instructions",
+      "lines": [
+        {
+          "speaker": "Михаил (Владелец кафе — через радио 94.5 FM)",
+          "text": "«Лера! Это Михаил! Не слушай существо за шестым столом! Это не человек и не гость, это мимик Разлома 1986 года! Если отдашь ему силу — кафе погибнет!\nСлушай меня внимательно:\n1. Иди на кухню в морозильную камеру — там в ледяном лабиринте спрятаны 3 части архивного чека 1986 года.\n2. Нажми [G], чтобы осмотреть стекло — за зеркалом тень Веры отдаст серебряный ключ.\nТолько с чеком и ключом ты сможешь изгнать его! Не смей ему подчиняться!»"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Послушать владельца (Идти в морозильник за чеком и к стеклу за ключом Веры)",
+          "actions": [
+            {
+              "type": "set_flag",
+              "target": "n3_path_listened_owner"
+            },
+            {
+              "type": "clear_flag",
+              "target": "n3_path_defied_owner"
+            },
+            {
+              "type": "add_sanity",
+              "value": 10
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            },
+            {
+              "type": "event",
+              "target": "key_moment_n3_choice_owner"
+            }
+          ],
+          "nextNode": "n3_path_owner_accepted"
+        },
+        {
+          "text": "Поступить по-своему (Проигнорировать Михаила и довериться Незнакомцу)",
+          "actions": [
+            {
+              "type": "set_flag",
+              "target": "n3_path_defied_owner"
+            },
+            {
+              "type": "clear_flag",
+              "target": "n3_path_listened_owner"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night11_ceiling_crawler"
+            },
+            {
+              "type": "add_sanity",
+              "value": -25
+            },
+            {
+              "type": "event",
+              "target": "key_moment_n3_choice_defy"
+            }
+          ],
+          "nextNode": "n3_path_defy_chosen"
+        }
+      ]
+    },
+    {
+      "id": "n3_path_owner_accepted",
+      "lines": [
+        {
+          "speaker": "Лера",
+          "text": "«Михаил прав. Я найду чек в морозильнике кухни и ключ Веры через стекло [G], а потом вернусь сюда!»\nСущность за столом №6 злобно шипит в полумраке, не решаясь напасть при свете."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Вернуться в зал кафе",
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "n3_path_defy_chosen",
+      "lines": [
+        {
+          "speaker": "Лера",
+          "text": "«Михаил сам бросил кафе в 1986 году. Я не стану слушать указания из радио. Я разберусь с этим сама»."
+        },
+        {
+          "speaker": "Сущность Стола №6",
+          "text": "«Мудрое решение, девочка... Нам не нужны бумажки Михаила. Нам нужна ты!»\nТени вздымаются к потолку, стекло окон покрывается коркой льда, и кафе погружается во тьму!"
+        }
+      ],
+      "choices": [
+        {
+          "text": "[04:00] Принять неизбежное — Плохая концовка",
+          "actions": [
+            {
+              "type": "set_flag",
+              "target": "n3_boss_resolved"
+            },
+            {
+              "type": "set_flag",
+              "target": "n3_bad_ending_triggered"
+            },
+            {
+              "type": "set_flag",
+              "target": "n3_shift_0400_ready"
+            }
+          ],
+          "nextNode": "n3_bad_ending_complete"
+        }
+      ]
+    },
+    {
+      "id": "n3_good_ending_complete",
+      "lines": [
+        {
+          "speaker": "ХОРОШАЯ КОНЦОВКА ГЛАВЫ 3 — «ЗАПЕЧАТАННЫЙ РАЗЛОМ»",
+          "text": "Серебряный ключ Веры и архивный чек ослепляют тень вспышкой яркого света! Сущность Стола №6 с пронзительным воем изгоняется обратно в бездну. Кафе спасено! На часах 04:00."
+        }
+      ],
+      "choices": [
+        {
+          "text": "Завершить Ночь 3 и перейти к Ночи 4: «Полночный звонок»",
+          "actions": [
+            {
+              "type": "set_flag",
+              "target": "night3_completed"
+            },
+            {
+              "type": "play_sfx",
+              "target": "audio/sfx/sfx_cash_register.wav"
+            },
+            {
+              "type": "event",
+              "target": "start_night_4"
+            }
+          ],
+          "nextNode": ""
+        }
+      ]
+    },
+    {
+      "id": "n3_bad_ending_complete",
+      "lines": [
+        {
+          "speaker": "ПЛОХАЯ КОНЦОВКА — «ПОГЛОЩЕНИЕ РАЗЛОМОМ»",
+          "text": "Вы отказались следовать плану владельца. Без ритуала очищения Разлом вырвался на свободу: кафе рухнуло в бездну 1986 года, а Лера навеки стала призрачной узницей Стола №6.\n\n[ИГРА ОКОНЧЕНА — ПЛОХАЯ КОНЦОВКА]"
+        }
+      ],
+      "choices": [
+        {
+          "text": "Попробовать снова (Перезапустить Ночь 3 и послушать Михаила)",
+          "actions": [
+            {
+              "type": "event",
+              "target": "start_night_3"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Выйти в Главное меню",
+          "actions": [
+            {
+              "type": "event",
+              "target": "return_main_menu"
+            }
+          ],
+          "nextNode": ""
+        }
+      ]
     }
   ]
 }

@@ -25,11 +25,11 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
 
     std::string mirrorDlg = (nightNumber == 1) ? "mirror_night1" : ((nightNumber == 2) ? "n2_mirror_inspect" : "n3_mirror_inspect");
     std::string windowDlg = (nightNumber >= 3) ? "n3_window_hands_inspect" : "backdoor_window_inspect";
-    std::string basementDlg = (nightNumber < 3) ? "basement_locked" : ((nightNumber == 3) ? "n3_basement_inspect" : "basement_locked");
+    std::string basementDlg = (nightNumber < 3) ? "basement_locked" : ((nightNumber == 3) ? "n3_basement_inspect" : ((nightNumber == 4) ? "n4_basement_rift" : "basement_locked"));
     std::string fridgeDlg = (nightNumber < 3) ? "fridge_locked" : ((nightNumber == 3) ? "n3_fridge_inspect" : "fridge_locked");
     std::string breakerDlg = (nightNumber == 2) ? "n2_fusebox_use" : "breaker_normal";
     std::string phoneDlg = (nightNumber == 4) ? "n4_phone_ring_talk" : "phone_silent";
-    std::string jukeDlg = (nightNumber == 4 && !eng.State().HasFlag("n4_jukebox_cleared")) ? "n4_jukebox_haunted" : "jukebox_use";
+    std::string jukeDlg = "jukebox_use";
     std::string table6Dlg = (nightNumber == 1) ? "table6_closed" : "";
     std::string radioDlg = eng.State().HasFlag("heard_radio_0214") ? "radio_tuned" :
                            (eng.State().HasFlag("radio_0214_ringing") ? "radio_0214" : "radio_turned_off");

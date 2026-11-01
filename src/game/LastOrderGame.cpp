@@ -62,7 +62,7 @@ void LastOrderGame::SetVisor3DActive(engine::core::Engine& eng, bool active) {
     }
 }
 
-void LastOrderGame::SaveCurrentGame(engine::core::Engine& eng) {
+void LastOrderGame::SaveCurrentGame(engine::core::Engine& eng, int slotIndex) {
     systems::SaveProfile sp{};
     sp.chapter = m_currentChapter;
     sp.currentNight = m_currentNight;
@@ -79,18 +79,58 @@ void LastOrderGame::SaveCurrentGame(engine::core::Engine& eng) {
     for (const auto& f : eng.State().GetAllFlags()) {
         sp.flags.push_back(f);
     }
+    char timeBuf[32];
+    std::snprintf(timeBuf, sizeof(timeBuf), "%02d:%02d", sp.hour, sp.minute);
+    if (slotIndex == 0) {
+        sp.slotTitle = "Быстрое [F5]: Ночь " + std::to_string(m_currentNight) + ", " + timeBuf;
+    } else if (slotIndex == 1) {
+        sp.slotTitle = "Авто: Начало Ночи " + std::to_string(m_currentNight);
+    } else {
+        sp.slotTitle = "Авто: Ночь " + std::to_string(m_currentNight) + ", " + timeBuf;
+    }
     sp.valid = true;
 
-    if (systems::SaveSystem::Save(sp)) {
-        m_saveBannerText = "ИГРА УСПЕШНО СОХРАНЕНА!";
+    if (systems::SaveSystem::SaveSlot(slotIndex, sp)) {
+        if (slotIndex == 0) m_saveBannerText = "ИГРА СОХРАНЕНА [СЛОТ 1 — БЫСТРОЕ]";
+        else if (slotIndex == 1) m_saveBannerText = "АВТОСОХРАНЕНИЕ СМЕНЫ [СЛОТ 2]";
+        else m_saveBannerText = "АВТОСОХРАНЕНИЕ [СЛОТ 3]";
         m_saveBannerTimer = 2.8f;
         eng.Audio().PlaySfx("audio/sfx/sfx_cash_register.wav", 0.85f);
     }
 }
 
-void LastOrderGame::LoadSavedGame(engine::core::Engine& eng) {
+void LastOrderGame::SaveKeyMoment(engine::core::Engine& eng, const std::string& momentTitle) {
     systems::SaveProfile sp{};
-    if (!systems::SaveSystem::Load(sp) || !sp.valid) {
+    sp.chapter = m_currentChapter;
+    sp.currentNight = m_currentNight;
+    sp.hour = eng.Time().GetHours24();
+    sp.minute = eng.Time().GetMinutes();
+    sp.elapsedMinutes = eng.Time().GetShiftElapsedMinutes();
+    sp.sanity = eng.State().GetSanity();
+    sp.heldItem = eng.State().GetHeldItem();
+    sp.heldItemName = eng.State().GetHeldItemName();
+    sp.playerX = m_playerBody.position.x;
+    sp.playerY = m_playerBody.position.y;
+    sp.playerFacing = m_playerFacing;
+    sp.maxUnlockedNight = std::max(m_maxUnlockedNight, m_currentNight);
+    for (const auto& f : eng.State().GetAllFlags()) {
+        sp.flags.push_back(f);
+    }
+    char timeBuf[32];
+    std::snprintf(timeBuf, sizeof(timeBuf), "%02d:%02d", sp.hour, sp.minute);
+    sp.slotTitle = "Ключ: " + momentTitle + " (" + timeBuf + ")";
+    sp.valid = true;
+
+    systems::SaveSystem::SaveSlot(2, sp);
+    m_saveBannerText = "СОХРАНЁН МОМЕНТ: " + momentTitle;
+    m_saveBannerTimer = 2.8f;
+    eng.Audio().PlaySfx("audio/sfx/sfx_cash_register.wav", 0.75f);
+}
+
+void LastOrderGame::LoadSavedGame(engine::core::Engine& eng, int slotIndex) {
+    systems::SaveProfile sp{};
+    bool loaded = (slotIndex >= 0) ? systems::SaveSystem::LoadSlot(slotIndex, sp) : systems::SaveSystem::Load(sp);
+    if (!loaded || !sp.valid) {
         StartNewShift(eng, 1, false);
         return;
     }
@@ -100,7 +140,7 @@ void LastOrderGame::LoadSavedGame(engine::core::Engine& eng) {
     eng.Time().Reset(sp.hour, sp.minute, 1.80f);
     m_playerBody.position = {sp.playerX, sp.playerY};
     m_playerFacing = sp.playerFacing;
-    m_maxUnlockedNight = sp.maxUnlockedNight;
+    m_maxUnlockedNight = std::max(m_maxUnlockedNight, sp.maxUnlockedNight);
 
     eng.State().Reset();
     eng.State().SetSanity(sp.sanity);
@@ -115,7 +155,8 @@ void LastOrderGame::LoadSavedGame(engine::core::Engine& eng) {
         eng.Audio().PlayAmbient("audio/bgm/mus_jukebox_retro.wav", 0.85f);
     }
 
-    m_saveBannerText = "СОХРАНЕНИЕ ЗАГРУЖЕНО";
+    m_screen = (sp.currentNight == 0) ? GameScreen::EndlessMode : GameScreen::PlayingShift;
+    m_saveBannerText = "ЗАГРУЖЕНО: " + sp.slotTitle;
     m_saveBannerTimer = 2.8f;
     eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.85f);
 }
@@ -224,32 +265,38 @@ void LastOrderGame::CompleteActiveMinigame(engine::core::Engine& eng) {
     if (t == systems::MinigameType::Night1_RadioTuner2D) {
         eng.State().SetFlag("heard_radio_0214");
         eng.Physics().UpdateTriggerDialogue("trig_radio", "radio_tuned", "Радиоприёмник [94.5 FM]");
+        SaveKeyMoment(eng, "Радио 94.5 FM настроено");
     } else if (t == systems::MinigameType::Night2_BasementFuse3D) {
         eng.State().SetFlag("n2_power_restored");
         m_lightsFlickering = false;
         m_blackoutMode = false;
         eng.Lighting().SetAmbientColor(Color{112, 96, 92, 255});
         eng.Lighting().SetAllPointLightsFlicker(2.0f, 0.03f);
+        SaveKeyMoment(eng, "Электросеть восстановлена");
     } else if (t == systems::MinigameType::Night3_FreezerMaze3D) {
         eng.State().SetFlag("n3_fridge_checked");
         eng.State().SetFlag("n3_basement_checked");
+        SaveKeyMoment(eng, "Чек 1986 года найден");
     } else if (t == systems::MinigameType::Night4_MirrorHunt3D) {
         eng.State().SetFlag("n4_jukebox_cleared");
         m_lightsFlickering = false;
         m_blackoutMode = false;
         eng.Lighting().SetAmbientColor(Color{112, 96, 92, 255});
         eng.Lighting().SetAllPointLightsFlicker(2.0f, 0.03f);
+        SaveKeyMoment(eng, "Зазеркалье очищено");
     } else if (t == systems::MinigameType::Night5_HighwayChase3D) {
         eng.State().SetFlag("n5_relic_collected");
         eng.State().SetFlag("n3_mirror_key_found");
+        SaveKeyMoment(eng, "Погоня на шоссе пройдена");
     } else if (t == systems::MinigameType::Night_JukeboxTuner2D) {
         eng.State().SetFlag("jukebox_playing");
         eng.Audio().PlayAmbient("audio/bgm/mus_jukebox_retro.wav", 0.85f);
         eng.State().AddSanity(12);
         eng.Renderer().TriggerFlash(Color{244, 184, 96, 200}, 0.35f);
         eng.Audio().PlaySfx("audio/sfx/sfx_cash_register.wav", 0.85f);
-        m_saveBannerText = "ПЛАСТИНКА ИГРАЕТ! РАССУДОК +25%";
+        m_saveBannerText = "ПЛАСТИНКА ИГРАЕТ! РАССУДОК +12%";
         m_saveBannerTimer = 3.0f;
+        SaveKeyMoment(eng, "Мелодия-86 запущена");
     }
     m_world.BuildLighting(eng, std::max(1, m_currentNight));
     m_screen = (m_currentNight == 0) ? GameScreen::EndlessMode : GameScreen::PlayingShift;
@@ -340,6 +387,7 @@ void LastOrderGame::StartNewShift(engine::core::Engine& eng, int nightNumber, bo
 
     m_tutorial.Reset(nightNumber, withTutorial);
     m_screen = GameScreen::PlayingShift;
+    SaveCurrentGame(eng, 1);
 }
 
 void LastOrderGame::UpdatePlayerMovement(engine::core::Engine& eng, float dt) {
@@ -798,8 +846,19 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         eng.Renderer().SetSkip2DLightmap(false);
         ui::MenuCommand cmd = m_mainMenu.Update(eng, dt);
         switch (cmd) {
+            case ui::MenuCommand::None:
+                break;
             case ui::MenuCommand::ContinueSaveGame:
-                LoadSavedGame(eng);
+                LoadSavedGame(eng, -1);
+                break;
+            case ui::MenuCommand::LoadSlot0:
+                LoadSavedGame(eng, 0);
+                break;
+            case ui::MenuCommand::LoadSlot1:
+                LoadSavedGame(eng, 1);
+                break;
+            case ui::MenuCommand::LoadSlot2:
+                LoadSavedGame(eng, 2);
                 break;
             case ui::MenuCommand::StartNight1_IntroTutorial:
                 StartNewShift(eng, 1, true);
@@ -1152,7 +1211,7 @@ void LastOrderGame::UpdatePauseMenu(engine::core::Engine& eng) {
         return;
     }
 
-    constexpr int COUNT = 8;
+    constexpr int COUNT = 7;
     if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) {
         m_pauseSelectedBtn = (m_pauseSelectedBtn - 1 + COUNT) % COUNT;
         eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.45f);
@@ -1166,7 +1225,7 @@ void LastOrderGame::UpdatePauseMenu(engine::core::Engine& eng) {
     engine::math::Vec2 mpos = eng.Renderer().GetVirtualMousePos();
 
     for (int i = 0; i < COUNT; ++i) {
-        engine::math::Rect r = {380.0f, 175.0f + i * 48.0f, 520.0f, 42.0f};
+        engine::math::Rect r = {340.0f, 160.0f + i * 58.0f, 600.0f, 48.0f};
         if (r.Contains(mpos)) {
             m_pauseSelectedBtn = i;
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) activate = true;
@@ -1176,14 +1235,28 @@ void LastOrderGame::UpdatePauseMenu(engine::core::Engine& eng) {
     if (activate) {
         eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.55f);
         switch (m_pauseSelectedBtn) {
-            case 0: m_screen = (m_currentNight == 0) ? GameScreen::EndlessMode : GameScreen::PlayingShift; break;
-            case 1: m_settingsUI.Open(); break;
-            case 2: StartNewShift(eng, 1, false); break;
-            case 3: StartNewShift(eng, 2, false); break;
-            case 4: StartNewShift(eng, 3, false); break;
-            case 5: StartNewShift(eng, 4, false); break;
-            case 6: StartNewShift(eng, 5, false); break;
-            case 7:
+            case 0:
+                m_screen = (m_currentNight == 0) ? GameScreen::EndlessMode : GameScreen::PlayingShift;
+                break;
+            case 1:
+                SaveCurrentGame(eng, 0);
+                break;
+            case 2:
+                if (systems::SaveSystem::HasSlot(0)) LoadSavedGame(eng, 0);
+                else eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.4f);
+                break;
+            case 3:
+                if (systems::SaveSystem::HasSlot(1)) LoadSavedGame(eng, 1);
+                else eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.4f);
+                break;
+            case 4:
+                if (systems::SaveSystem::HasSlot(2)) LoadSavedGame(eng, 2);
+                else eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.4f);
+                break;
+            case 5:
+                m_settingsUI.Open();
+                break;
+            case 6:
                 m_mainMenu.Init(eng);
                 m_screen = GameScreen::MainMenu;
                 break;
@@ -1194,34 +1267,45 @@ void LastOrderGame::UpdatePauseMenu(engine::core::Engine& eng) {
 void LastOrderGame::RenderPauseMenu(engine::core::Engine& eng) const {
     Font font = eng.Assets().GetMainFont();
     DrawRectangle(0, 0, 1280, 720, Color{10, 13, 26, 212});
-    DrawRectangle(340, 95, 600, 525, Color{42, 23, 21, 248});
-    DrawRectangleLinesEx(Rectangle{340, 95, 600, 525}, 3.0f, Color{244, 184, 96, 255});
+    DrawRectangle(320, 90, 640, 540, Color{42, 23, 21, 248});
+    DrawRectangleLinesEx(Rectangle{320, 90, 640, 540}, 3.0f, Color{244, 184, 96, 255});
 
     std::string title =
         (m_currentNight == 0) ? "ПАУЗА — СВОБОДНЫЙ РЕЖИМ" :
                                 ("ПАУЗА — ГЛАВА " + std::to_string(m_currentChapter) + ": НОЧЬ " + std::to_string(m_currentNight));
-    engine::graphics::TextLayout::DrawCentered(font, title, 640.0f, 125.0f, 24.0f, Color{244, 184, 96, 255}, 1.0f);
+    engine::graphics::TextLayout::DrawCentered(font, title, 640.0f, 118.0f, 24.0f, Color{244, 184, 96, 255}, 1.0f);
 
-    const char* labels[8] = {
-        "Продолжить смену",
-        "Настройки",
-        "Перезапустить Ночь 1",
-        "Перезапустить Ночь 2",
-        "Перезапустить Ночь 3",
-        "Перезапустить Ночь 4",
-        "Перезапустить Ночь 5",
-        "Выйти в главное меню"
-    };
+    systems::SaveProfile sp0 = systems::SaveSystem::GetSlotInfo(0);
+    systems::SaveProfile sp1 = systems::SaveSystem::GetSlotInfo(1);
+    systems::SaveProfile sp2 = systems::SaveSystem::GetSlotInfo(2);
 
-    for (int i = 0; i < 8; ++i) {
+    std::string labels[7];
+    labels[0] = "Продолжить смену";
+    labels[1] = "Быстрое сохранение [F5]";
+    labels[2] = sp0.valid ? ("Загрузить Слот 1: " + sp0.slotTitle) : "Загрузить: [Слот 1 пуст]";
+    labels[3] = sp1.valid ? ("Загрузить Слот 2: " + sp1.slotTitle) : "Загрузить: [Слот 2 пуст]";
+    labels[4] = sp2.valid ? ("Загрузить Слот 3: " + sp2.slotTitle) : "Загрузить: [Слот 3 пуст]";
+    labels[5] = "Настройки";
+    labels[6] = "Выйти в главное меню";
+
+    for (int i = 0; i < 7; ++i) {
         bool sel = (m_pauseSelectedBtn == i);
-        float bx = 380.0f;
-        float by = 175.0f + i * 48.0f;
-        DrawRectangle(static_cast<int>(bx), static_cast<int>(by), 520, 42,
-                      sel ? Color{150, 82, 46, 255} : Color{107, 51, 34, 235});
-        DrawRectangleLinesEx(Rectangle{bx, by, 520, 42}, sel ? 2.0f : 1.0f, Color{244, 184, 96, 255});
-        DrawTextEx(font, labels[i], Vector2{bx + 18.0f, by + 11.0f}, 18.0f, 1.0f,
-                   sel ? Color{244, 184, 96, 255} : Color{232, 227, 217, 235});
+        float bx = 340.0f;
+        float by = 160.0f + i * 58.0f;
+        float bw = 600.0f;
+        float bh = 48.0f;
+
+        Color bg = sel ? Color{107, 51, 34, 255} : Color{28, 16, 14, 220};
+        Color bdr = sel ? Color{244, 184, 96, 255} : Color{196, 122, 59, 170};
+        DrawRectangle(static_cast<int>(bx), static_cast<int>(by), static_cast<int>(bw), static_cast<int>(bh), bg);
+        DrawRectangleLinesEx(Rectangle{bx, by, bw, bh}, sel ? 2.5f : 1.0f, bdr);
+
+        if (sel) {
+            DrawRectangle(static_cast<int>(bx), static_cast<int>(by), 8, static_cast<int>(bh), Color{244, 184, 96, 255});
+        }
+
+        DrawTextEx(font, labels[i].c_str(), Vector2{bx + 18.0f, by + 12.0f}, 19.5f, 1.0f,
+                   sel ? Color{244, 184, 96, 255} : Color{232, 227, 217, 230});
     }
 }
 
@@ -1301,6 +1385,10 @@ void LastOrderGame::OnAction(engine::core::Engine& eng, const engine::core::Engi
             StartNewShift(eng, 4, false);
         } else if (action.target == "start_night_5") {
             StartNewShift(eng, 5, false);
+        } else if (action.target == "key_moment_n3_choice_owner") {
+            SaveKeyMoment(eng, "Ночь 3: Выбор Михаила (Хороший путь)");
+        } else if (action.target == "key_moment_n3_choice_defy") {
+            SaveKeyMoment(eng, "Ночь 3: Выбор Разлома (Плохой путь)");
         } else if (action.target == "return_main_menu") {
             m_mainMenu.Init(eng);
             m_screen = GameScreen::MainMenu;

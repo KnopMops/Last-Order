@@ -49,8 +49,9 @@ private:
     void Update3DVisorShooter(engine::core::Engine& eng, float dt);
     void Fire3DVisorWeapon(engine::core::Engine& eng);
     void SetVisor3DActive(engine::core::Engine& eng, bool active);
-    void SaveCurrentGame(engine::core::Engine& eng);
-    void LoadSavedGame(engine::core::Engine& eng);
+    void SaveCurrentGame(engine::core::Engine& eng, int slotIndex = 0);
+    void SaveKeyMoment(engine::core::Engine& eng, const std::string& momentTitle);
+    void LoadSavedGame(engine::core::Engine& eng, int slotIndex = -1);
 
     void UpdatePauseMenu(engine::core::Engine& eng);
     void RenderPauseMenu(engine::core::Engine& eng) const;

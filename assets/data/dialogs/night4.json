@@ -297,6 +297,51 @@
           "nextNode": ""
         }
       ]
+    },
+    {
+      "id": "n4_basement_rift",
+      "lines": [
+        {
+          "speaker": "Люк в подвал — Зеркальный Разлом",
+          "text": "Из глубины подвала слышен звон разбитых зеркал и глухой рокот. Зеркальные двойники пытаются вырваться наружу!"
+        }
+      ],
+      "choices": [
+        {
+          "text": "[3D Мини-игра] Спуститься в подвал и выжечь 5 зеркальных двойников",
+          "forbidFlag": "n4_jukebox_cleared",
+          "actions": [
+            {
+              "type": "event",
+              "target": "start_minigame_n4"
+            }
+          ],
+          "nextNode": ""
+        },
+        {
+          "text": "Запереть люк на стальной засов",
+          "forbidFlag": "n4_jukebox_cleared",
+          "actions": [
+            {
+              "type": "set_flag",
+              "target": "n4_jukebox_cleared"
+            },
+            {
+              "type": "event",
+              "target": "stabilize_lights"
+            },
+            {
+              "type": "screamer",
+              "target": "sc_night10_bloody_mirror"
+            }
+          ],
+          "nextNode": "n4_jukebox_silenced"
+        },
+        {
+          "text": "Отойти",
+          "nextNode": ""
+        }
+      ]
     }
   ]
 }
