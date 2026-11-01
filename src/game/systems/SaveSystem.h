@@ -5,6 +5,7 @@
 namespace game::systems {
 
 struct SaveProfile {
+    int chapter = 1;
     int currentNight = 1;
     int hour = 22;
     int minute = 0;

@@ -1,3 +1,5 @@
+#include <nlohmann/json.hpp>
+#include <fstream>
 #include "game/world/CafeWorld.h"
 #include "raylib.h"
 #include <algorithm>
@@ -13,25 +15,6 @@ engine::math::Vec2 CafeWorld::ComputeCameraOffset(engine::math::Vec2 ) const {
 void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNumber) {
     auto& phys = eng.Physics();
     phys.Clear();
-
-    phys.AddStaticCollider("wall_top",       {0.0f,   0.0f,   320.0f, 22.0f});
-    phys.AddStaticCollider("wall_bottom",    {0.0f,   172.0f, 320.0f, 8.0f});
-    phys.AddStaticCollider("wall_left",      {0.0f,   0.0f,   10.0f,  180.0f});
-    phys.AddStaticCollider("wall_right",     {310.0f, 0.0f,   10.0f,  180.0f});
-
-    phys.AddStaticCollider("bar_counter",    {82.0f,  42.0f,  112.0f, 12.0f});
-    phys.AddStaticCollider("prop_jukebox",   {52.0f,  22.0f,  16.0f,  18.0f});
-
-    phys.AddStaticCollider("kitchen_oven",   {236.0f, 22.0f,  30.0f,  16.0f});
-    phys.AddStaticCollider("kitchen_fridge", {274.0f, 22.0f,  28.0f,  18.0f});
-    phys.AddStaticCollider("corr_generator", {12.0f,  64.0f,  18.0f,  18.0f});
-
-    phys.AddStaticCollider("booth_1",        {68.0f,  84.0f,  20.0f,  12.0f});
-    phys.AddStaticCollider("booth_2",        {68.0f,  126.0f, 20.0f,  12.0f});
-    phys.AddStaticCollider("booth_3",        {148.0f, 84.0f,  20.0f,  12.0f});
-    phys.AddStaticCollider("booth_4",        {148.0f, 126.0f, 20.0f,  12.0f});
-    phys.AddStaticCollider("booth_5",        {228.0f, 84.0f,  20.0f,  12.0f});
-    phys.AddStaticCollider("booth_table6",   {228.0f, 126.0f, 20.0f,  12.0f});
 
     std::string noteDlg =
         (nightNumber == 1) ? "note_mikhail_intro" :
@@ -49,32 +32,110 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
     std::string jukeDlg = (nightNumber == 4 && !eng.State().HasFlag("n4_jukebox_cleared")) ? "n4_jukebox_haunted" : "jukebox_use";
     std::string table6Dlg = (nightNumber == 1) ? "table6_closed" : "";
 
-    phys.AddTrigger({"trig_note",     "Касса",               noteDlg,               {82.0f,  32.0f,  26.0f, 26.0f}, true});
-    phys.AddTrigger({"trig_visor",    "Комплекс «ОКО-86»",   "visor_inspect",       {110.0f, 32.0f,  24.0f, 26.0f}, true});
-    phys.AddTrigger({"trig_coffee",   "Кофемашина",          "coffee_machine_use",  {136.0f, 32.0f,  28.0f, 26.0f}, true});
-    phys.AddTrigger({"trig_radio",    "Радиоприёмник",       "radio_0214",          {166.0f, 32.0f,  28.0f, 26.0f}, true});
+    auto resolveDlg = [&](const std::string& tid, const std::string& def) -> std::string {
+        if (tid == "trig_note") return noteDlg;
+        if (tid == "trig_mirror") return mirrorDlg;
+        if (tid == "trig_window") return windowDlg;
+        if (tid == "trig_basement") return basementDlg;
+        if (tid == "trig_fridge") return fridgeDlg;
+        if (tid == "trig_breaker") return breakerDlg;
+        if (tid == "trig_phone") return phoneDlg;
+        if (tid == "trig_jukebox") return jukeDlg;
+        if (tid == "trig_table6") return table6Dlg;
+        return def;
+    };
 
-    phys.AddTrigger({"trig_jukebox",  "Музыкальный автомат", jukeDlg,               {48.0f,  18.0f,  24.0f, 28.0f}, true});
-    phys.AddTrigger({"trig_rules",    "Устав смены",         "wall_rules_night1",   {106.0f, 10.0f,  22.0f, 20.0f}, true});
-    phys.AddTrigger({"trig_phone",    "Телефон на стене",    phoneDlg,              {140.0f, 10.0f,  22.0f, 20.0f}, true});
-    phys.AddTrigger({"trig_cat",      "Кот Уголёк",          "cat_ugolyok_talk",    {196.0f, 34.0f,  24.0f, 24.0f}, true});
+    std::string mapPath = eng.Assets().GetBaseDir() + "/data/maps/chapter1_cafe.json";
+    bool loadedJson = false;
 
-    phys.AddTrigger({"trig_oven",     "Печь и Хозблок",      "pie_oven_use",        {232.0f, 18.0f,  36.0f, 26.0f}, true});
-    phys.AddTrigger({"trig_fridge",   "Морозильная камера",  fridgeDlg,             {270.0f, 18.0f,  36.0f, 28.0f}, true});
+    try {
+        std::ifstream file(mapPath);
+        if (file.is_open()) {
+            nlohmann::json root;
+            file >> root;
 
-    phys.AddTrigger({"trig_mirror",   "Настенное зеркало",   mirrorDlg,             {16.0f,  12.0f,  28.0f, 24.0f}, true});
-    phys.AddTrigger({"trig_breaker",  "Электрощиток",        breakerDlg,            {10.0f,  58.0f,  28.0f, 28.0f}, true});
-    phys.AddTrigger({"trig_basement", "Люк в подвал",        basementDlg,           {10.0f,  132.0f, 28.0f, 28.0f}, true});
+            if (root.contains("colliders") && root["colliders"].is_array()) {
+                for (const auto& c : root["colliders"]) {
+                    std::string cid = c.value("id", "");
+                    float x = c.value("x", 0.0f);
+                    float y = c.value("y", 0.0f);
+                    float w = c.value("w", 16.0f);
+                    float h = c.value("h", 16.0f);
+                    phys.AddStaticCollider(cid, {x, y, w, h});
+                }
+            }
 
-    phys.AddTrigger({"trig_backdoor", "Уличный контейнер",   "backdoor_window_inspect", {118.0f, 150.0f, 38.0f, 22.0f}, true});
-    phys.AddTrigger({"trig_window",   "Окно на шоссе",       windowDlg,             {168.0f, 150.0f, 40.0f, 22.0f}, true});
+            if (root.contains("triggers") && root["triggers"].is_array()) {
+                for (const auto& t : root["triggers"]) {
+                    std::string tid = t.value("id", "");
+                    std::string name = t.value("name", "");
+                    std::string dlg = t.value("dialogue", "");
+                    float x = t.value("x", 0.0f);
+                    float y = t.value("y", 0.0f);
+                    float w = t.value("w", 16.0f);
+                    float h = t.value("h", 16.0f);
+                    bool en = t.value("enabled", true);
 
-    phys.AddTrigger({"trig_booth1",   "Стол №1",             "",                    {56.0f,  70.0f,  42.0f, 36.0f}, false});
-    phys.AddTrigger({"trig_booth2",   "Стол №2",             "",                    {56.0f,  112.0f, 42.0f, 36.0f}, false});
-    phys.AddTrigger({"trig_booth3",   "Стол №3",             "",                    {136.0f, 70.0f,  42.0f, 36.0f}, false});
-    phys.AddTrigger({"trig_booth4",   "Стол №4",             "",                    {136.0f, 112.0f, 42.0f, 36.0f}, false});
-    phys.AddTrigger({"trig_booth5",   "Стол №5",             "",                    {216.0f, 70.0f,  42.0f, 36.0f}, false});
-    phys.AddTrigger({"trig_table6",   "Стол №6",             table6Dlg,             {216.0f, 112.0f, 42.0f, 36.0f}, (nightNumber == 1)});
+                    if (tid == "trig_table6") {
+                        en = (nightNumber == 1);
+                    }
+                    std::string finalDlg = resolveDlg(tid, dlg);
+                    phys.AddTrigger({tid, name, finalDlg, {x, y, w, h}, en});
+                }
+            }
+            loadedJson = true;
+        }
+    } catch (...) {
+        loadedJson = false;
+    }
+
+    if (!loadedJson) {
+        phys.AddStaticCollider("wall_top",       {0.0f,   0.0f,   320.0f, 22.0f});
+        phys.AddStaticCollider("wall_bottom",    {0.0f,   172.0f, 320.0f, 8.0f});
+        phys.AddStaticCollider("wall_left",      {0.0f,   0.0f,   10.0f,  180.0f});
+        phys.AddStaticCollider("wall_right",     {310.0f, 0.0f,   10.0f,  180.0f});
+
+        phys.AddStaticCollider("bar_counter",    {82.0f,  42.0f,  112.0f, 12.0f});
+        phys.AddStaticCollider("prop_jukebox",   {52.0f,  22.0f,  16.0f,  18.0f});
+
+        phys.AddStaticCollider("kitchen_oven",   {236.0f, 22.0f,  30.0f,  16.0f});
+        phys.AddStaticCollider("kitchen_fridge", {274.0f, 22.0f,  28.0f,  18.0f});
+        phys.AddStaticCollider("corr_generator", {12.0f,  64.0f,  18.0f,  18.0f});
+
+        phys.AddStaticCollider("booth_1",        {68.0f,  84.0f,  20.0f,  12.0f});
+        phys.AddStaticCollider("booth_2",        {68.0f,  126.0f, 20.0f,  12.0f});
+        phys.AddStaticCollider("booth_3",        {148.0f, 84.0f,  20.0f,  12.0f});
+        phys.AddStaticCollider("booth_4",        {148.0f, 126.0f, 20.0f,  12.0f});
+        phys.AddStaticCollider("booth_5",        {228.0f, 84.0f,  20.0f,  12.0f});
+        phys.AddStaticCollider("booth_table6",   {228.0f, 126.0f, 20.0f,  12.0f});
+
+        phys.AddTrigger({"trig_note",     "Касса",               noteDlg,               {82.0f,  32.0f,  26.0f, 26.0f}, true});
+        phys.AddTrigger({"trig_visor",    "Комплекс «ОКО-86»",   "visor_inspect",       {110.0f, 32.0f,  24.0f, 26.0f}, true});
+        phys.AddTrigger({"trig_coffee",   "Кофемашина",          "coffee_machine_use",  {136.0f, 32.0f,  28.0f, 26.0f}, true});
+        phys.AddTrigger({"trig_radio",    "Радиоприёмник",       "radio_0214",          {166.0f, 32.0f,  28.0f, 26.0f}, true});
+
+        phys.AddTrigger({"trig_jukebox",  "Музыкальный автомат", jukeDlg,               {48.0f,  18.0f,  24.0f, 28.0f}, true});
+        phys.AddTrigger({"trig_rules",    "Устав смены",         "wall_rules_night1",   {106.0f, 10.0f,  22.0f, 20.0f}, true});
+        phys.AddTrigger({"trig_phone",    "Телефон на стене",    phoneDlg,              {140.0f, 10.0f,  22.0f, 20.0f}, true});
+        phys.AddTrigger({"trig_cat",      "Кот Уголёк",          "cat_ugolyok_talk",    {196.0f, 34.0f,  24.0f, 24.0f}, true});
+
+        phys.AddTrigger({"trig_oven",     "Печь и Хозблок",      "pie_oven_use",        {232.0f, 18.0f,  36.0f, 26.0f}, true});
+        phys.AddTrigger({"trig_fridge",   "Морозильная камера",  fridgeDlg,             {270.0f, 18.0f,  36.0f, 28.0f}, true});
+
+        phys.AddTrigger({"trig_mirror",   "Настенное зеркало",   mirrorDlg,             {16.0f,  12.0f,  28.0f, 24.0f}, true});
+        phys.AddTrigger({"trig_breaker",  "Электрощиток",        breakerDlg,            {10.0f,  58.0f,  28.0f, 28.0f}, true});
+        phys.AddTrigger({"trig_basement", "Люк в подвал",        basementDlg,           {10.0f,  132.0f, 28.0f, 28.0f}, true});
+
+        phys.AddTrigger({"trig_backdoor", "Уличный контейнер",   "backdoor_window_inspect", {118.0f, 150.0f, 38.0f, 22.0f}, true});
+        phys.AddTrigger({"trig_window",   "Окно на шоссе",       windowDlg,             {168.0f, 150.0f, 40.0f, 22.0f}, true});
+
+        phys.AddTrigger({"trig_booth1",   "Стол №1",             "",                    {56.0f,  70.0f,  42.0f, 36.0f}, false});
+        phys.AddTrigger({"trig_booth2",   "Стол №2",             "",                    {56.0f,  112.0f, 42.0f, 36.0f}, false});
+        phys.AddTrigger({"trig_booth3",   "Стол №3",             "",                    {136.0f, 70.0f,  42.0f, 36.0f}, false});
+        phys.AddTrigger({"trig_booth4",   "Стол №4",             "",                    {136.0f, 112.0f, 42.0f, 36.0f}, false});
+        phys.AddTrigger({"trig_booth5",   "Стол №5",             "",                    {216.0f, 70.0f,  42.0f, 36.0f}, false});
+        phys.AddTrigger({"trig_table6",   "Стол №6",             table6Dlg,             {216.0f, 112.0f, 42.0f, 36.0f}, (nightNumber == 1)});
+    }
 }
 
 void CafeWorld::BuildLighting(engine::core::Engine& eng, int nightNumber) {
@@ -85,13 +146,43 @@ void CafeWorld::BuildLighting(engine::core::Engine& eng, int nightNumber) {
                                    : Color{84, 72, 84, 255};
     light.SetAmbientColor(amb);
 
-    light.AddPointLight({"lamp_counter",  {140.0f, 44.0f},  95.0f, Color{244, 184, 96, 255}, 1.0f,  2.5f, 0.03f, true});
-    light.AddPointLight({"lamp_hall_L",   {78.0f,  105.0f}, 85.0f, Color{244, 184, 96, 255}, 0.90f, 1.8f, 0.02f, true});
-    light.AddPointLight({"lamp_hall_C",   {158.0f, 105.0f}, 85.0f, Color{244, 184, 96, 255}, 0.88f, 2.1f, 0.03f, true});
-    light.AddPointLight({"lamp_hall_R",   {238.0f, 105.0f}, 80.0f, Color{244, 184, 96, 255}, 0.82f, 3.2f, 0.04f, true});
-    light.AddPointLight({"lamp_jukebox",  {60.0f,  30.0f},  50.0f, Color{214, 69,  69, 255}, 0.70f, 6.0f, 0.08f, true});
-    light.AddPointLight({"lamp_kitchen",  {268.0f, 36.0f},  75.0f, Color{216, 230, 242, 255},0.85f, 4.0f, 0.05f, true});
-    light.AddPointLight({"lamp_corridor", {24.0f,  90.0f},  65.0f, Color{143, 169, 196, 255},0.75f, 5.0f, 0.08f, true});
+    std::string mapPath = eng.Assets().GetBaseDir() + "/data/maps/chapter1_cafe.json";
+    bool loadedLights = false;
+    try {
+        std::ifstream file(mapPath);
+        if (file.is_open()) {
+            nlohmann::json root;
+            file >> root;
+            if (root.contains("lights") && root["lights"].is_array()) {
+                for (const auto& l : root["lights"]) {
+                    std::string lid = l.value("id", "lamp");
+                    float lx = l.value("x", 160.0f);
+                    float ly = l.value("y", 90.0f);
+                    float lr = l.value("radius", 80.0f);
+                    unsigned char cr = l.value("r", 244);
+                    unsigned char cg = l.value("g", 184);
+                    unsigned char cb = l.value("b", 96);
+                    float lint = l.value("intensity", 1.0f);
+                    float lspd = l.value("speed", 2.0f);
+                    float lamt = l.value("amount", 0.03f);
+                    light.AddPointLight({lid, {lx, ly}, lr, Color{cr, cg, cb, 255}, lint, lspd, lamt, true});
+                }
+                loadedLights = true;
+            }
+        }
+    } catch (...) {
+        loadedLights = false;
+    }
+
+    if (!loadedLights) {
+        light.AddPointLight({"lamp_counter",  {140.0f, 44.0f},  95.0f, Color{244, 184, 96, 255}, 1.0f,  2.5f, 0.03f, true});
+        light.AddPointLight({"lamp_hall_L",   {78.0f,  105.0f}, 85.0f, Color{244, 184, 96, 255}, 0.90f, 1.8f, 0.02f, true});
+        light.AddPointLight({"lamp_hall_C",   {158.0f, 105.0f}, 85.0f, Color{244, 184, 96, 255}, 0.88f, 2.1f, 0.03f, true});
+        light.AddPointLight({"lamp_hall_R",   {238.0f, 105.0f}, 80.0f, Color{244, 184, 96, 255}, 0.82f, 3.2f, 0.04f, true});
+        light.AddPointLight({"lamp_jukebox",  {60.0f,  30.0f},  50.0f, Color{214, 69,  69, 255}, 0.70f, 6.0f, 0.08f, true});
+        light.AddPointLight({"lamp_kitchen",  {268.0f, 36.0f},  75.0f, Color{216, 230, 242, 255},0.85f, 4.0f, 0.05f, true});
+        light.AddPointLight({"lamp_corridor", {24.0f,  90.0f},  65.0f, Color{143, 169, 196, 255},0.75f, 5.0f, 0.08f, true});
+    }
 
     auto& fl = light.GetFlashlight();
     fl.fovDeg = 65.0f;
@@ -237,12 +328,13 @@ void CafeWorld::Render(engine::core::Engine& eng,
     for (const auto& g : guests) {
         if (!g.spawned) continue;
         Texture2D gTex = assets.GetTexture(g.spritePath);
-        float shadowOffsetX = g.anomalous ? -5.0f : 3.0f;
+        bool isUnmasked = eng.State().HasFlag("n2_mirror_checked") || eng.State().HasFlag("mimic_unmasked_" + g.id);
+        float shadowOffsetX = (g.anomalous && isUnmasked) ? -5.0f : 3.0f;
         DrawEllipse(static_cast<int>(g.pos.x + 16.0f + shadowOffsetX),
                     static_cast<int>(g.pos.y + 28.0f), 9.0f, 4.0f,
-                    g.anomalous ? Color{85, 8, 14, 195} : Color{10, 13, 26, 165});
+                    (g.anomalous && isUnmasked) ? Color{85, 8, 14, 195} : Color{10, 13, 26, 165});
 
-        if (g.anomalous && (std::rand() % 6 == 0)) {
+        if (g.anomalous && isUnmasked && (std::rand() % 6 == 0)) {
             DrawRectangle(static_cast<int>(g.pos.x + 6), static_cast<int>(g.pos.y + (std::rand() % 24)), 20, 1, Color{215, 25, 35, 190});
         }
 
@@ -353,9 +445,11 @@ void CafeWorld::Render3DVisor(engine::core::Engine& eng,
         Texture2D gTex = eng.Assets().GetTexture(g.spritePath);
         Rectangle src = {0.0f, 0.0f, 32.0f, 32.0f};
         Vector3 gPos = {(g.pos.x + 16.0f) * S, 1.05f, (g.pos.y + 16.0f) * S};
-        Color tint = g.anomalous ? Color{255, 65, 65, 255} : Color{190, 255, 225, 255};
+        bool isUnmasked = eng.State().HasFlag("n2_mirror_checked") || eng.State().HasFlag("mimic_unmasked_" + g.id);
+        bool showAnomaly = (g.anomalous && isUnmasked);
+        Color tint = showAnomaly ? Color{255, 65, 65, 255} : Color{190, 255, 225, 255};
         DrawBillboardRec(cam, gTex, src, gPos, Vector2{1.5f, 1.5f}, tint);
-        if (g.anomalous) {
+        if (showAnomaly) {
             float pulse = 1.35f + 0.25f * std::sin(tNow * 8.0f);
             DrawCubeWiresV(gPos, Vector3{1.1f * pulse, 1.9f, 1.1f * pulse}, Color{255, 35, 35, 255});
         }

@@ -57,6 +57,7 @@ private:
     void RenderDebugOverlay(engine::core::Engine& eng) const;
 
     GameScreen m_screen = GameScreen::MainMenu;
+    int m_currentChapter = 1;
     int m_currentNight = 1;
 
     world::CafeWorld m_world{};

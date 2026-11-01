@@ -197,7 +197,7 @@
       ],
       "choices": [
         {
-          "text": "Разоблачить двойника и прогнать из кафе",
+          "text": "Разоблачить двойника (вас нет в зеркале подсобки!)",
           "forbidFlag": "n2_fake_kurt_resolved",
           "actions": [
             {
@@ -209,7 +209,8 @@
               "target": "banish_fake_kurt"
             }
           ],
-          "nextNode": "n2_fake_kurt_banished"
+          "nextNode": "n2_fake_kurt_banished",
+          "requireFlag": "n2_mirror_checked"
         },
         {
           "text": "Подать чай с сахаром",
@@ -241,6 +242,11 @@
         },
         {
           "text": "Отойти",
+          "nextNode": ""
+        },
+        {
+          "text": "Отойти (нужно проверить его отражение в зеркале подсобки...)",
+          "forbidFlag": "n2_mirror_checked",
           "nextNode": ""
         }
       ]

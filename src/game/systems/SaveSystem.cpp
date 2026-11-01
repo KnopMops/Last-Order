@@ -10,6 +10,7 @@ bool SaveSystem::Save(const SaveProfile& profile) {
     try {
         std::string path = engine::core::GetUserSavePath();
         nlohmann::json j;
+        j["chapter"] = profile.chapter;
         j["currentNight"] = profile.currentNight;
         j["hour"] = profile.hour;
         j["minute"] = profile.minute;
@@ -42,6 +43,7 @@ bool SaveSystem::Load(SaveProfile& outProfile) {
         nlohmann::json j;
         file >> j;
 
+        outProfile.chapter = j.value("chapter", 1);
         outProfile.currentNight = j.value("currentNight", 1);
         outProfile.hour = j.value("hour", 22);
         outProfile.minute = j.value("minute", 0);

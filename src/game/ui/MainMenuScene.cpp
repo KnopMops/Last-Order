@@ -9,6 +9,7 @@
 namespace game::ui {
 
 void MainMenuScene::Init(engine::core::Engine& eng) {
+    eng.Audio().PlayAmbient("audio/bgm/amb_cafe_calm_lp.ogg", 0.65f);
     m_selectedBtn = 0;
     m_inPlaySubMenu = false;
     m_animMode = 0;
@@ -405,7 +406,7 @@ void MainMenuScene::RenderUI(engine::core::Engine& eng) const {
         if (hasSave) {
             systems::SaveProfile sp = systems::SaveSystem::GetQuickInfo();
             char cBuf[128];
-            std::snprintf(cBuf, sizeof(cBuf), "Продолжить (Ночь %d, %02d:%02d)", sp.currentNight, sp.hour, sp.minute);
+            std::snprintf(cBuf, sizeof(cBuf), "Продолжить (Гл.%d: Ночь %d, %02d:%02d)", sp.chapter, sp.currentNight, sp.hour, sp.minute);
             subButtons.push_back(cBuf);
         }
         subButtons.push_back("С обучением (Ночь 1)");

@@ -8,6 +8,7 @@ namespace game::ui {
 void InspectionOverlay::Reset() {
     m_notebookOpen = false;
     m_rulesSheetOpen = false;
+    m_notesGuideOpen = false;
 }
 
 void InspectionOverlay::ToggleNotebook(engine::core::Engine& eng) {
@@ -22,9 +23,19 @@ void InspectionOverlay::ToggleRulesSheet(engine::core::Engine& eng) {
     eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.65f);
 }
 
+void InspectionOverlay::ToggleNotesGuide(engine::core::Engine& eng) {
+    m_notesGuideOpen = !m_notesGuideOpen;
+    if (m_notesGuideOpen) {
+        m_notebookOpen = false;
+        m_rulesSheetOpen = false;
+    }
+    eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.65f);
+}
+
 void InspectionOverlay::CloseAll() {
     m_notebookOpen = false;
     m_rulesSheetOpen = false;
+    m_notesGuideOpen = false;
 }
 
 void InspectionOverlay::Render(engine::core::Engine& eng, int currentNight, const MirrorWorldState& mirrorState) const {
@@ -39,6 +50,8 @@ void InspectionOverlay::Render(engine::core::Engine& eng, int currentNight, cons
         RenderNotebook(eng, currentNight);
     } else if (m_rulesSheetOpen) {
         RenderRulesSheet(eng, currentNight);
+    } else if (m_notesGuideOpen) {
+        RenderNotesGuide(eng, currentNight);
     }
 }
 
@@ -212,6 +225,83 @@ void InspectionOverlay::RenderNotebook(engine::core::Engine& eng, int currentNig
 
     DrawTextEx(font, "[TAB] Закрыть | [R] Правила | [V] 3D-Визор | [F3] Debug-режим",
                Vector2{564, 592}, 17.5f, 1.0f, Color{244, 184, 96, 255});
+}
+
+void InspectionOverlay::RenderNotesGuide(engine::core::Engine& eng, int currentNight) const {
+    Font font = eng.Assets().GetMainFont();
+
+    DrawRectangle(0, 0, 1280, 720, Color{10, 13, 26, 215});
+
+    float bx = 160.0f;
+    float by = 48.0f;
+    float bw = 960.0f;
+    float bh = 624.0f;
+
+    DrawRectangle(static_cast<int>(bx - 8), static_cast<int>(by - 8), static_cast<int>(bw + 16), static_cast<int>(bh + 16), Color{107, 51, 34, 255});
+    DrawRectangle(static_cast<int>(bx), static_cast<int>(by), static_cast<int>(bw), static_cast<int>(bh), Color{22, 26, 38, 252});
+    DrawRectangleLinesEx(Rectangle{bx, by, bw, bh}, 3.0f, Color{244, 184, 96, 255});
+
+    DrawRectangle(static_cast<int>(bx + 18), static_cast<int>(by + 16), static_cast<int>(bw - 36), 54, Color{36, 24, 28, 240});
+    DrawRectangleLines(static_cast<int>(bx + 18), static_cast<int>(by + 16), static_cast<int>(bw - 36), 54, Color{196, 122, 59, 255});
+
+    engine::graphics::TextLayout::DrawCentered(font, "ПАМЯТКА СМЕНЩИКА: СОВЕТЫ И ПРИМЕЧАНИЯ", 640.0f, by + 26.0f, 24.0f, Color{244, 184, 96, 255});
+    engine::graphics::TextLayout::DrawCentered(font, "ГЛАВА 1: КАФЕ «ТЁПЛЫЙ УГОЛ» — НОЧНАЯ СМЕНА", 640.0f, by + 48.0f, 15.0f, Color{188, 178, 162, 220});
+
+    struct TipItem {
+        const char* title;
+        const char* desc;
+        Color col;
+    };
+
+    const TipItem tips[] = {
+        {
+            "1. МУЗЫКАЛЬНЫЙ АВТОМАТ («МЕЛОДИЯ-86»)",
+            "Взаимодействуйте с автоматом у входа и пройдите 2D-мини-игру настройки звукоснимателя. При успешной калибровке заиграет спокойная ретро-музыка, а Лера восстановит +25% рассудка.",
+            Color{244, 184, 96, 255}
+        },
+        {
+            "2. РАДИОПРИЁМНИК И ПОДАВЛЕНИЕ ПОМЕХ (94.5 FM)",
+            "В 02:30 из динамика раздаётся агрессивный паранормальный шум, истощающий рассудок. Подойдите к приёмнику на стойке, настройте волну [A/D] на 94.5 FM до захвата сигнала. Это нейтрализует шум и даст +30% рассудка.",
+            Color{120, 240, 150, 255}
+        },
+        {
+            "3. НАСТЕННОЕ ЗЕРКАЛО И РАЗОБЛАЧЕНИЕ ДВОЙНИКОВ",
+            "Сущности-мимики выдают себя за обычных людей. Проверяйте зеркало в служебном коридоре! Мимики не имеют отражения в зале. Только после обнаружения обмана в зеркале двойника можно изгнать через диалог или уничтожить визором.",
+            Color{180, 220, 255, 255}
+        },
+        {
+            "4. РЕЖИМ 3D-ВИЗОРА «ОКО-86» [V]",
+            "Клавиша [V] переключает в тактический 3D-режим. Визор обнаруживает потусторонние разломы и парящих фантомов, позволяя уничтожать их выстрелом [ЛКМ]. Длительное использование расходует рассудок.",
+            Color{255, 120, 140, 255}
+        },
+        {
+            "5. ЭЛЕКТРОЩИТОК И ЗАКАЗЫ НА КУХНЕ",
+            "При блэкауте бегите к щитку в левом коридоре для перезапуска сети. Кофемашина и печь позволяют варить кофе и греть пироги — их можно отдавать гостям или съедать для подкрепления рассудка.",
+            Color{244, 210, 120, 255}
+        },
+        {
+            "6. СИСТЕМА СОХРАНЕНИЯ ПРОГРЕССА [F5]",
+            "Вы можете в любой момент смены быстро сохранить игру по клавише [F5] или через меню паузы [Esc]. Сохраняются текущее время, рассудок, инвентарь и состояние сюжета.",
+            Color{140, 230, 220, 255}
+        }
+    };
+
+    float cardY = by + 82.0f;
+    for (const auto& tip : tips) {
+        DrawRectangle(static_cast<int>(bx + 24), static_cast<int>(cardY), static_cast<int>(bw - 48), 74, Color{16, 20, 30, 220});
+        DrawRectangleLines(static_cast<int>(bx + 24), static_cast<int>(cardY), static_cast<int>(bw - 48), 74, Color{60, 50, 65, 200});
+
+        DrawTextEx(font, tip.title, Vector2{bx + 36.0f, cardY + 8.0f}, 17.5f, 1.0f, tip.col);
+        engine::graphics::TextLayout::DrawWrapped(font, tip.desc,
+            engine::math::Rect{bx + 36.0f, cardY + 28.0f, bw - 72.0f, 42.0f},
+            15.0f, 1.5f, Color{225, 220, 210, 240});
+
+        cardY += 80.0f;
+    }
+
+    DrawRectangle(static_cast<int>(bx + 18), static_cast<int>(by + bh - 50), static_cast<int>(bw - 36), 36, Color{36, 24, 28, 240});
+    DrawRectangleLines(static_cast<int>(bx + 18), static_cast<int>(by + bh - 50), static_cast<int>(bw - 36), 36, Color{196, 122, 59, 255});
+    engine::graphics::TextLayout::DrawCentered(font, "[I] или [ESC] — Закрыть памятку", 640.0f, by + bh - 42.0f, 18.0f, Color{244, 184, 96, 255});
 }
 
 }

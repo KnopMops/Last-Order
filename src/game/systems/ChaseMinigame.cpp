@@ -42,7 +42,11 @@ void ChaseMinigame::Reset() {
     m_roadScroll = 0.0f;
     m_pantTimer = 0.0f;
 
-    if (m_type == MinigameType::Night_JukeboxTuner2D) {
+    if (m_type == MinigameType::Night1_RadioTuner2D) {
+        m_shardsTotal = 1;
+        m_radioPlayerFreq = 0.12f;
+        m_radioTargetFreq = 0.325f;
+    } else if (m_type == MinigameType::Night_JukeboxTuner2D) {
         m_shardsTotal = 1;
         m_radioPlayerFreq = 0.2f;
         m_radioTargetFreq = 0.65f;
@@ -125,14 +129,14 @@ void ChaseMinigame::Update(engine::core::Engine& eng, float dt) {
 }
 
 void ChaseMinigame::UpdateRadio2D(engine::core::Engine& eng, float dt) {
-    m_radioTargetFreq = 0.5f + 0.35f * std::sin(m_timer * 1.6f) + 0.12f * std::cos(m_timer * 3.7f);
-    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  m_radioPlayerFreq -= dt * 0.75f;
-    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) m_radioPlayerFreq += dt * 0.75f;
-    m_radioPlayerFreq = std::clamp(m_radioPlayerFreq, 0.05f, 0.95f);
+    m_radioTargetFreq = 0.325f + 0.006f * std::sin(m_timer * 0.8f);
+    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  m_radioPlayerFreq -= dt * 0.22f;
+    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) m_radioPlayerFreq += dt * 0.22f;
+    m_radioPlayerFreq = std::clamp(m_radioPlayerFreq, 0.02f, 0.98f);
 
     float diff = std::abs(m_radioTargetFreq - m_radioPlayerFreq);
-    if (diff < 0.14f) {
-        m_progress += dt * 26.0f;
+    if (diff < 0.055f) {
+        m_progress += dt * 38.0f;
     } else {
         m_progress = std::max(0.0f, m_progress - dt * 10.0f);
     }
@@ -141,7 +145,7 @@ void ChaseMinigame::UpdateRadio2D(engine::core::Engine& eng, float dt) {
         m_progress = 100.0f;
         m_shardsCollected = 3;
         m_state = ChaseState::Victory;
-        eng.Audio().PlaySfx("audio/sfx/sfx_chase_gate_escape.wav", 1.0f);
+        eng.Audio().PlaySfx("audio/sfx/sfx_pie_microwave_bell.wav", 1.0f);
     }
 }
 
@@ -387,21 +391,71 @@ void ChaseMinigame::RenderWorld(engine::core::Engine& eng) {
     }
 }
 
-void ChaseMinigame::RenderRadio2D(engine::core::Engine&) const {
-    DrawRectangle(0, 0, 320, 180, Color{10, 14, 18, 255});
-    DrawRectangle(20, 20, 280, 140, Color{18, 28, 24, 255});
-    DrawRectangleLinesEx(Rectangle{20, 20, 280, 140}, 3.0f, Color{196, 122, 59, 255});
+void ChaseMinigame::RenderRadio2D(engine::core::Engine& eng) const {
+    DrawRectangle(0, 0, 320, 180, Color{16, 12, 16, 255});
+    DrawRectangle(12, 12, 296, 156, Color{45, 24, 20, 255});
+    DrawRectangleLinesEx(Rectangle{12, 12, 296, 156}, 2.0f, Color{196, 122, 59, 255});
 
-    for (int gx = 30; gx < 290; gx += 20) DrawLine(gx, 25, gx, 155, Color{40, 70, 55, 120});
-    for (int gy = 30; gy < 155; gy += 20) DrawLine(25, gy, 295, gy, Color{40, 70, 55, 120});
-
-    for (int x = 26; x < 292; x += 2) {
-        float phase = static_cast<float>(x) * 0.08f + m_timer * 8.0f;
-        float yTarget = 90.0f + std::sin(phase * (0.5f + m_radioTargetFreq * 2.0f)) * 34.0f;
-        float yPlayer = 90.0f + std::sin(phase * (0.5f + m_radioPlayerFreq * 2.0f)) * 34.0f;
-        DrawPixel(x, static_cast<int>(yTarget), Color{214, 69, 69, 230});
-        DrawPixel(x, static_cast<int>(yPlayer), Color{90, 240, 130, 255});
+    for (int sx = 22; sx <= 78; sx += 5) {
+        DrawLine(sx, 24, sx, 156, Color{28, 14, 12, 255});
     }
+
+    DrawRectangle(88, 20, 212, 140, Color{22, 18, 24, 255});
+    DrawRectangleLines(88, 20, 212, 140, Color{107, 51, 34, 255});
+
+    DrawRectangle(96, 26, 196, 40, Color{28, 22, 18, 255});
+    DrawRectangleLines(96, 26, 196, 40, Color{244, 184, 96, 220});
+
+    for (int ti = 0; ti <= 10; ++ti) {
+        float tx = 102.0f + static_cast<float>(ti) * 18.4f;
+        int tickH = (ti % 5 == 0) ? 14 : 7;
+        DrawLine(static_cast<int>(tx), 28, static_cast<int>(tx), 28 + tickH, Color{196, 122, 59, 200});
+    }
+
+    float targetLineX = 102.0f + m_radioTargetFreq * 184.0f;
+    DrawRectangle(static_cast<int>(targetLineX - 6), 28, 12, 34, Color{80, 240, 120, 50});
+    DrawLine(static_cast<int>(targetLineX), 28, static_cast<int>(targetLineX), 62, Color{244, 184, 96, 255});
+
+    float needleX = 102.0f + m_radioPlayerFreq * 184.0f;
+    DrawLineEx(Vector2{needleX, 26}, Vector2{needleX, 66}, 2.0f, Color{244, 60, 60, 255});
+    DrawCircle(static_cast<int>(needleX), 27, 2.5f, RED);
+
+    float diff = std::abs(m_radioTargetFreq - m_radioPlayerFreq);
+    bool locked = (diff < 0.055f);
+
+    DrawRectangle(96, 72, 196, 16, Color{14, 14, 18, 255});
+    DrawRectangleLines(96, 72, 196, 16, locked ? Color{80, 240, 120, 255} : Color{220, 60, 60, 255});
+
+    Font font = eng.Assets().GetMainFont();
+    float mhz = 88.0f + m_radioPlayerFreq * 20.0f;
+    char freqBuf[64];
+    if (locked) {
+        std::snprintf(freqBuf, sizeof(freqBuf), "94.5 FM [СИГНАЛ МИХАИЛА ЗАХВАЧЕН]");
+        DrawTextEx(font, freqBuf, Vector2{102, 74}, 11.0f, 1.0f, Color{80, 240, 120, 255});
+    } else {
+        std::snprintf(freqBuf, sizeof(freqBuf), "%.1f FM: ПОИСК (ПОМЕХИ ЭФИРА)", mhz);
+        DrawTextEx(font, freqBuf, Vector2{102, 74}, 11.0f, 1.0f, Color{230, 80, 80, 255});
+    }
+
+    DrawRectangle(96, 92, 196, 38, Color{12, 14, 20, 255});
+    DrawRectangleLines(96, 92, 196, 38, Color{70, 80, 95, 200});
+    for (int x = 98; x < 290; x += 2) {
+        float waveY = 111.0f;
+        if (locked) {
+            float phase = (x - 98) * 0.14f + m_timer * 12.0f;
+            waveY += std::sin(phase) * 14.0f;
+            DrawPixel(x, static_cast<int>(waveY), Color{80, 240, 120, 255});
+            DrawPixel(x, static_cast<int>(waveY + 1.0f), Color{80, 240, 120, 160});
+        } else {
+            float n = std::sin((x * 17.13f) + m_timer * 45.0f) * 12.0f + std::cos((x * 31.4f) - m_timer * 33.0f) * 4.0f;
+            DrawPixel(x, static_cast<int>(111.0f + n), Color{214, 69, 69, 220});
+        }
+    }
+
+    DrawRectangle(96, 134, 196, 14, Color{14, 14, 18, 255});
+    DrawRectangleLines(96, 134, 196, 14, Color{244, 184, 96, 255});
+    int fillW = static_cast<int>((m_progress / 100.0f) * 192.0f);
+    DrawRectangle(98, 136, fillW, 10, locked ? Color{80, 240, 120, 230} : Color{244, 184, 96, 200});
 }
 
 void ChaseMinigame::RenderJukebox2D(engine::core::Engine&) const {
@@ -594,7 +648,7 @@ void ChaseMinigame::RenderUI(engine::core::Engine& eng) const {
     Font font = eng.Assets().GetMainFont();
 
     const char* title =
-        (m_type == MinigameType::Night1_RadioTuner2D)   ? "НОЧЬ 1: ЧАСТОТА 1986 (ОСЦИЛЛОГРАФ)" :
+        (m_type == MinigameType::Night1_RadioTuner2D)   ? "НОЧЬ 1: РАДИОПРИЁМНИК (ЭФИР МИХАИЛА 94.5 FM)" :
         (m_type == MinigameType::Night2_BasementFuse3D) ? "НОЧЬ 2: КОТЕЛЬНАЯ И ФАЗЫ (3D)" :
         (m_type == MinigameType::Night3_FreezerMaze3D)  ? "НОЧЬ 3: МОРОЗИЛЬНИК (3D)" :
         (m_type == MinigameType::Night4_MirrorHunt3D)   ? "НОЧЬ 4: ЗАЗЕРКАЛЬЕ (3D)" :
@@ -602,7 +656,7 @@ void ChaseMinigame::RenderUI(engine::core::Engine& eng) const {
                                                           "НОЧЬ 5: ПОГОНЯ ПО ШОССЕ (3D)";
 
     const char* rules =
-        (m_type == MinigameType::Night1_RadioTuner2D)   ? "Удерживайте волну приёмника [A / D] на красной линии сигнала до 100%." :
+        (m_type == MinigameType::Night1_RadioTuner2D)   ? "Поворачивайте ручку частоты [A / D] или [Стрелки], чтобы поймать 94.5 FM и подавить паранормальный шум. Удерживайте захват волны." :
         (m_type == MinigameType::Night2_BasementFuse3D) ? "В 3D-подвале найдите 3 золотых узла питания [WASD]. Вспышка [F] отгоняет тень." :
         (m_type == MinigameType::Night3_FreezerMaze3D)  ? "В 3D-морозильнике соберите 3 замёрзших улики [WASD]. Свет [F] слепит Краулера." :
         (m_type == MinigameType::Night4_MirrorHunt3D)   ? "Поворачивайтесь [A / D] и сжигайте вспышкой [F / ПРОБЕЛ] 5 красных двойников." :

@@ -64,6 +64,7 @@ void LastOrderGame::SetVisor3DActive(engine::core::Engine& eng, bool active) {
 
 void LastOrderGame::SaveCurrentGame(engine::core::Engine& eng) {
     systems::SaveProfile sp{};
+    sp.chapter = m_currentChapter;
     sp.currentNight = m_currentNight;
     sp.hour = eng.Time().GetHours24();
     sp.minute = eng.Time().GetMinutes();
@@ -94,6 +95,7 @@ void LastOrderGame::LoadSavedGame(engine::core::Engine& eng) {
         return;
     }
 
+    m_currentChapter = sp.chapter;
     StartNewShift(eng, sp.currentNight, false);
     eng.Time().Reset(sp.hour, sp.minute, 1.80f);
     m_playerBody.position = {sp.playerX, sp.playerY};
@@ -447,6 +449,13 @@ void LastOrderGame::Fire3DVisorWeapon(engine::core::Engine& eng) {
         engine::math::Vec2 dir = toG / dist;
         float dot = dir.x * lookDir.x + dir.y * lookDir.y;
         if (dot >= 0.90f) {
+            bool isUnmasked = eng.State().HasFlag("n2_mirror_checked") || eng.State().HasFlag("mimic_unmasked_" + g.id);
+            if (!isUnmasked) {
+                m_visorKillBanner = "ОБЪЕКТ НЕ ОПОЗНАН КАК АНОМАЛИЯ: Проверьте зеркало!";
+                m_visorKillBannerTimer = 2.6f;
+                eng.Audio().PlaySfx("audio/sfx/sfx_radio_static.wav", 0.6f);
+                return;
+            }
             g.spawned = false;
             g.finished = true;
             eng.Physics().SetTriggerEnabled(g.triggerId, false);
@@ -521,9 +530,12 @@ void LastOrderGame::Update3DVisorShooter(engine::core::Engine& eng, float dt) {
                 engine::math::Vec2 dirToG = (gCenter - pCenter) / dist;
                 float dot = dirToG.x * lookDir.x + dirToG.y * lookDir.y;
                 if (dot >= 0.91f) {
-                    m_scannerTargetText = g.anomalous
-                        ? ("ДВОЙНИК: " + g.name)
-                        : ("ЧЕЛОВЕК: " + g.name);
+                    bool isUnmasked = eng.State().HasFlag("n2_mirror_checked") || eng.State().HasFlag("mimic_unmasked_" + g.id);
+                    if (g.anomalous && isUnmasked) {
+                        m_scannerTargetText = "ДВОЙНИК (МИМИК): " + g.name;
+                    } else {
+                        m_scannerTargetText = "ПОСЕТИТЕЛЬ: " + g.name;
+                    }
                     m_scannerTargetDist = dist * 0.05f;
                     break;
                 }
@@ -830,6 +842,11 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         return;
     }
 
+    if (IsKeyPressed(KEY_I)) {
+        if (eng.Dialogue().IsActive()) eng.Dialogue().CloseDialogue();
+        m_inspectionUI.ToggleNotesGuide(eng);
+    }
+
     if (IsKeyPressed(KEY_V)) {
         if (eng.Dialogue().IsActive()) eng.Dialogue().CloseDialogue();
         if (m_inspectionUI.IsAnyModalOpen()) m_inspectionUI.CloseAll();
@@ -1113,11 +1130,7 @@ void LastOrderGame::RenderPauseMenu(engine::core::Engine& eng) const {
 
     std::string title =
         (m_currentNight == 0) ? "ПАУЗА — СВОБОДНЫЙ РЕЖИМ" :
-        (m_currentNight == 1) ? "ПАУЗА — НОЧЬ 1" :
-        (m_currentNight == 2) ? "ПАУЗА — НОЧЬ 2" :
-        (m_currentNight == 3) ? "ПАУЗА — НОЧЬ 3" :
-        (m_currentNight == 4) ? "ПАУЗА — НОЧЬ 4" :
-                                "ПАУЗА — НОЧЬ 5";
+                                ("ПАУЗА — ГЛАВА " + std::to_string(m_currentChapter) + ": НОЧЬ " + std::to_string(m_currentNight));
     engine::graphics::TextLayout::DrawCentered(font, title, 640.0f, 125.0f, 24.0f, Color{244, 184, 96, 255}, 1.0f);
 
     const char* labels[8] = {
@@ -1371,13 +1384,8 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     Color panelBorder = (activeAnomalies > 0) ? Color{214, 45, 45, 255} : Color{196, 122, 59, 255};
     DrawRectangleLinesEx(Rectangle{1038, 12, 228, 84}, 2.0f, panelBorder);
 
-    const char* nightTitle =
-        (m_currentNight == 1) ? "НОЧЬ 1: СМЕНА" :
-        (m_currentNight == 2) ? "НОЧЬ 2: ДОЖДЬ" :
-        (m_currentNight == 3) ? "НОЧЬ 3: ТРУБЫ" :
-        (m_currentNight == 4) ? "НОЧЬ 4: ЗВОНОК" :
-                                "НОЧЬ 5: ФИНАЛ";
-    DrawTextEx(font, nightTitle, Vector2{1052, 18}, 16.5f, 1.0f, Color{143, 169, 196, 255});
+    std::string chapterNight = "ГЛ." + std::to_string(m_currentChapter) + " НОЧЬ " + std::to_string(m_currentNight);
+    DrawTextEx(font, chapterNight.c_str(), Vector2{1052, 18}, 16.5f, 1.0f, Color{143, 169, 196, 255});
 
     std::string timeStr = m_sanity.FormatHudClock(eng);
     DrawTextEx(font, timeStr.c_str(), Vector2{1052, 38}, 24.0f, 1.0f, Color{244, 184, 96, 255});
@@ -1394,6 +1402,10 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
         DrawRectangleLinesEx(Rectangle{14, 12, 280, 44}, 2.0f, Color{196, 122, 59, 255});
         std::string trayText = "В руках: " + held;
         DrawTextEx(font, trayText.c_str(), Vector2{26, 24}, 18.5f, 1.0f, Color{244, 184, 96, 255});
+    }
+
+    if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && !m_sanity.IsGameOver()) {
+        DrawTextEx(font, "[I] Советы и памятка  |  [F5] Сохранить", Vector2{24, 692}, 16.0f, 1.0f, Color{188, 178, 162, 210});
     }
 
     if (!m_visor3DActive && !eng.Dialogue().IsActive() && !m_inspectionUI.IsAnyModalOpen() && !m_sanity.IsGameOver() && m_nearestTrigger.has_value()) {
