@@ -1,4 +1,5 @@
 #include "game/ui/MainMenuScene.h"
+#include "game/GameVersion.h"
 #include "game/systems/SaveSystem.h"
 #include "engine/graphics/TextLayout.h"
 #include "raylib.h"
@@ -550,7 +551,12 @@ void MainMenuScene::RenderUI(engine::core::Engine& eng) const {
     DrawRectangle(0, 686, 1280, 34, Color{10, 13, 26, 238});
     DrawTextEx(font, "[W/S, ENTER / ЛКМ] Выбор | [ESC] Назад | [TAB] Сменить сцену | [F11] Экран",
                Vector2{24, 694}, 17.5f, 1.0f, Color{188, 178, 162, 230});
-    DrawTextEx(font, "Версия 1.0.0", Vector2{1130, 694}, 17.5f, 1.0f, Color{143, 169, 196, 220});
+    std::string verText = game::GetVersionBuildString();
+#if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
+    verText += " [DEBUG]";
+#endif
+    Vector2 verSize = MeasureTextEx(font, verText.c_str(), 17.5f, 1.0f);
+    DrawTextEx(font, verText.c_str(), Vector2{1280.0f - verSize.x - 24.0f, 694.0f}, 17.5f, 1.0f, Color{143, 169, 196, 220});
 }
 
 }

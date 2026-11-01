@@ -1,5 +1,6 @@
 #include "engine/core/Engine.h"
 #include "game/LastOrderGame.h"
+#include "game/GameVersion.h"
 #include <filesystem>
 #include <string>
 
@@ -24,7 +25,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    std::string title = "Последний заказ (Last Order) v1.0.0";
+    std::string title = std::string("Последний заказ (Last Order) v") + game::GetGameVersion();
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
     title += " [DEBUG BUILD]";
 #endif

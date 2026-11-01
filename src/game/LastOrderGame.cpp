@@ -1476,6 +1476,8 @@ void LastOrderGame::OnAction(engine::core::Engine& eng, const engine::core::Engi
         } else if (action.target == "return_main_menu") {
             m_mainMenu.Init(eng);
             m_screen = GameScreen::MainMenu;
+        } else if (action.target == "open_mirror_inspector") {
+            m_inspectionUI.ToggleMirrorInspector(eng);
         }
     }
 }

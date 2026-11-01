@@ -24,7 +24,7 @@ void CafeWorld::BuildCollidersAndTriggers(engine::core::Engine& eng, int nightNu
                              "n5_intro_diary";
 
     std::string mirrorDlg = (nightNumber == 1) ? "mirror_night1" : ((nightNumber == 2) ? "n2_mirror_inspect" : "n3_mirror_inspect");
-    std::string windowDlg = (nightNumber >= 3) ? "n3_window_hands_inspect" : "backdoor_window_inspect";
+    std::string windowDlg = (nightNumber == 3 && !eng.State().HasFlag("n3_window_hands_cleared")) ? "n3_window_hands_inspect" : "window_glass_inspect";
     std::string basementDlg = (nightNumber < 3) ? "basement_locked" : ((nightNumber == 3) ? "n3_basement_inspect" : ((nightNumber == 4) ? "n4_basement_rift" : "basement_locked"));
     std::string fridgeDlg = (nightNumber < 3) ? "fridge_locked" : ((nightNumber == 3) ? "n3_fridge_inspect" : "fridge_locked");
     std::string breakerDlg = (nightNumber == 2) ? "n2_fusebox_use" : "breaker_normal";

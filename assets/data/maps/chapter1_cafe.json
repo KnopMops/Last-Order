@@ -248,7 +248,7 @@
     {
       "id": "trig_window",
       "name": "Окно на шоссе (Стекло)",
-      "dialogue": "backdoor_window_inspect",
+      "dialogue": "window_glass_inspect",
       "x": 8.0,
       "y": 24.0,
       "w": 32.0,
@@ -318,7 +318,7 @@
     {
       "id": "trig_window_south",
       "name": "Окно у входа (Стекло)",
-      "dialogue": "backdoor_window_inspect",
+      "dialogue": "window_glass_inspect",
       "x": 154.0,
       "y": 140.0,
       "w": 64.0,
