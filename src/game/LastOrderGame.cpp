@@ -899,6 +899,8 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
                 break;
             case ui::MenuCommand::StartChapter2_Motel3D:
                 m_screen = GameScreen::Chapter2_Motel3D;
+                eng.Renderer().SetHighRes3DMode(true);
+                eng.Renderer().SetSkip2DLightmap(true);
                 m_motel3D.Init(eng, 1);
                 break;
             case ui::MenuCommand::OpenSettings:
@@ -920,6 +922,9 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         }
         m_motel3D.Update(eng, dt);
         if (m_motel3D.WantsReturnToMenu()) {
+            m_motel3D.Shutdown(eng);
+            eng.Renderer().SetHighRes3DMode(false);
+            eng.Renderer().SetSkip2DLightmap(false);
             m_screen = GameScreen::MainMenu;
             m_mainMenu.Init(eng);
             EnableCursor();

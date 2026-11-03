@@ -8,10 +8,14 @@ namespace engine::graphics {
 void Renderer::Init(int, int, const std::string& crtShaderPath) {
     m_sceneRT = LoadRenderTexture(NATIVE_W, NATIVE_H);
     m_compositeRT = LoadRenderTexture(NATIVE_W, NATIVE_H);
+    m_scene3DRT = LoadRenderTexture(HI3D_W, HI3D_H);
+    m_composite3DRT = LoadRenderTexture(HI3D_W, HI3D_H);
     m_uiRT = LoadRenderTexture(UI_W, UI_H);
 
     SetTextureFilter(m_sceneRT.texture, TEXTURE_FILTER_POINT);
     SetTextureFilter(m_compositeRT.texture, TEXTURE_FILTER_POINT);
+    SetTextureFilter(m_scene3DRT.texture, TEXTURE_FILTER_BILINEAR);
+    SetTextureFilter(m_composite3DRT.texture, TEXTURE_FILTER_BILINEAR);
     SetTextureFilter(m_uiRT.texture, TEXTURE_FILTER_BILINEAR);
 
     m_crtShader = LoadShader(nullptr, crtShaderPath.c_str());
@@ -27,6 +31,8 @@ void Renderer::Init(int, int, const std::string& crtShaderPath) {
 void Renderer::Shutdown() {
     if (m_crtShader.id != 0) UnloadShader(m_crtShader);
     if (m_uiRT.id != 0) UnloadRenderTexture(m_uiRT);
+    if (m_composite3DRT.id != 0) UnloadRenderTexture(m_composite3DRT);
+    if (m_scene3DRT.id != 0) UnloadRenderTexture(m_scene3DRT);
     if (m_compositeRT.id != 0) UnloadRenderTexture(m_compositeRT);
     if (m_sceneRT.id != 0) UnloadRenderTexture(m_sceneRT);
 }
@@ -97,26 +103,31 @@ Rectangle Renderer::ComputeTargetViewport() const {
 }
 
 void Renderer::BeginWorldPass() {
-    BeginTextureMode(m_sceneRT);
+    BeginTextureMode(m_highRes3DMode ? m_scene3DRT : m_sceneRT);
     ClearBackground(Color{10, 13, 26, 255});
 }
 
 void Renderer::EndWorldPass(LightingSystem& lighting, float totalTime) {
     EndTextureMode();
 
-    if (!m_skip2DLightmap) {
+    bool use2DLight = !m_skip2DLightmap && !m_highRes3DMode;
+    if (use2DLight) {
         lighting.RenderLightMap(totalTime);
     }
 
-    BeginTextureMode(m_compositeRT);
+    int targetW = m_highRes3DMode ? HI3D_W : NATIVE_W;
+    int targetH = m_highRes3DMode ? HI3D_H : NATIVE_H;
+    float scaleMul = m_highRes3DMode ? 4.0f : 1.0f;
+
+    BeginTextureMode(m_highRes3DMode ? m_composite3DRT : m_compositeRT);
     ClearBackground(BLACK);
 
-    Rectangle srcFlip = {0.0f, 0.0f, static_cast<float>(NATIVE_W), -static_cast<float>(NATIVE_H)};
-    Vector2 shakePos = m_shakeOffset;
+    Rectangle srcFlip = {0.0f, 0.0f, static_cast<float>(targetW), -static_cast<float>(targetH)};
+    Vector2 shakePos = {m_shakeOffset.x * scaleMul, m_shakeOffset.y * scaleMul};
 
-    DrawTextureRec(m_sceneRT.texture, srcFlip, shakePos, WHITE);
+    DrawTextureRec((m_highRes3DMode ? m_scene3DRT : m_sceneRT).texture, srcFlip, shakePos, WHITE);
 
-    if (!m_skip2DLightmap) {
+    if (use2DLight) {
         BeginBlendMode(BLEND_MULTIPLIED);
         DrawTextureRec(lighting.GetLightMap().texture, srcFlip, Vector2{0.0f, 0.0f}, WHITE);
         EndBlendMode();
@@ -127,20 +138,20 @@ void Renderer::EndWorldPass(LightingSystem& lighting, float totalTime) {
         float pulseZoom = 1.06f + progress * 0.62f + std::sin(totalTime * 75.0f) * 0.09f;
         if ((std::rand() % 5) == 0) pulseZoom += 0.18f;
 
-        float w = static_cast<float>(NATIVE_W) * pulseZoom;
-        float h = static_cast<float>(NATIVE_H) * pulseZoom;
-        float jx = (static_cast<float>(std::rand() % 25) - 12.0f) + shakePos.x;
-        float jy = (static_cast<float>(std::rand() % 25) - 12.0f) + shakePos.y;
+        float w = static_cast<float>(targetW) * pulseZoom;
+        float h = static_cast<float>(targetH) * pulseZoom;
+        float jx = ((static_cast<float>(std::rand() % 25) - 12.0f) * scaleMul) + shakePos.x;
+        float jy = ((static_cast<float>(std::rand() % 25) - 12.0f) * scaleMul) + shakePos.y;
         float rot = std::sin(totalTime * 62.0f) * 4.5f;
 
         Rectangle srcSc = {0.0f, 0.0f, static_cast<float>(m_screamerTex.width), static_cast<float>(m_screamerTex.height)};
         Vector2 origin = {w * 0.5f, h * 0.5f};
-        Rectangle dstCenter = {NATIVE_W * 0.5f + jx, NATIVE_H * 0.5f + jy, w, h};
+        Rectangle dstCenter = {targetW * 0.5f + jx, targetH * 0.5f + jy, w, h};
 
-        DrawRectangle(0, 0, NATIVE_W, NATIVE_H, (std::rand() % 4 == 0) ? Color{85, 0, 0, 230} : Color{6, 2, 4, 230});
+        DrawRectangle(0, 0, targetW, targetH, (std::rand() % 4 == 0) ? Color{85, 0, 0, 230} : Color{6, 2, 4, 230});
 
-        Rectangle dstRed = {dstCenter.x - 9.0f, dstCenter.y - 3.0f, w, h};
-        Rectangle dstCyan = {dstCenter.x + 9.0f, dstCenter.y + 3.0f, w, h};
+        Rectangle dstRed = {dstCenter.x - 9.0f * scaleMul, dstCenter.y - 3.0f * scaleMul, w, h};
+        Rectangle dstCyan = {dstCenter.x + 9.0f * scaleMul, dstCenter.y + 3.0f * scaleMul, w, h};
         DrawTexturePro(m_screamerTex, srcSc, dstRed, origin, rot - 2.0f, Color{255, 25, 25, 185});
         DrawTexturePro(m_screamerTex, srcSc, dstCyan, origin, rot + 2.0f, Color{40, 220, 255, 150});
 
@@ -151,44 +162,35 @@ void Renderer::EndWorldPass(LightingSystem& lighting, float totalTime) {
         DrawTexturePro(m_screamerTex, srcSc, dstCenter, origin, rot, mainTint);
 
         for (int s = 0; s < 7; ++s) {
-            int sliceY = std::rand() % (NATIVE_H - 12);
-            int sliceH = 4 + (std::rand() % 12);
-            float shiftX = static_cast<float>((std::rand() % 33) - 16);
-            float ty = (static_cast<float>(sliceY) / static_cast<float>(NATIVE_H)) * static_cast<float>(m_screamerTex.height);
-            float th = (static_cast<float>(sliceH) / static_cast<float>(NATIVE_H)) * static_cast<float>(m_screamerTex.height);
+            int sliceY = std::rand() % (targetH - 12);
+            int sliceH = static_cast<int>((4 + (std::rand() % 12)) * scaleMul);
+            float shiftX = static_cast<float>((std::rand() % 33) - 16) * scaleMul;
+            float ty = (static_cast<float>(sliceY) / static_cast<float>(targetH)) * static_cast<float>(m_screamerTex.height);
+            float th = (static_cast<float>(sliceH) / static_cast<float>(targetH)) * static_cast<float>(m_screamerTex.height);
             DrawTexturePro(m_screamerTex,
                            Rectangle{0.0f, ty, static_cast<float>(m_screamerTex.width), th},
-                           Rectangle{shiftX, static_cast<float>(sliceY), static_cast<float>(NATIVE_W), static_cast<float>(sliceH)},
+                           Rectangle{shiftX, static_cast<float>(sliceY), static_cast<float>(targetW), static_cast<float>(sliceH)},
                            Vector2{0.0f, 0.0f}, 0.0f, Color{255, 70, 70, 230});
         }
 
         for (int g = 0; g < 14; ++g) {
-            int gy = std::rand() % NATIVE_H;
+            int gy = std::rand() % targetH;
             Color gc = (g % 2 == 0) ? Color{235, 15, 20, 185} : Color{10, 0, 0, 210};
-            DrawRectangle(0, gy, NATIVE_W, 1 + (std::rand() % 3), gc);
+            DrawRectangle(0, gy, targetW, static_cast<int>((1 + (std::rand() % 3)) * scaleMul), gc);
         }
 
-        for (int b = 0; b < 18; ++b) {
-            int bx = (b * 19 + std::rand() % 9) % NATIVE_W;
-            int bh = 8 + (std::rand() % 32);
-            DrawRectangle(bx, 0, 3, bh, Color{165, 8, 14, 235});
-            DrawRectangle(bx, NATIVE_H - bh, 3, bh, Color{165, 8, 14, 235});
-        }
-
-        DrawRectangleLinesEx(Rectangle{0, 0, NATIVE_W, NATIVE_H}, 8.0f, Color{185, 10, 15, 245});
-        DrawRectangleLinesEx(Rectangle{4, 4, NATIVE_W - 8, NATIVE_H - 8}, 4.0f, Color{95, 0, 5, 210});
+        DrawRectangleLinesEx(Rectangle{0.0f, 0.0f, static_cast<float>(targetW), static_cast<float>(targetH)}, 8.0f * scaleMul, Color{185, 10, 15, 245});
     } else if (m_aftershockTimer > 0.0f) {
         float aRatio = m_aftershockTimer / 3.0f;
         unsigned char ba = static_cast<unsigned char>(std::clamp(aRatio * 140.0f * (0.6f + 0.4f * std::sin(totalTime * 16.0f)), 0.0f, 180.0f));
-        DrawRectangleLinesEx(Rectangle{0, 0, NATIVE_W, NATIVE_H}, 7.0f, Color{165, 10, 16, ba});
-        DrawRectangleLinesEx(Rectangle{5, 5, NATIVE_W - 10, NATIVE_H - 10}, 4.0f, Color{110, 5, 10, static_cast<unsigned char>(ba / 2)});
+        DrawRectangleLinesEx(Rectangle{0.0f, 0.0f, static_cast<float>(targetW), static_cast<float>(targetH)}, 7.0f * scaleMul, Color{165, 10, 16, ba});
     }
 
     if (m_flashTimer > 0.0f && m_flashDuration > 0.0f && m_shakeAllowed) {
         float alpha = (m_flashTimer / m_flashDuration);
         Color c = m_flashColor;
         c.a = static_cast<unsigned char>(math::Clamp(alpha * static_cast<float>(m_flashColor.a), 0.0f, 255.0f));
-        DrawRectangle(0, 0, NATIVE_W, NATIVE_H, c);
+        DrawRectangle(0, 0, targetW, targetH, c);
     }
 
     EndTextureMode();
@@ -203,13 +205,15 @@ void Renderer::EndUIPassAndPresent() {
     EndTextureMode();
 
     Rectangle dstScreen = ComputeTargetViewport();
+    int targetW = m_highRes3DMode ? HI3D_W : NATIVE_W;
+    int targetH = m_highRes3DMode ? HI3D_H : NATIVE_H;
 
     BeginDrawing();
     ClearBackground(Color{6, 8, 16, 255});
 
     if (m_crtEnabled) BeginShaderMode(m_crtShader);
-    Rectangle srcWorld = {0.0f, 0.0f, static_cast<float>(NATIVE_W), -static_cast<float>(NATIVE_H)};
-    DrawTexturePro(m_compositeRT.texture, srcWorld, dstScreen, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+    Rectangle srcWorld = {0.0f, 0.0f, static_cast<float>(targetW), -static_cast<float>(targetH)};
+    DrawTexturePro((m_highRes3DMode ? m_composite3DRT : m_compositeRT).texture, srcWorld, dstScreen, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
     if (m_crtEnabled) EndShaderMode();
 
     Rectangle srcUI = {0.0f, 0.0f, static_cast<float>(UI_W), -static_cast<float>(UI_H)};

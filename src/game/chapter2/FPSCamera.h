@@ -22,9 +22,11 @@ public:
     bool IsSprinting() const { return m_isSprinting; }
     bool IsMoving() const { return m_isMoving; }
     float GetBobTimer() const { return m_bobTimer; }
+    bool PopFootstepTriggered();
 
     void SetPosition(Vector3 pos) { m_position = pos; }
     void SetLookAngle(float yaw, float pitch);
+    void ResetMouseLook();
 
 private:
     Camera3D m_camera{};
@@ -32,10 +34,13 @@ private:
     float m_yaw = 0.0f;
     float m_pitch = 0.0f;
     float m_bobTimer = 0.0f;
+    float m_footstepTimer = 0.0f;
+    bool m_footstepTriggered = false;
     float m_stamina = 100.0f;
     bool m_isCrouching = false;
     bool m_isSprinting = false;
     bool m_isMoving = false;
+    bool m_firstFrame = true;
 };
 
 }

@@ -48,6 +48,12 @@ private:
     void HandleInteraction(engine::core::Engine& eng);
     void RenderInspectOverlay(Font font) const;
 
+    void DrawFloorQuad(Texture2D tex, float x0, float z0, float x1, float z1, float y, float uTile, float vTile, Color tint) const;
+    void DrawCeilingQuad(Texture2D tex, float x0, float z0, float x1, float z1, float y, float uTile, float vTile, Color tint) const;
+    void DrawWallQuadX(Texture2D tex, float x, float y0, float z0, float y1, float z1, float uTile, float vTile, Color tint) const;
+    void DrawWallQuadZ(Texture2D tex, float z, float x0, float y0, float x1, float y1, float uTile, float vTile, Color tint) const;
+    void DrawBoxTextured(Texture2D sideTex, Texture2D topTex, Vector3 min, Vector3 max, Color tint) const;
+
     FPSCamera m_camera{};
     std::vector<BoundingBox> m_colliders;
     std::vector<InteractiveObject3D> m_interactives;
@@ -63,6 +69,20 @@ private:
     Texture2D m_texKeyTag{};
     Texture2D m_texMirror{};
     Texture2D m_texRadio{};
+
+    Shader m_litShader{};
+    int m_uViewPosLoc = -1;
+    int m_uFlashlightPosLoc = -1;
+    int m_uFlashlightDirLoc = -1;
+    int m_uFlashlightColorLoc = -1;
+    int m_uFlashlightCutoffLoc = -1;
+    int m_uFlashlightOuterCutoffLoc = -1;
+    int m_uFlashlightIntensityLoc = -1;
+    int m_uAmbientColorLoc = -1;
+    int m_uFogColorLoc = -1;
+    int m_uFogStartLoc = -1;
+    int m_uFogEndLoc = -1;
+    bool m_shaderLoaded = false;
 
     InteractiveType m_focusedType = InteractiveType::None;
     std::string m_focusPrompt;
@@ -91,6 +111,7 @@ private:
     std::string m_bannerText;
     float m_bannerTimer = 0.0f;
 
+    int m_stepSoundIndex = 0;
     bool m_returnToMenu = false;
     int m_nightNumber = 1;
     float m_globalTime = 0.0f;

@@ -11,6 +11,8 @@ class Renderer {
 public:
     static constexpr int NATIVE_W = 320;
     static constexpr int NATIVE_H = 180;
+    static constexpr int HI3D_W = 1280;
+    static constexpr int HI3D_H = 720;
     static constexpr int UI_W = 1280;
     static constexpr int UI_H = 720;
 
@@ -36,6 +38,9 @@ public:
     void SetSkip2DLightmap(bool skip) { m_skip2DLightmap = skip; }
     bool IsSkip2DLightmap() const { return m_skip2DLightmap; }
 
+    void SetHighRes3DMode(bool hiRes) { m_highRes3DMode = hiRes; }
+    bool IsHighRes3DMode() const { return m_highRes3DMode; }
+
     bool IsScreamerActive() const { return m_screamerTimer > 0.0f; }
     void SetCrtEnabled(bool enabled) { m_crtEnabled = enabled; }
     bool IsCrtEnabled() const { return m_crtEnabled; }
@@ -48,6 +53,8 @@ private:
 
     RenderTexture2D m_sceneRT{};
     RenderTexture2D m_compositeRT{};
+    RenderTexture2D m_scene3DRT{};
+    RenderTexture2D m_composite3DRT{};
     RenderTexture2D m_uiRT{};
 
     Shader m_crtShader{};
@@ -63,6 +70,7 @@ private:
     bool m_shakeAllowed = true;
     bool m_stretchToUltrawide = true;
     bool m_skip2DLightmap = false;
+    bool m_highRes3DMode = false;
     float m_sanityStress = 0.0f;
 
     float m_shakeAmplitude = 0.0f;
