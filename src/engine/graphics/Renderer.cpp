@@ -54,9 +54,12 @@ void Renderer::Update(float dt, float totalTime, const core::GameSettings& setti
         effectiveChroma = std::max(effectiveChroma, 1.0f);
     }
 
+    float effectiveDistortion = m_highRes3DMode ? (settings.barrelDistortion * 0.25f) : settings.barrelDistortion;
+    float effectiveScanline = m_highRes3DMode ? (settings.scanlineIntensity * 0.40f) : settings.scanlineIntensity;
+
     SetShaderValue(m_crtShader, m_uTimeLoc,         &totalTime,                  SHADER_UNIFORM_FLOAT);
-    SetShaderValue(m_crtShader, m_uDistortionLoc,   &settings.barrelDistortion,  SHADER_UNIFORM_FLOAT);
-    SetShaderValue(m_crtShader, m_uScanlineLoc,     &settings.scanlineIntensity, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(m_crtShader, m_uDistortionLoc,   &effectiveDistortion,        SHADER_UNIFORM_FLOAT);
+    SetShaderValue(m_crtShader, m_uScanlineLoc,     &effectiveScanline,          SHADER_UNIFORM_FLOAT);
     SetShaderValue(m_crtShader, m_uChromaLoc,       &effectiveChroma,            SHADER_UNIFORM_FLOAT);
     SetShaderValue(m_crtShader, m_uBrightnessLoc,   &settings.brightness,        SHADER_UNIFORM_FLOAT);
     SetShaderValue(m_crtShader, m_uSanityStressLoc, &effectiveStress,            SHADER_UNIFORM_FLOAT);

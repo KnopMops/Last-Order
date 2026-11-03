@@ -14,7 +14,7 @@ void MotelWorld3D::Init(engine::core::Engine& eng, int nightNumber) {
     m_returnToMenu = false;
     m_stepSoundIndex = 0;
 
-    m_camera.Init(Vector3{0.0f, 0.0f, 15.0f}, 3.14159f, 0.0f);
+    m_camera.Init(Vector3{0.0f, 0.0f, 18.0f}, 0.0f, 0.0f);
     m_camera.ResetMouseLook();
 
     auto& assets = eng.Assets();
@@ -89,15 +89,15 @@ void MotelWorld3D::Init(engine::core::Engine& eng, int nightNumber) {
     BuildCollidersAndInteractives();
 
     m_rain.clear();
-    for (int i = 0; i < 90; ++i) {
+    for (int i = 0; i < 110; ++i) {
         RainDrop3D drop;
         drop.pos = Vector3{
-            static_cast<float>((std::rand() % 320) - 160) * 0.1f,
+            static_cast<float>((std::rand() % 400) - 200) * 0.1f,
             static_cast<float>(std::rand() % 90) * 0.1f + 1.0f,
-            static_cast<float>((std::rand() % 220) - 20) * 0.1f + 8.0f
+            static_cast<float>((std::rand() % 260) + 40) * 0.1f
         };
-        drop.speed = 14.0f + static_cast<float>(std::rand() % 6);
-        drop.len = 0.35f + static_cast<float>(std::rand() % 3) * 0.1f;
+        drop.speed = 15.0f + static_cast<float>(std::rand() % 6);
+        drop.len = 0.40f + static_cast<float>(std::rand() % 3) * 0.1f;
         m_rain.push_back(drop);
     }
 
@@ -117,78 +117,82 @@ void MotelWorld3D::BuildCollidersAndInteractives() {
     m_colliders.clear();
     m_interactives.clear();
 
-    m_colliders.push_back({Vector3{-18.0f, 0.0f, 26.0f}, Vector3{18.0f, 6.0f, 27.0f}});
-    m_colliders.push_back({Vector3{-18.0f, 0.0f, 7.5f},  Vector3{-2.5f, 5.0f, 8.5f}});
-    m_colliders.push_back({Vector3{2.5f,   0.0f, 7.5f},  Vector3{18.0f, 5.0f, 8.5f}});
+    m_colliders.push_back({Vector3{-25.0f, 0.0f, 29.0f}, Vector3{25.0f, 4.0f, 31.0f}});
+    m_colliders.push_back({Vector3{-26.0f, 0.0f, 5.0f},  Vector3{-24.0f, 4.0f, 30.0f}});
+    m_colliders.push_back({Vector3{24.0f,  0.0f, 5.0f},  Vector3{26.0f, 4.0f, 30.0f}});
 
-    m_colliders.push_back({Vector3{-10.5f, 0.0f, -12.0f}, Vector3{-9.5f, 4.0f, 8.0f}});
-    m_colliders.push_back({Vector3{9.5f,   0.0f, -12.0f}, Vector3{10.5f, 4.0f, 8.0f}});
-    m_colliders.push_back({Vector3{-10.0f, 0.0f, -12.5f}, Vector3{10.0f, 4.0f, -11.5f}});
+    m_colliders.push_back({Vector3{-20.0f, 0.0f, 5.8f}, Vector3{-1.6f, 4.0f, 6.4f}});
+    m_colliders.push_back({Vector3{1.6f,   0.0f, 5.8f}, Vector3{20.0f, 4.0f, 6.4f}});
 
-    m_colliders.push_back({Vector3{1.5f, 0.0f, 0.2f}, Vector3{6.8f, 1.2f, 2.5f}});
+    m_colliders.push_back({Vector3{11.8f, 0.0f, -6.5f}, Vector3{12.4f, 4.0f, 6.2f}});
+    m_colliders.push_back({Vector3{-8.0f, 0.0f, -6.5f}, Vector3{12.0f, 4.0f, -5.8f}});
 
-    m_colliders.push_back({Vector3{-5.5f, 0.0f, 8.0f}, Vector3{5.5f, 3.5f, 8.5f}});
+    m_colliders.push_back({Vector3{1.8f, 0.0f, -1.2f}, Vector3{7.5f, 1.25f, 1.8f}});
 
-    m_colliders.push_back({Vector3{-7.8f, 0.0f, -11.0f}, Vector3{-7.2f, 3.5f, -2.5f}});
-    m_colliders.push_back({Vector3{-18.5f, 0.0f, -12.0f}, Vector3{-17.5f, 3.5f, -2.0f}});
-    m_colliders.push_back({Vector3{-18.0f, 0.0f, -12.5f}, Vector3{-7.5f, 3.5f, -11.5f}});
-    m_colliders.push_back({Vector3{-18.0f, 0.0f, -2.5f}, Vector3{-7.5f, 3.5f, -1.8f}});
+    m_colliders.push_back({Vector3{-17.0f, 0.0f, 2.0f}, Vector3{-7.8f, 4.0f, 2.6f}});
+    m_colliders.push_back({Vector3{-17.2f, 0.0f, -18.5f}, Vector3{-16.6f, 4.0f, 2.5f}});
+    m_colliders.push_back({Vector3{-17.0f, 0.0f, -6.5f}, Vector3{-11.5f, 4.0f, -5.8f}});
 
-    m_colliders.push_back({Vector3{-15.0f, 0.0f, -9.5f}, Vector3{-12.0f, 0.9f, -6.0f}});
-    m_colliders.push_back({Vector3{-16.2f, 0.0f, -5.7f}, Vector3{-13.6f, 2.5f, -3.0f}});
+    m_colliders.push_back({Vector3{-15.6f, 0.0f, -12.6f}, Vector3{-12.4f, 0.9f, -9.4f}});
+    m_colliders.push_back({Vector3{-16.2f, 0.0f, -8.6f}, Vector3{-14.2f, 2.5f, -6.6f}});
+
+    m_colliders.push_back({Vector3{-17.0f, 0.0f, -18.4f}, Vector3{-7.8f, 4.0f, -17.8f}});
+    m_colliders.push_back({Vector3{-8.2f,  0.0f, -18.0f}, Vector3{-7.8f, 4.0f, -6.0f}});
+
+    m_colliders.push_back({Vector3{-7.5f, 0.0f, 15.5f}, Vector3{-3.8f, 1.7f, 20.0f}});
 
     m_interactives.push_back({
         InteractiveType::EntranceDoor,
-        {Vector3{-1.8f, 0.0f, 7.2f}, Vector3{1.8f, 2.8f, 9.2f}},
+        {Vector3{-1.8f, 0.0f, 5.2f}, Vector3{1.8f, 2.8f, 7.2f}},
         "Дверь в регистратуру мотеля",
         true
     });
 
     m_interactives.push_back({
         InteractiveType::DeskBell,
-        {Vector3{2.0f, 1.0f, 0.8f}, Vector3{2.8f, 1.4f, 1.6f}},
+        {Vector3{3.0f, 1.0f, 0.6f}, Vector3{4.2f, 1.4f, 1.6f}},
         "Колокольчик на стойке вызова [Дзинь]",
         true
     });
 
     m_interactives.push_back({
         InteractiveType::Key101Tag,
-        {Vector3{6.2f, 1.4f, 1.0f}, Vector3{7.2f, 2.2f, 1.8f}},
+        {Vector3{8.2f, 1.3f, -6.2f}, Vector3{10.0f, 2.4f, -5.5f}},
         "Ключ от номера 101 с изумрудным брелоком",
         true
     });
 
     m_interactives.push_back({
         InteractiveType::RadioTransistor,
-        {Vector3{4.0f, 1.0f, 1.0f}, Vector3{4.8f, 1.5f, 1.8f}},
+        {Vector3{4.8f, 1.0f, 0.6f}, Vector3{6.2f, 1.6f, 1.6f}},
         "Радиоприёмник «Океан-214» [Частота 94.5 FM]",
         true
     });
 
     m_interactives.push_back({
         InteractiveType::DoorRoom101,
-        {Vector3{-8.5f, 0.0f, -5.5f}, Vector3{-6.5f, 2.8f, -2.5f}},
+        {Vector3{-11.8f, 0.0f, -6.5f}, Vector3{-8.8f, 2.8f, -5.2f}},
         "Дверь номера 101",
         true
     });
 
     m_interactives.push_back({
         InteractiveType::WardrobeCloset,
-        {Vector3{-16.4f, 0.0f, -5.8f}, Vector3{-13.4f, 2.6f, -3.0f}},
+        {Vector3{-16.2f, 0.0f, -8.6f}, Vector3{-14.0f, 2.6f, -6.5f}},
         "Платяной шкаф (Укрытие)",
         true
     });
 
     m_interactives.push_back({
         InteractiveType::BathroomMirror,
-        {Vector3{-16.0f, 1.1f, -12.4f}, Vector3{-13.2f, 2.7f, -11.3f}},
+        {Vector3{-14.2f, 1.0f, -18.2f}, Vector3{-11.2f, 2.7f, -17.2f}},
         "Настенное зеркало в ванной",
         true
     });
 
     m_interactives.push_back({
         InteractiveType::HighwayCar,
-        {Vector3{-7.5f, 0.0f, 14.5f}, Vector3{-3.5f, 2.0f, 19.5f}},
+        {Vector3{-8.0f, 0.0f, 15.0f}, Vector3{-3.5f, 2.0f, 20.5f}},
         "Ваша заглохшая машина (Аварийка мигает)",
         true
     });
@@ -197,10 +201,11 @@ void MotelWorld3D::BuildCollidersAndInteractives() {
 void MotelWorld3D::UpdateRain(float dt) {
     for (auto& drop : m_rain) {
         drop.pos.y -= drop.speed * dt;
+        drop.pos.x -= drop.speed * 0.12f * dt;
         if (drop.pos.y < 0.05f) {
             drop.pos.y = 8.5f + static_cast<float>(std::rand() % 20) * 0.1f;
-            drop.pos.x = static_cast<float>((std::rand() % 320) - 160) * 0.1f;
-            drop.pos.z = static_cast<float>((std::rand() % 220) - 20) * 0.1f + 8.0f;
+            drop.pos.x = static_cast<float>((std::rand() % 400) - 200) * 0.1f;
+            drop.pos.z = static_cast<float>((std::rand() % 260) + 40) * 0.1f;
         }
     }
 }
@@ -260,7 +265,7 @@ void MotelWorld3D::Update(engine::core::Engine& eng, float dt) {
     m_camera.Update(dt, m_colliders);
 
     if (m_camera.PopFootstepTriggered()) {
-        bool outdoor = (m_camera.GetPosition().z > 8.0f);
+        bool outdoor = (m_camera.GetPosition().z > 6.0f);
         int stepIdx = (m_stepSoundIndex % 4) + 1;
         m_stepSoundIndex++;
         char sfxPath[64];
@@ -297,14 +302,14 @@ void MotelWorld3D::HandleInteraction(engine::core::Engine& eng) {
     switch (m_focusedType) {
         case InteractiveType::EntranceDoor:
             eng.Audio().PlaySfx("audio/sfx/sfx_door_bell.wav", 0.8f);
-            if (m_camera.GetPosition().z > 8.0f) {
-                m_camera.SetPosition(Vector3{0.0f, 0.0f, 5.5f});
-                m_camera.SetLookAngle(3.14159f, 0.0f);
+            if (m_camera.GetPosition().z > 6.0f) {
+                m_camera.SetPosition(Vector3{0.0f, 0.0f, 4.2f});
+                m_camera.SetLookAngle(0.0f, 0.0f);
                 m_camera.ResetMouseLook();
                 m_bannerText = "ВЫ ВОШЛИ В ХОЛЛ МОТЕЛЯ. ЗДЕСЬ СУХО, НО ВОЗДУХ ЛЕДЯНОЙ.";
             } else {
-                m_camera.SetPosition(Vector3{0.0f, 0.0f, 10.5f});
-                m_camera.SetLookAngle(0.0f, 0.0f);
+                m_camera.SetPosition(Vector3{0.0f, 0.0f, 8.0f});
+                m_camera.SetLookAngle(3.14159f, 0.0f);
                 m_camera.ResetMouseLook();
                 m_bannerText = "ВЫ ВЫШЛИ НА ДОЖДЛИВЫЙ ДВОР МОТЕЛЯ.";
             }
@@ -361,8 +366,13 @@ void MotelWorld3D::HandleInteraction(engine::core::Engine& eng) {
                 m_bannerText = "ЗАМОК ЩЁЛКНУЛ. ДВЕРЬ В НОМЕР 101 ОТКРЫТА.";
                 m_bannerTimer = 3.5f;
             } else {
-                m_camera.SetPosition(Vector3{-10.5f, 0.0f, -5.0f});
-                m_camera.SetLookAngle(3.14159f * 0.5f, 0.0f);
+                if (m_camera.GetPosition().z > -6.0f) {
+                    m_camera.SetPosition(Vector3{-10.2f, 0.0f, -7.5f});
+                    m_camera.SetLookAngle(0.0f, 0.0f);
+                } else {
+                    m_camera.SetPosition(Vector3{-10.2f, 0.0f, -4.5f});
+                    m_camera.SetLookAngle(3.14159f, 0.0f);
+                }
                 m_camera.ResetMouseLook();
             }
             break;
@@ -371,12 +381,12 @@ void MotelWorld3D::HandleInteraction(engine::core::Engine& eng) {
             m_inWardrobe = !m_inWardrobe;
             eng.Audio().PlaySfx("audio/sfx/sfx_door_creak_spooky.wav", 0.8f);
             if (m_inWardrobe) {
-                m_camera.SetPosition(Vector3{-14.6f, 0.0f, -4.4f});
-                m_camera.SetLookAngle(0.0f, 0.0f);
+                m_camera.SetPosition(Vector3{-15.2f, 0.0f, -7.6f});
+                m_camera.SetLookAngle(1.5708f, 0.0f);
                 m_camera.ResetMouseLook();
                 m_bannerText = "ВЫ СПРЯТАЛИСЬ В ШКАФУ. ЗАДЕРЖИТЕ ДЫХАНИЕ [ПРОБЕЛ].";
             } else {
-                m_camera.SetPosition(Vector3{-13.5f, 0.0f, -4.4f});
+                m_camera.SetPosition(Vector3{-13.8f, 0.0f, -7.6f});
                 m_camera.ResetMouseLook();
                 m_bannerText = "ВЫ ВЫШЛИ ИЗ ШКАФА.";
             }
@@ -426,7 +436,7 @@ void MotelWorld3D::DrawCeilingQuad(Texture2D tex, float x0, float z0, float x1, 
     rlColor4ub(tint.r, tint.g, tint.b, tint.a);
     rlNormal3f(0.0f, -1.0f, 0.0f);
     rlTexCoord2f(0.0f, 0.0f);
-    rlVertex3f(x0, y, y < 0.0f ? z0 : z0);
+    rlVertex3f(x0, y, z0);
     rlTexCoord2f(0.0f, vTile);
     rlVertex3f(x0, y, z1);
     rlTexCoord2f(uTile, vTile);
@@ -482,28 +492,68 @@ void MotelWorld3D::DrawBoxTextured(Texture2D sideTex, Texture2D topTex, Vector3 
     DrawWallQuadX(sideTex, max.x, min.y, min.z, max.y, max.z, 1.0f, 1.0f, tint);
 }
 
+void MotelWorld3D::DrawFlashlightViewmodel() const {
+    Vector3 camPos = m_camera.GetCamera().position;
+    Vector3 fwd = m_camera.GetForward();
+    Vector3 right = m_camera.GetRight();
+    Vector3 up = m_camera.GetCamera().up;
+
+    float bob = m_camera.GetBobTimer();
+    float swayX = std::cos(bob * 0.5f) * 0.012f;
+    float swayY = std::abs(std::sin(bob)) * 0.015f;
+
+    float focusShiftX = m_flashlightFocus ? -0.09f : 0.0f;
+    float focusShiftY = m_flashlightFocus ? 0.05f : 0.0f;
+
+    Vector3 handOffset = Vector3{
+        right.x * (0.22f + focusShiftX + swayX) + up.x * (-0.18f + focusShiftY + swayY) + fwd.x * 0.36f,
+        right.y * (0.22f + focusShiftX + swayX) + up.y * (-0.18f + focusShiftY + swayY) + fwd.y * 0.36f,
+        right.z * (0.22f + focusShiftX + swayX) + up.z * (-0.18f + focusShiftY + swayY) + fwd.z * 0.36f
+    };
+
+    Vector3 bodyBack = Vector3{camPos.x + handOffset.x, camPos.y + handOffset.y, camPos.z + handOffset.z};
+    Vector3 bodyFront = Vector3{bodyBack.x + fwd.x * 0.15f, bodyBack.y + fwd.y * 0.15f, bodyBack.z + fwd.z * 0.15f};
+    Vector3 bezelFront = Vector3{bodyFront.x + fwd.x * 0.035f, bodyFront.y + fwd.y * 0.035f, bodyFront.z + fwd.z * 0.035f};
+
+    DrawCylinderEx(bodyBack, bodyFront, 0.022f, 0.028f, 8, Color{40, 42, 48, 255});
+    DrawCylinderWiresEx(bodyBack, bodyFront, 0.0225f, 0.0285f, 8, Color{18, 20, 24, 255});
+    DrawCylinderEx(bodyFront, bezelFront, 0.030f, 0.035f, 8, Color{28, 30, 35, 255});
+
+    if (m_flashlightOn && m_flashlightBattery > 0.0f) {
+        Color lensCol = m_flashlightFocus ? Color{255, 255, 220, 255} : Color{255, 240, 185, 255};
+        DrawSphere(bezelFront, 0.022f, lensCol);
+
+        Vector3 coneTip = bezelFront;
+        Vector3 coneBase = Vector3{bezelFront.x + fwd.x * 0.95f, bezelFront.y + fwd.y * 0.95f, bezelFront.z + fwd.z * 0.95f};
+        Color coneCol = m_flashlightFocus ? Color{255, 250, 200, 35} : Color{255, 235, 170, 20};
+        DrawCylinderEx(coneTip, coneBase, 0.032f, m_flashlightFocus ? 0.20f : 0.36f, 10, coneCol);
+    } else {
+        DrawSphere(bezelFront, 0.020f, Color{45, 40, 35, 255});
+    }
+}
+
 void MotelWorld3D::Render3D(engine::core::Engine& ) {
     BeginMode3D(m_camera.GetCamera());
 
-    ClearBackground(Color{10, 12, 18, 255});
+    ClearBackground(Color{8, 10, 16, 255});
 
-    Vector3 camPos = m_camera.GetPosition();
+    Vector3 camPos = m_camera.GetCamera().position;
     Vector3 fwd = m_camera.GetForward();
     float flashIntensity = 0.0f;
     if (m_flashlightOn && m_flashlightBattery > 0.0f) {
         if (m_flashlightFlickerTimer <= 0.0f || std::fmod(m_flashlightFlickerTimer, 0.22f) < 0.11f) {
-            flashIntensity = m_flashlightFocus ? 1.6f : 1.15f;
+            flashIntensity = m_flashlightFocus ? 2.4f : 1.55f;
         }
     }
-    Vector3 flashPos = {camPos.x, camPos.y - 0.12f, camPos.z};
+    Vector3 flashPos = {camPos.x, camPos.y - 0.08f, camPos.z};
     Vector3 flashColor = m_flashlightFocus ? Vector3{1.0f, 0.96f, 0.85f} : Vector3{0.95f, 0.90f, 0.78f};
-    float cutoff = m_flashlightFocus ? std::cos(14.0f * DEG2RAD) : std::cos(26.0f * DEG2RAD);
-    float outerCutoff = m_flashlightFocus ? std::cos(22.0f * DEG2RAD) : std::cos(38.0f * DEG2RAD);
+    float cutoff = m_flashlightFocus ? std::cos(14.0f * DEG2RAD) : std::cos(25.0f * DEG2RAD);
+    float outerCutoff = m_flashlightFocus ? std::cos(22.0f * DEG2RAD) : std::cos(36.0f * DEG2RAD);
 
-    Vector3 ambientCol = {0.14f, 0.16f, 0.22f};
-    Vector3 fogCol = {0.05f, 0.06f, 0.09f};
+    Vector3 ambientCol = {0.20f, 0.22f, 0.28f};
+    Vector3 fogCol = {0.04f, 0.05f, 0.08f};
     float fogStart = 8.0f;
-    float fogEnd = 28.0f;
+    float fogEnd = 32.0f;
 
     if (m_shaderLoaded) {
         SetShaderValue(m_litShader, m_uViewPosLoc, &camPos, SHADER_UNIFORM_VEC3);
@@ -521,51 +571,80 @@ void MotelWorld3D::Render3D(engine::core::Engine& ) {
         BeginShaderMode(m_litShader);
     }
 
-    DrawFloorQuad(m_texConcrete, -25.0f, 8.0f, 25.0f, 32.0f, 0.0f, 10.0f, 6.0f, Color{210, 215, 230, 255});
+    DrawFloorQuad(m_texConcrete, -25.0f, 6.0f, 25.0f, 30.0f, 0.0f, 12.0f, 8.0f, Color{210, 215, 230, 255});
 
-    DrawWallQuadZ(m_texWall, 8.0f, -22.0f, 0.0f, -2.5f, 4.5f, 8.0f, 2.0f, WHITE);
-    DrawWallQuadZ(m_texWall, 8.0f, 2.5f, 0.0f, 22.0f, 4.5f, 8.0f, 2.0f, WHITE);
-    DrawWallQuadZ(m_texWall, 8.0f, -2.5f, 2.8f, 2.5f, 4.5f, 2.0f, 1.0f, WHITE);
+    DrawFloorQuad(m_texConcrete, -16.0f, 5.5f, 16.0f, 7.5f, 0.05f, 8.0f, 1.0f, WHITE);
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{-16.0f, 3.8f, 5.2f}, Vector3{16.0f, 4.0f, 7.6f}, WHITE);
 
-    DrawWallQuadZ(m_texDoor, 8.0f, -2.5f, 0.0f, 2.5f, 2.8f, 1.0f, 1.0f, WHITE);
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{-10.2f, 0.0f, 5.8f}, Vector3{-9.8f, 3.8f, 6.2f}, WHITE);
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{-3.4f,  0.0f, 5.8f}, Vector3{-3.0f, 3.8f, 6.2f}, WHITE);
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{3.0f,   0.0f, 5.8f}, Vector3{3.4f,  3.8f, 6.2f}, WHITE);
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{9.8f,   0.0f, 5.8f}, Vector3{10.2f, 3.8f, 6.2f}, WHITE);
 
-    DrawFloorQuad(m_texCarpet, -10.0f, -12.0f, 10.0f, 8.0f, 0.0f, 6.0f, 6.0f, WHITE);
-    DrawCeilingQuad(m_texCeiling, -10.0f, -12.0f, 10.0f, 8.0f, 3.4f, 6.0f, 6.0f, WHITE);
-    DrawWallQuadZ(m_texWall, -12.0f, 10.0f, 0.0f, -10.0f, 3.4f, 6.0f, 1.5f, WHITE);
-    DrawWallQuadX(m_texWall, 10.0f, 0.0f, -12.0f, 3.4f, 8.0f, 6.0f, 1.5f, WHITE);
-    DrawWallQuadX(m_texWall, -10.0f, 0.0f, 8.0f, 3.4f, 1.0f, 2.5f, 1.5f, WHITE);
-    DrawWallQuadX(m_texWall, -10.0f, 0.0f, -2.5f, 3.4f, -12.0f, 3.0f, 1.5f, WHITE);
+    DrawWallQuadZ(m_texWall, 6.0f, -16.0f, 0.0f, -1.8f, 3.8f, 5.0f, 1.6f, WHITE);
+    DrawWallQuadZ(m_texWall, 6.0f, 1.8f, 0.0f, 16.0f, 3.8f, 5.0f, 1.6f, WHITE);
+    DrawWallQuadZ(m_texWall, 6.0f, -1.8f, 2.7f, 1.8f, 3.8f, 1.5f, 0.5f, WHITE);
+    DrawWallQuadZ(m_texDoor, 6.0f, -1.8f, 0.0f, 1.8f, 2.7f, 1.0f, 1.0f, WHITE);
 
-    DrawFloorQuad(m_texTile, 1.5f, 0.2f, 6.8f, 2.5f, 0.01f, 3.0f, 2.0f, WHITE);
-    DrawBoxTextured(m_texWall, m_texWall, Vector3{1.5f, 0.0f, 0.2f}, Vector3{6.8f, 1.15f, 2.5f}, WHITE);
+    DrawFloorQuad(m_texCarpet, -8.0f, -6.0f, 12.0f, 6.0f, 0.0f, 6.0f, 4.0f, WHITE);
+    DrawCeilingQuad(m_texCeiling, -8.0f, -6.0f, 12.0f, 6.0f, 3.6f, 6.0f, 4.0f, WHITE);
+    DrawWallQuadX(m_texWall, 12.0f, 0.0f, -6.0f, 3.6f, 6.0f, 4.0f, 1.5f, WHITE);
+    DrawWallQuadZ(m_texWall, -6.0f, 12.0f, 0.0f, -8.0f, 3.6f, 6.0f, 1.5f, WHITE);
+    DrawWallQuadZ(m_texWall, 5.95f, 12.0f, 0.0f, 1.8f, 3.6f, 4.0f, 1.5f, WHITE);
+    DrawWallQuadZ(m_texWall, 5.95f, -1.8f, 0.0f, -8.0f, 3.6f, 3.0f, 1.5f, WHITE);
 
-    DrawFloorQuad(m_texCarpet, -18.0f, -12.0f, -10.0f, 1.0f, 0.0f, 4.0f, 4.0f, WHITE);
-    DrawCeilingQuad(m_texCeiling, -18.0f, -12.0f, -10.0f, 1.0f, 3.4f, 4.0f, 4.0f, WHITE);
-    DrawWallQuadX(m_texWall, -18.0f, 0.0f, -12.0f, 3.4f, 1.0f, 4.0f, 1.5f, WHITE);
-    DrawWallQuadZ(m_texWall, 1.0f, -18.0f, 0.0f, -10.0f, 3.4f, 3.0f, 1.5f, WHITE);
+    DrawWallQuadX(m_texWall, -8.0f, 0.0f, 2.2f, 3.6f, 6.0f, 2.0f, 1.5f, WHITE);
+    DrawWallQuadX(m_texWall, -8.0f, 0.0f, -6.0f, 3.6f, -1.5f, 2.0f, 1.5f, WHITE);
+    DrawWallQuadX(m_texWall, -8.0f, 2.6f, -1.5f, 3.6f, 2.2f, 1.5f, 0.5f, WHITE);
 
-    DrawWallQuadZ(m_texWall, -2.5f, -10.0f, 2.6f, -7.5f, 3.4f, 1.0f, 0.5f, WHITE);
-    float doorZ = m_door101Open ? -3.2f : -2.5f;
-    DrawWallQuadZ(m_texDoor, doorZ, -10.0f, 0.0f, -7.5f, 2.6f, 1.0f, 1.0f, WHITE);
+    DrawFloorQuad(m_texTile, 2.0f, -3.0f, 7.5f, 1.5f, 0.01f, 3.0f, 2.5f, WHITE);
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{2.0f, 0.0f, 0.6f}, Vector3{7.5f, 1.15f, 1.6f}, WHITE);
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{2.0f, 0.0f, -2.5f}, Vector3{2.9f, 1.15f, 0.6f}, WHITE);
 
-    DrawBoxTextured(m_texWall, m_texWall, Vector3{-16.2f, 0.0f, -5.7f}, Vector3{-13.6f, 2.5f, -3.0f}, WHITE);
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{8.0f, 1.4f, -5.98f}, Vector3{10.8f, 2.3f, -5.88f}, Color{50, 32, 20, 255});
+    if (!m_hasKey101) {
+        DrawWallQuadZ(m_texKeyTag, -5.86f, 8.8f, 1.55f, 9.4f, 2.15f, 1.0f, 1.0f, WHITE);
+    }
 
-    DrawFloorQuad(m_texTile, -18.0f, -12.0f, -13.0f, -8.5f, 0.01f, 2.5f, 2.0f, WHITE);
-    DrawWallQuadZ(m_texMirror, -11.95f, -15.8f, 1.2f, -13.4f, 2.6f, 1.0f, 1.0f, WHITE);
+    DrawFloorQuad(m_texCarpet, -16.0f, -6.0f, -8.0f, 2.2f, 0.0f, 3.0f, 3.0f, WHITE);
+    DrawCeilingQuad(m_texCeiling, -16.0f, -6.0f, -8.0f, 2.2f, 3.6f, 3.0f, 3.0f, WHITE);
+    DrawWallQuadX(m_texWall, -16.0f, 0.0f, -6.0f, 3.6f, 2.2f, 3.0f, 1.5f, WHITE);
+    DrawWallQuadZ(m_texWall, 2.2f, -16.0f, 0.0f, -8.0f, 3.6f, 3.0f, 1.5f, WHITE);
 
-    DrawBoxTextured(m_texConcrete, m_texConcrete, Vector3{-7.2f, 0.0f, 14.8f}, Vector3{-3.8f, 1.35f, 19.2f}, Color{35, 55, 85, 255});
+    DrawWallQuadZ(m_texWall, -5.98f, -16.0f, 0.0f, -11.5f, 3.6f, 2.0f, 1.5f, WHITE);
+    DrawWallQuadZ(m_texWall, -5.98f, -11.5f, 2.6f, -9.0f, 3.6f, 1.0f, 0.5f, WHITE);
+    float doorZ = m_door101Open ? -6.8f : -5.95f;
+    DrawWallQuadZ(m_texDoor, doorZ, -11.5f, 0.0f, -9.0f, 2.6f, 1.0f, 1.0f, WHITE);
+
+    DrawFloorQuad(m_texCarpet, -16.0f, -14.0f, -8.0f, -6.0f, 0.0f, 3.0f, 3.0f, WHITE);
+    DrawCeilingQuad(m_texCeiling, -16.0f, -14.0f, -8.0f, -6.0f, 3.4f, 3.0f, 3.0f, WHITE);
+    DrawWallQuadX(m_texWall, -8.0f, 0.0f, -14.0f, 3.4f, -6.0f, 3.0f, 1.5f, WHITE);
+    DrawWallQuadX(m_texWall, -16.0f, 0.0f, -6.0f, 3.4f, -14.0f, 3.0f, 1.5f, WHITE);
+    DrawWallQuadZ(m_texWall, -14.0f, -16.0f, 0.0f, -13.0f, 3.4f, 1.2f, 1.5f, WHITE);
+    DrawWallQuadZ(m_texWall, -14.0f, -10.5f, 0.0f, -8.0f, 3.4f, 1.2f, 1.5f, WHITE);
+    DrawWallQuadZ(m_texWall, -14.0f, -13.0f, 2.5f, -10.5f, 3.4f, 1.0f, 0.5f, WHITE);
+
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{-15.5f, 0.0f, -12.5f}, Vector3{-12.5f, 0.5f, -9.5f}, WHITE);
+    DrawBoxTextured(m_texCarpet, m_texCarpet, Vector3{-15.4f, 0.5f, -12.4f}, Vector3{-12.6f, 0.85f, -9.6f}, Color{160, 45, 55, 255});
+    DrawBoxTextured(m_texCeiling, m_texCeiling, Vector3{-15.2f, 0.85f, -12.3f}, Vector3{-12.8f, 1.05f, -11.5f}, Color{220, 215, 205, 255});
+
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{-15.8f, 0.0f, -8.5f}, Vector3{-14.4f, 2.4f, -6.8f}, Color{45, 28, 18, 255});
+    DrawWallQuadZ(m_texDoor, -6.78f, -15.8f, 0.0f, -14.4f, 2.4f, 1.0f, 1.0f, WHITE);
+
+    DrawFloorQuad(m_texTile, -16.0f, -18.0f, -8.0f, -14.0f, 0.01f, 3.0f, 2.0f, WHITE);
+    DrawCeilingQuad(m_texCeiling, -16.0f, -18.0f, -8.0f, -14.0f, 3.2f, 3.0f, 2.0f, WHITE);
+    DrawWallQuadZ(m_texWall, -18.0f, -8.0f, 0.0f, -16.0f, 3.2f, 3.0f, 1.5f, WHITE);
+    DrawWallQuadX(m_texWall, -8.0f, 0.0f, -18.0f, 3.2f, -14.0f, 2.0f, 1.5f, WHITE);
+    DrawWallQuadX(m_texWall, -16.0f, 0.0f, -14.0f, 3.2f, -18.0f, 2.0f, 1.5f, WHITE);
+
+    DrawBoxTextured(m_texTile, m_texTile, Vector3{-13.8f, 0.0f, -17.9f}, Vector3{-11.5f, 0.95f, -16.8f}, WHITE);
+    DrawWallQuadZ(m_texMirror, -17.96f, -13.5f, 1.15f, -11.8f, 2.45f, 1.0f, 1.0f, WHITE);
+
+    DrawBoxTextured(m_texConcrete, m_texConcrete, Vector3{-7.2f, 0.25f, 15.5f}, Vector3{-4.2f, 1.15f, 19.8f}, Color{32, 48, 75, 255});
+    DrawBoxTextured(m_texConcrete, m_texConcrete, Vector3{-6.9f, 1.15f, 16.5f}, Vector3{-4.5f, 1.65f, 18.8f}, Color{22, 34, 52, 255});
 
     if (m_shaderLoaded) {
         EndShaderMode();
-    }
-
-    bool hazardBlink = (std::fmod(m_globalTime, 1.0f) < 0.5f);
-    Color hazardCol = hazardBlink ? Color{255, 170, 30, 255} : Color{50, 30, 10, 255};
-    DrawSphere(Vector3{-6.8f, 0.7f, 19.3f}, 0.12f, hazardCol);
-    DrawSphere(Vector3{-4.2f, 0.7f, 19.3f}, 0.12f, hazardCol);
-
-    for (const auto& drop : m_rain) {
-        DrawLine3D(drop.pos, Vector3{drop.pos.x, drop.pos.y - drop.len, drop.pos.z}, Color{175, 205, 240, 180});
     }
 
     float neonFlicker = 0.85f + 0.15f * std::sin(m_globalTime * 18.0f) * std::cos(m_globalTime * 7.0f);
@@ -575,24 +654,33 @@ void MotelWorld3D::Render3D(engine::core::Engine& ) {
         static_cast<unsigned char>(255 * neonFlicker),
         255
     };
-    DrawBillboard(m_camera.GetCamera(), m_texNeon, Vector3{0.0f, 4.3f, 8.12f}, 6.2f, neonTint);
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{-3.5f, 3.7f, 5.9f}, Vector3{3.5f, 4.8f, 6.1f}, Color{25, 25, 30, 255});
+    DrawWallQuadZ(m_texNeon, 5.88f, -3.4f, 3.8f, 3.4f, 4.7f, 1.0f, 1.0f, neonTint);
 
-    DrawSphere(Vector3{2.4f, 1.22f, 1.2f}, 0.11f, Color{225, 195, 75, 255});
+    DrawSphere(Vector3{3.6f, 1.22f, 1.1f}, 0.10f, Color{225, 195, 75, 255});
 
-    DrawBillboard(m_camera.GetCamera(), m_texRadio, Vector3{4.4f, 1.35f, 1.4f}, 0.65f, WHITE);
+    DrawBoxTextured(m_texWall, m_texWall, Vector3{5.0f, 1.15f, 0.9f}, Vector3{5.9f, 1.45f, 1.3f}, Color{60, 45, 30, 255});
+    DrawWallQuadZ(m_texRadio, 1.31f, 5.05f, 1.16f, 5.85f, 1.44f, 1.0f, 1.0f, WHITE);
 
-    if (!m_hasKey101) {
-        DrawBillboard(m_camera.GetCamera(), m_texKeyTag, Vector3{6.6f, 1.75f, 1.4f}, 0.40f, WHITE);
+    DrawSphere(Vector3{-6.8f, 0.7f, 15.4f}, 0.12f, Color{255, 250, 210, 200});
+    DrawSphere(Vector3{-4.6f, 0.7f, 15.4f}, 0.12f, Color{255, 250, 210, 200});
+    bool hazardBlink = (std::fmod(m_globalTime, 1.0f) < 0.5f);
+    Color hazardCol = hazardBlink ? Color{255, 175, 30, 255} : Color{50, 30, 10, 255};
+    DrawSphere(Vector3{-6.9f, 0.7f, 19.85f}, 0.12f, hazardCol);
+    DrawSphere(Vector3{-4.5f, 0.7f, 19.85f}, 0.12f, hazardCol);
+
+    for (const auto& drop : m_rain) {
+        DrawLine3D(drop.pos, Vector3{drop.pos.x - 0.05f, drop.pos.y - drop.len, drop.pos.z}, Color{175, 205, 240, 180});
     }
 
     if (m_mirrorTriggered) {
         float pulse = 0.5f + 0.5f * std::sin(m_globalTime * 12.0f);
-        DrawCube(Vector3{-14.6f, 1.9f, -11.90f}, 1.8f, 1.2f, 0.02f, Color{195, 20, 25, static_cast<unsigned char>(150 * pulse)});
-        DrawSphere(Vector3{-14.6f, 1.9f, -11.2f}, 0.28f, Color{15, 8, 20, 210});
+        DrawCube(Vector3{-12.65f, 1.8f, -17.92f}, 1.6f, 1.2f, 0.02f, Color{195, 20, 25, static_cast<unsigned char>(150 * pulse)});
+        DrawSphere(Vector3{-12.65f, 1.8f, -17.2f}, 0.28f, Color{15, 8, 20, 210});
     }
 
     if (flashIntensity > 0.0f) {
-        float flashRange = m_flashlightFocus ? 11.0f : 7.5f;
+        float flashRange = m_flashlightFocus ? 12.0f : 8.5f;
         Ray flashRay = m_camera.GetViewRay();
         float hitDist = flashRange;
         for (const auto& c : m_colliders) {
@@ -609,6 +697,8 @@ void MotelWorld3D::Render3D(engine::core::Engine& ) {
         Color spotCol = m_flashlightFocus ? Color{255, 250, 220, 110} : Color{255, 235, 190, 60};
         DrawSphere(hitPoint, m_flashlightFocus ? 0.35f : 0.65f, spotCol);
     }
+
+    DrawFlashlightViewmodel();
 
     EndMode3D();
 }

@@ -47,6 +47,7 @@ private:
     void UpdateRain(float dt);
     void HandleInteraction(engine::core::Engine& eng);
     void RenderInspectOverlay(Font font) const;
+    void DrawFlashlightViewmodel() const;
 
     void DrawFloorQuad(Texture2D tex, float x0, float z0, float x1, float z1, float y, float uTile, float vTile, Color tint) const;
     void DrawCeilingQuad(Texture2D tex, float x0, float z0, float x1, float z1, float y, float uTile, float vTile, Color tint) const;

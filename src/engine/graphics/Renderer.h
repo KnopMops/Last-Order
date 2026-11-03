@@ -41,6 +41,9 @@ public:
     void SetHighRes3DMode(bool hiRes) { m_highRes3DMode = hiRes; }
     bool IsHighRes3DMode() const { return m_highRes3DMode; }
 
+    void SetStretchToUltrawide(bool stretch) { m_stretchToUltrawide = stretch; }
+    bool IsStretchToUltrawide() const { return m_stretchToUltrawide; }
+
     bool IsScreamerActive() const { return m_screamerTimer > 0.0f; }
     void SetCrtEnabled(bool enabled) { m_crtEnabled = enabled; }
     bool IsCrtEnabled() const { return m_crtEnabled; }
@@ -68,7 +71,7 @@ private:
 
     bool m_crtEnabled = true;
     bool m_shakeAllowed = true;
-    bool m_stretchToUltrawide = true;
+    bool m_stretchToUltrawide = false;
     bool m_skip2DLightmap = false;
     bool m_highRes3DMode = false;
     float m_sanityStress = 0.0f;

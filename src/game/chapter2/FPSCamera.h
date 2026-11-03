@@ -6,7 +6,7 @@ namespace game::chapter2 {
 
 class FPSCamera {
 public:
-    void Init(Vector3 startPos, float startYaw, float startPitch);
+    void Init(Vector3 startPos, float startYaw = 0.0f, float startPitch = 0.0f);
     void Update(float dt, const std::vector<BoundingBox>& colliders);
 
     const Camera3D& GetCamera() const { return m_camera; }
@@ -17,6 +17,7 @@ public:
 
     float GetYaw() const { return m_yaw; }
     float GetPitch() const { return m_pitch; }
+    float GetRoll() const { return m_roll; }
     float GetStamina() const { return m_stamina; }
     bool IsCrouching() const { return m_isCrouching; }
     bool IsSprinting() const { return m_isSprinting; }
@@ -33,6 +34,7 @@ private:
     Vector3 m_position{0.0f, 1.65f, 0.0f};
     float m_yaw = 0.0f;
     float m_pitch = 0.0f;
+    float m_roll = 0.0f;
     float m_bobTimer = 0.0f;
     float m_footstepTimer = 0.0f;
     bool m_footstepTriggered = false;

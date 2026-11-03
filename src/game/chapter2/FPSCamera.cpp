@@ -8,6 +8,7 @@ void FPSCamera::Init(Vector3 startPos, float startYaw, float startPitch) {
     m_position = startPos;
     m_yaw = startYaw;
     m_pitch = startPitch;
+    m_roll = 0.0f;
     m_stamina = 100.0f;
     m_bobTimer = 0.0f;
     m_footstepTimer = 0.0f;
@@ -36,7 +37,7 @@ bool FPSCamera::PopFootstepTriggered() {
 
 void FPSCamera::SetLookAngle(float yaw, float pitch) {
     m_yaw = yaw;
-    m_pitch = std::clamp(pitch, -1.48f, 1.48f);
+    m_pitch = std::clamp(pitch, -1.45f, 1.45f);
     Vector3 fwd = GetForward();
     m_camera.target = Vector3{
         m_camera.position.x + fwd.x,
@@ -49,7 +50,7 @@ Vector3 FPSCamera::GetForward() const {
     return Vector3{
         std::sin(m_yaw) * std::cos(m_pitch),
         std::sin(m_pitch),
-        std::cos(m_yaw) * std::cos(m_pitch)
+        -std::cos(m_yaw) * std::cos(m_pitch)
     };
 }
 
@@ -57,7 +58,7 @@ Vector3 FPSCamera::GetRight() const {
     return Vector3{
         std::cos(m_yaw),
         0.0f,
-        -std::sin(m_yaw)
+        std::sin(m_yaw)
     };
 }
 
@@ -72,14 +73,14 @@ void FPSCamera::Update(float dt, const std::vector<BoundingBox>& colliders) {
         m_firstFrame = false;
     }
 
-    md.x = std::clamp(md.x, -45.0f, 45.0f);
-    md.y = std::clamp(md.y, -45.0f, 45.0f);
+    md.x = std::clamp(md.x, -35.0f, 35.0f);
+    md.y = std::clamp(md.y, -35.0f, 35.0f);
 
     m_yaw += md.x * 0.0022f;
     m_pitch -= md.y * 0.0022f;
-    m_pitch = std::clamp(m_pitch, -1.48f, 1.48f);
+    m_pitch = std::clamp(m_pitch, -1.45f, 1.45f);
 
-    Vector3 flatForward = Vector3{std::sin(m_yaw), 0.0f, std::cos(m_yaw)};
+    Vector3 flatForward = Vector3{std::sin(m_yaw), 0.0f, -std::cos(m_yaw)};
     Vector3 right = GetRight();
 
     Vector3 inputDir = {0.0f, 0.0f, 0.0f};
@@ -87,6 +88,11 @@ void FPSCamera::Update(float dt, const std::vector<BoundingBox>& colliders) {
     if (IsKeyDown(KEY_S)) { inputDir.x -= flatForward.x; inputDir.z -= flatForward.z; }
     if (IsKeyDown(KEY_D)) { inputDir.x += right.x; inputDir.z += right.z; }
     if (IsKeyDown(KEY_A)) { inputDir.x -= right.x; inputDir.z -= right.z; }
+
+    float targetRoll = 0.0f;
+    if (IsKeyDown(KEY_D)) targetRoll = -0.022f;
+    if (IsKeyDown(KEY_A)) targetRoll = 0.022f;
+    m_roll += (targetRoll - m_roll) * std::min(1.0f, dt * 10.0f);
 
     float inputLen = std::sqrt(inputDir.x * inputDir.x + inputDir.z * inputDir.z);
     m_isMoving = (inputLen > 0.001f);
@@ -100,7 +106,7 @@ void FPSCamera::Update(float dt, const std::vector<BoundingBox>& colliders) {
     m_isSprinting = (!m_isCrouching && IsKeyDown(KEY_LEFT_SHIFT) && m_isMoving && m_stamina > 4.0f);
 
     if (m_isSprinting) {
-        m_stamina = std::max(0.0f, m_stamina - dt * 26.0f);
+        m_stamina = std::max(0.0f, m_stamina - dt * 25.0f);
     } else {
         m_stamina = std::min(100.0f, m_stamina + dt * 18.0f);
     }
@@ -153,14 +159,27 @@ void FPSCamera::Update(float dt, const std::vector<BoundingBox>& colliders) {
     m_position = targetPos;
 
     float baseEyeY = m_isCrouching ? 0.95f : 1.62f;
-    float bobOffset = m_isMoving ? (std::sin(m_bobTimer) * 0.042f) : 0.0f;
-    m_camera.position = Vector3{m_position.x, m_position.y + baseEyeY + bobOffset, m_position.z};
+    float bobOffsetY = m_isMoving ? (std::sin(m_bobTimer) * 0.038f) : 0.0f;
+    float bobOffsetX = m_isMoving ? (std::cos(m_bobTimer * 0.5f) * 0.022f) : 0.0f;
+
+    Vector3 eyePos = Vector3{
+        m_position.x + right.x * bobOffsetX,
+        m_position.y + baseEyeY + bobOffsetY,
+        m_position.z + right.z * bobOffsetX
+    };
+    m_camera.position = eyePos;
 
     Vector3 lookDir = GetForward();
     m_camera.target = Vector3{
         m_camera.position.x + lookDir.x,
         m_camera.position.y + lookDir.y,
         m_camera.position.z + lookDir.z
+    };
+
+    m_camera.up = Vector3{
+        -std::cos(m_yaw) * m_roll,
+        1.0f,
+        -std::sin(m_yaw) * m_roll
     };
 }
 
