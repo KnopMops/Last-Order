@@ -7,3 +7,6 @@ release/
 *.zip
 settings.json
 save_profile.json
+CHAPTER_2_*.md
+*.spec.md
+
