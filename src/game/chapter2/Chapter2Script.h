@@ -35,6 +35,7 @@ public:
     virtual void AddSanity(float delta) = 0;
     virtual void AddBattery(float amount) = 0;
     virtual void SetAmbient(const std::string& path, float volume) = 0;
+    virtual void TriggerScreamer(const std::string& texture, float duration, float shake) = 0;
     virtual void EndAct(const std::string& text) = 0;
 };
 

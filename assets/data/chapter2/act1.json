@@ -1,8 +1,8 @@
 {
   "title": "АКТ 1 — РЕГИСТРАТУРА И ДВОР",
   "ambient": {
-    "path": "audio/bgm/amb_cafe_tension_lp.ogg",
-    "volume": 0.55
+    "path": "audio/bgm/amb_motel_storm_lp.wav",
+    "volume": 0.75
   },
   "start_event": "intro",
   "sounds": {
@@ -146,8 +146,8 @@
         "do": [
           {
             "type": "message",
-            "text": "В трубке тишина. Только капает вода.",
-            "time": 3
+            "text": "В трубке только гудки и шум дождя по козырьку.",
+            "time": 3.0
           }
         ]
       },
@@ -160,16 +160,32 @@
           {
             "type": "sfx",
             "path": "audio/sfx/sfx_phone_whisper.wav",
-            "volume": 0.9
+            "volume": 1.0
           },
           {
-            "type": "message",
-            "text": "Шёпот в трубке: «...Лера... зайди внутрь... ключи на доске...»",
-            "time": 5
+            "type": "sfx",
+            "path": "audio/screamers/sfx_sc_08_tv_static_shriek.wav",
+            "volume": 0.95
+          },
+          {
+            "type": "shake",
+            "amount": 6.5,
+            "time": 0.7
+          },
+          {
+            "type": "screamer",
+            "texture": "sprites/screamers/sc_night1_window.png",
+            "duration": 0.75,
+            "shake": 6.5
           },
           {
             "type": "sanity",
-            "delta": -5
+            "delta": -12
+          },
+          {
+            "type": "message",
+            "text": "ВОПЛЬ В ТРУБКЕ: «...Лера... не заходи... они заперли нас...»",
+            "time": 5.0
           }
         ]
       }
@@ -211,12 +227,12 @@
           {
             "type": "sfx",
             "path": "audio/sfx/sfx_door_bell.wav",
-            "volume": 0.9
+            "volume": 1.0
           },
           {
             "type": "sfx",
             "path": "audio/sfx/sfx_phantom_steps.wav",
-            "volume": 0.8,
+            "volume": 1.0,
             "at": [
               -12.0,
               1.2,
@@ -224,17 +240,33 @@
             ]
           },
           {
+            "type": "sfx",
+            "path": "audio/screamers/sfx_sc_09_shadow_roar.wav",
+            "volume": 1.0
+          },
+          {
+            "type": "shake",
+            "amount": 7.5,
+            "time": 0.85
+          },
+          {
+            "type": "screamer",
+            "texture": "sprites/screamers/sc_night12_corridor_rush.png",
+            "duration": 0.8,
+            "shake": 7.5
+          },
+          {
             "type": "flicker",
-            "time": 2.5
+            "time": 3.0
           },
           {
             "type": "sanity",
-            "delta": -8
+            "delta": -15
           },
           {
             "type": "message",
-            "text": "В глубине коридора кто-то сделал шаг. Потом ещё один.",
-            "time": 4
+            "text": "Шаги перешли в бешеный бег прямо к регистратуре!",
+            "time": 4.5
           }
         ]
       },
@@ -243,11 +275,11 @@
           {
             "type": "sfx",
             "path": "audio/sfx/sfx_door_bell.wav",
-            "volume": 0.9
+            "volume": 1.0
           },
           {
             "type": "message",
-            "text": "*ДЗИНЬ!* Никто не выходит.",
+            "text": "*ДЗИНЬ!* Звон протяжно затихает в пустом холле.",
             "time": 2.5
           }
         ]
@@ -350,23 +382,42 @@
       {
         "do": [
           {
+            "type": "set_flag",
+            "name": "corridor_whisper_done"
+          },
+          {
             "type": "sfx",
-            "path": "audio/sfx/sfx_sting_dread.wav",
-            "volume": 0.7,
-            "at": [
-              -18.0,
-              1.4,
-              -7.0
-            ]
+            "path": "audio/screamers/sfx_sc_05_glass_pound.wav",
+            "volume": 1.0
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_window_bang.wav",
+            "volume": 1.0
+          },
+          {
+            "type": "shake",
+            "amount": 9.5,
+            "time": 1.0
+          },
+          {
+            "type": "screamer",
+            "texture": "sprites/screamers/sc_night5_window_hands.png",
+            "duration": 0.9,
+            "shake": 9.5
           },
           {
             "type": "flicker",
-            "time": 1.2
+            "time": 2.2
+          },
+          {
+            "type": "sanity",
+            "delta": -18
           },
           {
             "type": "message",
-            "text": "Из дальнего конца коридора тянет холодом.",
-            "time": 3.5
+            "text": "УДАР В СТЕКЛО! В конце коридора в окно ударили окровавленные руки!",
+            "time": 5.0
           }
         ]
       }
@@ -565,26 +616,37 @@
           },
           {
             "type": "sfx",
-            "path": "audio/sfx/sfx_sting_dread.wav",
+            "path": "audio/screamers/sfx_sc_10_mirror_agony.wav",
             "volume": 1.0
           },
           {
             "type": "sfx",
-            "path": "audio/sfx/sfx_phone_whisper.wav",
-            "volume": 0.8
+            "path": "audio/screamers/sfx_sc_06_mirror_crack.wav",
+            "volume": 0.95
+          },
+          {
+            "type": "shake",
+            "amount": 9.5,
+            "time": 1.1
+          },
+          {
+            "type": "screamer",
+            "texture": "sprites/screamers/sc_night10_bloody_mirror.png",
+            "duration": 0.95,
+            "shake": 9.5
           },
           {
             "type": "flicker",
-            "time": 3.0
+            "time": 3.5
           },
           {
             "type": "sanity",
-            "delta": -15
+            "delta": -22
           },
           {
             "type": "message",
-            "text": "В отражении кто-то стоит у вас за спиной.",
-            "time": 4.5
+            "text": "В ОТРАЖЕНИИ ОНО СТОИТ ПРЯМО ЗА ВАМИ И СМОТРИТ В ГЛАЗА!",
+            "time": 5.0
           }
         ]
       }
@@ -610,9 +672,24 @@
             "target": "door_bath102"
           },
           {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_door_close_latch.wav",
+            "volume": 1.0
+          },
+          {
+            "type": "sfx",
+            "path": "audio/screamers/sfx_sc_12_chase_breath.wav",
+            "volume": 0.95
+          },
+          {
+            "type": "shake",
+            "amount": 5.0,
+            "time": 0.6
+          },
+          {
             "type": "message",
-            "text": "Дверь ванной захлопнулась сама. Шёпот Веры: «Не верь им...»",
-            "time": 5
+            "text": "Дверь ванной с грохотом захлопнулась сама! Шёпот в щели: «Не верь им...»",
+            "time": 5.0
           },
           {
             "type": "end_act",

@@ -222,6 +222,17 @@ void MotelWorld3D::SetAmbient(const std::string& path, float volume) {
     if (m_eng && !path.empty()) m_eng->Audio().PlayAmbient(path, volume);
 }
 
+void MotelWorld3D::TriggerScreamer(const std::string& texture, float duration, float shake) {
+    m_screamerActive = true;
+    m_screamerTimer = duration;
+    m_screamerDuration = duration;
+    m_screamerRedFlash = 1.0f;
+    if (m_eng && !texture.empty()) {
+        m_screamerTex = m_eng->Assets().GetTexture(texture);
+    }
+    if (m_eng) m_eng->Renderer().TriggerShake(shake, duration);
+}
+
 void MotelWorld3D::EndAct(const std::string& text) {
     m_endActText = text;
     m_endActTimer = 9.0f;
@@ -230,6 +241,13 @@ void MotelWorld3D::EndAct(const std::string& text) {
 
 void MotelWorld3D::Update(engine::core::Engine& eng, float dt) {
     m_time += dt;
+    if (m_screamerTimer > 0.0f) {
+        m_screamerTimer -= dt;
+        if (m_screamerTimer <= 0.0f) m_screamerActive = false;
+    }
+    if (m_screamerRedFlash > 0.0f) {
+        m_screamerRedFlash = std::max(0.0f, m_screamerRedFlash - dt * 2.0f);
+    }
     if (!m_ready) {
         if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_ENTER)) m_returnToMenu = true;
         return;
@@ -748,6 +766,11 @@ SceneEnvironment MotelWorld3D::BuildEnvironment() const {
     env.fogStart = le.fogStart;
     env.fogEnd = le.fogEnd;
     env.powerLevel = CurrentPowerLevel();
+    if (m_screamerActive) {
+        float f = std::clamp(m_screamerTimer / std::max(0.01f, m_screamerDuration), 0.0f, 1.0f);
+        env.ambientSky = Vector3Add(env.ambientSky, Vector3{1.4f * f, 1.5f * f, 1.8f * f});
+        env.fogColor = Vector3Add(env.fogColor, Vector3{0.35f * f, 0.4f * f, 0.5f * f});
+    }
     return env;
 }
 
@@ -827,27 +850,43 @@ void MotelWorld3D::DrawScene(const Shader* overrideShader, bool reflectionPass) 
     if (overrideShader == nullptr) m_lighting.SetObjectParams(2.0f, Vector3{0.0f, 0.0f, 0.0f}, 0.0f);
 
     if (reflectionPass) {
-        DrawPhantoms();
+        DrawPhantoms(true);
         DrawPlayerProxy();
+    } else {
+        DrawPhantoms(false);
     }
 }
 
-void MotelWorld3D::DrawPhantoms() const {
+void MotelWorld3D::DrawPhantoms(bool reflectionPass) const {
     for (const Phantom& p : m_level.Phantoms()) {
         if (!p.flag.empty() && !m_script.HasFlag(p.flag)) continue;
         if (!p.hideFlag.empty() && m_script.HasFlag(p.hideFlag)) continue;
+        bool isMirrorPhantom = (p.position.x > -19.0f && p.position.z > -3.0f);
+        if (reflectionPass != isMirrorPhantom) continue;
         Vector3 base = p.position;
         float sway = std::sin(m_time * 0.9f) * 0.02f;
         Vector3 fwd{std::sin(p.yaw), 0.0f, -std::cos(p.yaw)};
         Vector3 right{std::cos(p.yaw), 0.0f, std::sin(p.yaw)};
-        DrawCapsule(Vector3{base.x, base.y + 0.25f, base.z}, Vector3{base.x + sway, base.y + 1.5f, base.z}, 0.21f, 8, 4, Color{14, 12, 16, 255});
-        Vector3 head{base.x + sway + fwd.x * 0.03f, base.y + 1.78f, base.z + fwd.z * 0.03f};
-        DrawSphereEx(head, 0.135f, 8, 8, Color{168, 160, 150, 255});
+        bool horrific = m_script.HasFlag("mirror_seen") || m_script.HasFlag("corridor_whisper_done");
+        float jitter = horrific ? (std::sin(m_time * 55.0f) > 0.35f ? 0.035f : -0.035f) : 0.0f;
+        DrawCapsule(Vector3{base.x, base.y + 0.25f, base.z}, Vector3{base.x + sway + jitter * 0.5f, base.y + 1.5f, base.z}, 0.22f, 8, 4, Color{10, 8, 12, 255});
+        Vector3 head{base.x + sway + fwd.x * 0.03f + jitter, base.y + 1.78f, base.z + fwd.z * 0.03f + jitter * 0.5f};
+        Color skinColor = horrific ? Color{195, 185, 175, 255} : Color{168, 160, 150, 255};
+        DrawSphereEx(head, 0.14f, 8, 8, skinColor);
         for (float s : {-1.0f, 1.0f}) {
             Vector3 eye = Vector3Add(head, Vector3Add(Vector3Scale(fwd, 0.115f), Vector3Add(Vector3Scale(right, 0.045f * s), Vector3{0.0f, 0.02f, 0.0f})));
-            DrawSphereEx(eye, 0.026f, 6, 6, BLACK);
+            DrawSphereEx(eye, 0.034f, 6, 6, BLACK);
+            Vector3 pupil = Vector3Add(eye, Vector3Scale(fwd, 0.015f));
+            DrawSphereEx(pupil, 0.012f, 4, 4, Color{255, 25, 25, 255});
             Vector3 arm = Vector3Add(base, Vector3Scale(right, 0.27f * s));
-            DrawCapsule(Vector3{arm.x, base.y + 0.55f, arm.z}, Vector3{arm.x, base.y + 1.42f, arm.z}, 0.06f, 6, 3, Color{14, 12, 16, 255});
+            Vector3 armTarget = horrific ? Vector3Add(arm, Vector3Add(Vector3Scale(fwd, 0.42f), Vector3{0.0f, 0.1f, 0.0f}))
+                                         : Vector3{arm.x, base.y + 0.55f, arm.z};
+            DrawCapsule(Vector3{arm.x, base.y + 1.45f, arm.z}, armTarget, 0.065f, 6, 3, Color{10, 8, 12, 255});
+        }
+        if (horrific) {
+            Vector3 jawTop = Vector3Add(head, Vector3Add(Vector3Scale(fwd, 0.11f), Vector3{0.0f, -0.04f, 0.0f}));
+            Vector3 jawBot = Vector3Add(jawTop, Vector3{0.0f, -0.16f, 0.0f});
+            DrawCapsule(jawTop, jawBot, 0.05f, 6, 3, BLACK);
         }
     }
 }
@@ -974,6 +1013,11 @@ void MotelWorld3D::Render3D(engine::core::Engine&) {
         DrawLine3D(d.pos, Vector3{d.pos.x - 0.04f, d.pos.y - d.len, d.pos.z}, rainColor);
     }
 
+    if (m_screamerActive && m_screamerTex.id != 0 && m_script.HasFlag("corridor_whisper_done")) {
+        rlDrawRenderBatchActive();
+        DrawBillboard(cam, m_screamerTex, Vector3{-19.92f, 1.6f, -6.75f}, 1.5f, Color{255, 255, 255, 240});
+        rlDrawRenderBatchActive();
+    }
     DrawViewmodel();
     EndMode3D();
 }
@@ -1110,6 +1154,23 @@ void MotelWorld3D::RenderUI(engine::core::Engine& eng) {
         DrawRectangle(0, 250, static_cast<int>(UI_W), 120, Color{0, 0, 0, static_cast<unsigned char>(200 * a)});
         Vector2 size = MeasureTextEx(font, m_endActText.c_str(), 30.0f, 1.0f);
         DrawLabel(font, m_endActText, cx - size.x * 0.5f, 292.0f, 30.0f, Color{230, 200, 160, static_cast<unsigned char>(255 * a)});
+    }
+
+    if (m_screamerRedFlash > 0.0f) {
+        DrawRectangle(0, 0, static_cast<int>(UI_W), static_cast<int>(UI_H), Color{210, 15, 15, static_cast<unsigned char>(85 * m_screamerRedFlash)});
+    }
+
+    if (m_screamerTimer > 0.0f) {
+        float norm = m_screamerTimer / std::max(0.01f, m_screamerDuration);
+        float alpha = std::clamp(norm, 0.0f, 1.0f);
+        DrawRectangle(0, 0, static_cast<int>(UI_W), static_cast<int>(UI_H), Color{140, 10, 10, static_cast<unsigned char>(130 * alpha)});
+        if (m_screamerTex.id != 0) {
+            float jx = (std::sin(m_time * 80.0f) > 0.0f ? 8.0f : -8.0f) * alpha;
+            float jy = (std::cos(m_time * 70.0f) > 0.0f ? 6.0f : -6.0f) * alpha;
+            Rectangle src{0.0f, 0.0f, static_cast<float>(m_screamerTex.width), static_cast<float>(m_screamerTex.height)};
+            Rectangle dst{jx, jy, UI_W, UI_H};
+            DrawTexturePro(m_screamerTex, src, dst, Vector2{0.0f, 0.0f}, 0.0f, Color{255, 255, 255, static_cast<unsigned char>(255 * alpha)});
+        }
     }
 }
 

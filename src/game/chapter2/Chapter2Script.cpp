@@ -156,6 +156,8 @@ void Chapter2Script::Execute(const json& a, IScriptHost& host, std::optional<Vec
         host.AddBattery(a.value("amount", 30.0f));
     } else if (type == "ambient") {
         host.SetAmbient(a.value("path", std::string{}), a.value("volume", 0.6f));
+    } else if (type == "screamer") {
+        host.TriggerScreamer(a.value("texture", std::string{}), a.value("duration", 0.8f), a.value("shake", 8.0f));
     } else if (type == "end_act") {
         host.EndAct(a.value("text", std::string{}));
     } else if (type == "event") {

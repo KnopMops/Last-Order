@@ -58,6 +58,7 @@ private:
     void AddSanity(float delta) override;
     void AddBattery(float amount) override;
     void SetAmbient(const std::string& path, float volume) override;
+    void TriggerScreamer(const std::string& texture, float duration, float shake) override;
     void EndAct(const std::string& text) override;
 
     void UpdateFlashlight(float dt);
@@ -81,7 +82,7 @@ private:
     void BeginCamera(const Camera3D& camera) const;
 
     void DrawScene(const Shader* overrideShader, bool reflectionPass);
-    void DrawPhantoms() const;
+    void DrawPhantoms(bool reflectionPass) const;
     void DrawPlayerProxy() const;
     void DrawViewmodel() const;
     void DrawInspectOverlay(engine::core::Engine& eng);
@@ -134,6 +135,12 @@ private:
     float m_objectiveFlash = 0.0f;
     std::string m_endActText;
     float m_endActTimer = 0.0f;
+
+    bool m_screamerActive = false;
+    float m_screamerTimer = 0.0f;
+    float m_screamerDuration = 0.8f;
+    float m_screamerRedFlash = 0.0f;
+    Texture2D m_screamerTex{};
 
     std::vector<RainDrop3D> m_rain;
     int m_stepIndex = 0;
