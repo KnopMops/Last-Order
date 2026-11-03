@@ -11,6 +11,7 @@
 #include "game/ui/MainMenuScene.h"
 #include "game/ui/SettingsOverlay.h"
 #include "game/world/CafeWorld.h"
+#include "game/chapter2/MotelWorld3D.h"
 #include <optional>
 #include <string>
 #include <vector>
@@ -22,6 +23,7 @@ enum class GameScreen {
     PlayingShift,
     EndlessMode,
     NightmareChase,
+    Chapter2_Motel3D,
     Paused
 };
 
@@ -110,6 +112,7 @@ private:
     bool m_debugNoclip = false;
     int m_demoScreamerIdx = 0;
     float m_endlessSanityCooldownTimer = 0.0f;
+    chapter2::MotelWorld3D m_motel3D{};
 };
 
 }

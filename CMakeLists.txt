@@ -63,6 +63,8 @@ set(GAME_SOURCES
     src/game/systems/ChaseMinigame.cpp
     src/game/systems/EndlessDirector.cpp
     src/game/systems/SaveSystem.cpp
+    src/game/chapter2/FPSCamera.cpp
+    src/game/chapter2/MotelWorld3D.cpp
 )
 add_executable(last_order ${GAME_SOURCES})
 set_target_properties(last_order PROPERTIES OUTPUT_NAME "Last Order")

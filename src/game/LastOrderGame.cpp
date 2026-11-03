@@ -635,6 +635,9 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
         m_chaseMinigame.Update(eng, fixedDt);
         return;
     }
+    if (m_screen == GameScreen::Chapter2_Motel3D) {
+        return;
+    }
 
     if (m_settingsUI.IsOpen() || m_sanity.IsGameOver() ||
         m_screen == GameScreen::MainMenu || m_screen == GameScreen::Paused) {
@@ -894,6 +897,10 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
             case ui::MenuCommand::StartEndlessMode:
                 StartEndlessShift(eng);
                 break;
+            case ui::MenuCommand::StartChapter2_Motel3D:
+                m_screen = GameScreen::Chapter2_Motel3D;
+                m_motel3D.Init(eng, 1);
+                break;
             case ui::MenuCommand::OpenSettings:
                 m_settingsUI.Open();
                 break;
@@ -902,6 +909,20 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
                 break;
             default:
                 break;
+        }
+        return;
+    }
+
+    if (m_screen == GameScreen::Chapter2_Motel3D) {
+        if (m_settingsUI.IsOpen()) {
+            m_settingsUI.Update(eng);
+            return;
+        }
+        m_motel3D.Update(eng, dt);
+        if (m_motel3D.WantsReturnToMenu()) {
+            m_screen = GameScreen::MainMenu;
+            m_mainMenu.Init(eng);
+            EnableCursor();
         }
         return;
     }
@@ -1519,6 +1540,10 @@ void LastOrderGame::OnRenderWorld(engine::core::Engine& eng) {
         m_chaseMinigame.RenderWorld(eng);
         return;
     }
+    if (m_screen == GameScreen::Chapter2_Motel3D) {
+        m_motel3D.Render3D(eng);
+        return;
+    }
 
     int nightToRender = (m_screen == GameScreen::EndlessMode) ? 2 : m_currentNight;
 
@@ -1574,6 +1599,11 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     }
     if (m_screen == GameScreen::NightmareChase) {
         m_chaseMinigame.RenderUI(eng);
+        m_settingsUI.Render(eng);
+        return;
+    }
+    if (m_screen == GameScreen::Chapter2_Motel3D) {
+        m_motel3D.RenderUI(eng);
         m_settingsUI.Render(eng);
         return;
     }
@@ -1685,7 +1715,8 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     m_settingsUI.Render(eng);
 }
 
-void LastOrderGame::OnShutdown(engine::core::Engine& ) {
+void LastOrderGame::OnShutdown(engine::core::Engine& eng) {
+    m_motel3D.Shutdown(eng);
     if (IsCursorHidden()) EnableCursor();
 }
 

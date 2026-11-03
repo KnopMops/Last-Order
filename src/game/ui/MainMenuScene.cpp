@@ -226,8 +226,7 @@ MenuCommand MainMenuScene::Update(engine::core::Engine& eng, float dt) {
                     m_selectedBtn = 0;
                     return MenuCommand::None;
                 case 1:
-                    eng.Audio().PlaySfx("audio/sfx/sfx_clock_tick.wav", 0.4f);
-                    return MenuCommand::None;
+                    return MenuCommand::StartChapter2_Motel3D;
                 case 2:
                     m_state = MenuState::Main;
                     m_selectedBtn = 0;
@@ -430,7 +429,7 @@ void MainMenuScene::RenderUI(engine::core::Engine& eng) const {
 
         const char* chTitles[3] = {
             "Глава 1: Кафе «Тёплый угол» [5 Ночей]",
-            "Глава 2: Заброшенная АЗС [🔒 Скоро]",
+            "Глава 2: Мотель «Северное сияние» [3D]",
             "Назад в главное меню"
         };
 
@@ -441,7 +440,7 @@ void MainMenuScene::RenderUI(engine::core::Engine& eng) const {
             float bw = 480.0f;
             float bh = 56.0f;
 
-            bool locked = (i == 1);
+            bool locked = false;
             Color bgCol = locked ? Color{26, 18, 18, 180} : (sel ? Color{107, 51, 34, 245} : Color{42, 23, 21, 215});
             Color borderCol = locked ? Color{110, 80, 70, 120} : (sel ? Color{244, 184, 96, 255} : Color{196, 122, 59, 160});
 
