@@ -36,6 +36,13 @@ int main(int argc, char** argv) {
     }
 
     game::LastOrderGame game;
+#if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
+    for (int i = 1; i < argc; ++i) {
+        std::string arg = argv[i];
+        if (arg == "--chapter2") game.RequestChapter2Tour("");
+        if (arg == "--ch2-tour" && i + 1 < argc) game.RequestChapter2Tour(argv[i + 1]);
+    }
+#endif
     engine.Run(game, smokeTest);
     engine.Shutdown();
     return 0;

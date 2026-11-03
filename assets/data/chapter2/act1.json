@@ -1,0 +1,625 @@
+{
+  "title": "АКТ 1 — РЕГИСТРАТУРА И ДВОР",
+  "ambient": {
+    "path": "audio/bgm/amb_cafe_tension_lp.ogg",
+    "volume": 0.55
+  },
+  "start_event": "intro",
+  "sounds": {
+    "door_open": "audio/sfx/sfx_door_creak_open.wav",
+    "door_close": "audio/sfx/sfx_door_close_latch.wav",
+    "door_locked": "audio/sfx/sfx_door_locked_rattle.wav",
+    "pickup": "audio/sfx/sfx_key_pickup.wav",
+    "flashlight": "audio/sfx/sfx_flashlight_click.wav",
+    "inspect_close": "audio/sfx/sfx_notebook_flip.wav",
+    "hide": "audio/sfx/sfx_wardrobe_hide.wav",
+    "breath": "audio/sfx/sfx_chase_stamina_pant.wav",
+    "throw": "audio/sfx/sfx_chase_debris_hit.wav"
+  },
+  "items": {
+    "key_101": {
+      "name": "Ключ 101",
+      "model": "key",
+      "color": [
+        40,
+        150,
+        95
+      ],
+      "inspect_title": "КЛЮЧ ОТ НОМЕРА 101",
+      "inspect_text": "Тяжёлый латунный ключ с изумрудным брелоком.\nНа обороте выцарапано: «НЕ СМОТРИ В 102».",
+      "event": "got_key_101"
+    },
+    "key_102": {
+      "name": "Ключ 102",
+      "model": "key",
+      "color": [
+        170,
+        40,
+        45
+      ],
+      "inspect_title": "КЛЮЧ ОТ НОМЕРА 102",
+      "inspect_text": "Брелок мокрый и холодный, будто его только что держали в руке.\nМинуту назад этого ключа на доске не было.",
+      "event": "got_key_102"
+    },
+    "fuse": {
+      "name": "Предохранитель",
+      "model": "fuse",
+      "color": [
+        200,
+        200,
+        210
+      ],
+      "inspect_title": "ПРЕДОХРАНИТЕЛЬ ПК-45",
+      "inspect_text": "Керамический предохранитель для генератора.\nНа корпусе карандашом: «запасной — М.»",
+      "event": "got_fuse"
+    },
+    "battery": {
+      "name": "Батарейка",
+      "model": "battery",
+      "color": [
+        150,
+        40,
+        35
+      ],
+      "inspect_title": "БАТАРЕЙКА «ЭЛЕМЕНТ 373»",
+      "inspect_text": "Советская батарейка. Должна протянуть ещё пару часов.",
+      "event": "got_battery",
+      "consumable": true
+    },
+    "cassette": {
+      "name": "Кассета",
+      "model": "cassette",
+      "color": [
+        40,
+        40,
+        46
+      ],
+      "inspect_title": "АУДИОКАССЕТА «МК-60»",
+      "inspect_text": "На наклейке почерком Михаила: «86 км. Частота 94.5. Запись №1».\nМагнитофон нужен для прослушивания.",
+      "event": "got_cassette"
+    }
+  },
+  "events": {
+    "intro": [
+      {
+        "do": [
+          {
+            "type": "message",
+            "text": "Машина заглохла у самой вывески. Дождь не утихает.",
+            "time": 6
+          },
+          {
+            "type": "objective",
+            "text": "Найдите укрытие в мотеле"
+          }
+        ]
+      }
+    ],
+    "near_motel": [
+      {
+        "do": [
+          {
+            "type": "message",
+            "text": "Где-то под навесом звонит таксофон...",
+            "time": 4
+          }
+        ]
+      }
+    ],
+    "car": [
+      {
+        "when": {
+          "flag": "car_checked"
+        },
+        "do": [
+          {
+            "type": "message",
+            "text": "Аварийка мигает в пустоту. Дальше дороги нет.",
+            "time": 3
+          }
+        ]
+      },
+      {
+        "do": [
+          {
+            "type": "set_flag",
+            "name": "car_checked"
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_car_starter_dead.wav",
+            "volume": 0.7
+          },
+          {
+            "type": "message",
+            "text": "Двигатель залит водой. Свечи мертвы. Вы никуда не уедете.",
+            "time": 4
+          }
+        ]
+      }
+    ],
+    "payphone": [
+      {
+        "when": {
+          "flag": "payphone_answered"
+        },
+        "do": [
+          {
+            "type": "message",
+            "text": "В трубке тишина. Только капает вода.",
+            "time": 3
+          }
+        ]
+      },
+      {
+        "do": [
+          {
+            "type": "set_flag",
+            "name": "payphone_answered"
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_phone_whisper.wav",
+            "volume": 0.9
+          },
+          {
+            "type": "message",
+            "text": "Шёпот в трубке: «...Лера... зайди внутрь... ключи на доске...»",
+            "time": 5
+          },
+          {
+            "type": "sanity",
+            "delta": -5
+          }
+        ]
+      }
+    ],
+    "enter_lobby": [
+      {
+        "do": [
+          {
+            "type": "message",
+            "text": "Здесь сухо, но света нет. Только красная лампа над журналом.",
+            "time": 5
+          },
+          {
+            "type": "objective",
+            "text": "Осмотрите регистратуру"
+          }
+        ]
+      }
+    ],
+    "bell": [
+      {
+        "do": [
+          {
+            "type": "counter_add",
+            "name": "bell",
+            "value": 1
+          }
+        ],
+        "continue": true
+      },
+      {
+        "when": {
+          "counter": {
+            "name": "bell",
+            "eq": 3
+          }
+        },
+        "do": [
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_door_bell.wav",
+            "volume": 0.9
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_phantom_steps.wav",
+            "volume": 0.8,
+            "at": [
+              -12.0,
+              1.2,
+              -7.0
+            ]
+          },
+          {
+            "type": "flicker",
+            "time": 2.5
+          },
+          {
+            "type": "sanity",
+            "delta": -8
+          },
+          {
+            "type": "message",
+            "text": "В глубине коридора кто-то сделал шаг. Потом ещё один.",
+            "time": 4
+          }
+        ]
+      },
+      {
+        "do": [
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_door_bell.wav",
+            "volume": 0.9
+          },
+          {
+            "type": "message",
+            "text": "*ДЗИНЬ!* Никто не выходит.",
+            "time": 2.5
+          }
+        ]
+      }
+    ],
+    "radio": [
+      {
+        "when": {
+          "flag": "radio_heard"
+        },
+        "do": [
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_radio_click.wav",
+            "volume": 0.6
+          },
+          {
+            "type": "message",
+            "text": "Только шипение эфира на 94.5.",
+            "time": 3
+          }
+        ]
+      },
+      {
+        "do": [
+          {
+            "type": "set_flag",
+            "name": "radio_heard"
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_phone_whisper.wav",
+            "volume": 0.9
+          },
+          {
+            "type": "message",
+            "text": "РАДИО: «...если ты на 86-м... запусти генератор... не верь зеркалам...»",
+            "time": 6
+          },
+          {
+            "type": "objective",
+            "text": "Возьмите ключ с доски за стойкой"
+          }
+        ]
+      }
+    ],
+    "ledger": [
+      {
+        "do": [
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_notebook_flip.wav",
+            "volume": 0.8
+          },
+          {
+            "type": "message",
+            "text": "Журнал: последний постоялец заселился в 102 «сегодня». Подпись — ваша.",
+            "time": 6
+          },
+          {
+            "type": "sanity",
+            "delta": -6
+          }
+        ]
+      }
+    ],
+    "got_key_101": [
+      {
+        "do": [
+          {
+            "type": "objective",
+            "text": "Обыщите номер 101 (коридор слева от холла)"
+          }
+        ]
+      }
+    ],
+    "door_101_locked": [
+      {
+        "do": [
+          {
+            "type": "message",
+            "text": "Заперто. Ключ должен висеть на доске за стойкой.",
+            "time": 3
+          }
+        ]
+      }
+    ],
+    "door_101_unlocked": [
+      {
+        "do": [
+          {
+            "type": "message",
+            "text": "Замок номера 101 щёлкнул.",
+            "time": 2.5
+          }
+        ]
+      }
+    ],
+    "corridor_whisper": [
+      {
+        "do": [
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_sting_dread.wav",
+            "volume": 0.7,
+            "at": [
+              -18.0,
+              1.4,
+              -7.0
+            ]
+          },
+          {
+            "type": "flicker",
+            "time": 1.2
+          },
+          {
+            "type": "message",
+            "text": "Из дальнего конца коридора тянет холодом.",
+            "time": 3.5
+          }
+        ]
+      }
+    ],
+    "got_fuse": [
+      {
+        "do": [
+          {
+            "type": "objective",
+            "text": "Запустите генератор во дворе (через служебную дверь за стойкой)"
+          }
+        ]
+      }
+    ],
+    "got_battery": [
+      {
+        "do": [
+          {
+            "type": "battery",
+            "amount": 45
+          },
+          {
+            "type": "message",
+            "text": "Батарейка заменена. Фонарик светит ярче.",
+            "time": 3
+          }
+        ]
+      }
+    ],
+    "got_cassette": [
+      {
+        "do": [
+          {
+            "type": "message",
+            "text": "Кассета Михаила. Где-то здесь должен быть магнитофон.",
+            "time": 4
+          }
+        ]
+      }
+    ],
+    "generator": [
+      {
+        "when": {
+          "flag": "power"
+        },
+        "do": [
+          {
+            "type": "message",
+            "text": "Генератор ровно гудит.",
+            "time": 2.5
+          }
+        ]
+      },
+      {
+        "when": {
+          "not_item": "fuse"
+        },
+        "do": [
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_fuse_insert.wav",
+            "volume": 0.7
+          },
+          {
+            "type": "message",
+            "text": "Гнездо предохранителя пустое. Нужен ПК-45.",
+            "time": 3.5
+          }
+        ]
+      },
+      {
+        "do": [
+          {
+            "type": "take_item",
+            "item": "fuse"
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_generator_start.wav",
+            "volume": 1.0
+          },
+          {
+            "type": "power",
+            "on": true
+          },
+          {
+            "type": "set_flag",
+            "name": "power"
+          },
+          {
+            "type": "shake",
+            "amount": 2,
+            "time": 0.6
+          },
+          {
+            "type": "flicker",
+            "time": 1.6
+          },
+          {
+            "type": "close_door",
+            "target": "door_back"
+          },
+          {
+            "type": "message",
+            "text": "Генератор ожил. В мотеле зажёгся свет... и где-то хлопнула дверь.",
+            "time": 5
+          },
+          {
+            "type": "objective",
+            "text": "Вернитесь к доске с ключами"
+          }
+        ]
+      }
+    ],
+    "got_key_102": [
+      {
+        "do": [
+          {
+            "type": "sanity",
+            "delta": -6
+          },
+          {
+            "type": "objective",
+            "text": "Проверьте номер 102"
+          }
+        ]
+      }
+    ],
+    "door_102_locked": [
+      {
+        "when": {
+          "flag": "power"
+        },
+        "do": [
+          {
+            "type": "message",
+            "text": "Заперто. На доске появился новый ключ?..",
+            "time": 3
+          }
+        ]
+      },
+      {
+        "do": [
+          {
+            "type": "message",
+            "text": "Заперто. Ключа от 102 на доске нет.",
+            "time": 3
+          }
+        ]
+      }
+    ],
+    "door_102_unlocked": [
+      {
+        "do": [
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_heartbeat_dread.wav",
+            "volume": 0.7
+          }
+        ]
+      }
+    ],
+    "door_103_locked": [
+      {
+        "do": [
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_heartbeat_dread.wav",
+            "volume": 0.6
+          },
+          {
+            "type": "message",
+            "text": "Заперто изнутри. За дверью кто-то тихо дышит.",
+            "time": 3.5
+          }
+        ]
+      }
+    ],
+    "door_104_locked": [
+      {
+        "do": [
+          {
+            "type": "message",
+            "text": "Дверь не поддаётся. Замок залит воском.",
+            "time": 3
+          }
+        ]
+      }
+    ],
+    "mirror_102": [
+      {
+        "do": [
+          {
+            "type": "set_flag",
+            "name": "mirror_seen"
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_sting_dread.wav",
+            "volume": 1.0
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_phone_whisper.wav",
+            "volume": 0.8
+          },
+          {
+            "type": "flicker",
+            "time": 3.0
+          },
+          {
+            "type": "sanity",
+            "delta": -15
+          },
+          {
+            "type": "message",
+            "text": "В отражении кто-то стоит у вас за спиной.",
+            "time": 4.5
+          }
+        ]
+      }
+    ],
+    "leave_bathroom": [
+      {
+        "when": {
+          "flag": "phantom_gone"
+        },
+        "do": []
+      },
+      {
+        "when": {
+          "flag": "mirror_seen"
+        },
+        "do": [
+          {
+            "type": "set_flag",
+            "name": "phantom_gone"
+          },
+          {
+            "type": "close_door",
+            "target": "door_bath102"
+          },
+          {
+            "type": "message",
+            "text": "Дверь ванной захлопнулась сама. Шёпот Веры: «Не верь им...»",
+            "time": 5
+          },
+          {
+            "type": "end_act",
+            "text": "АКТ 1 ЗАВЕРШЁН — продолжение следует"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -21,6 +21,7 @@ public:
     virtual void OnInit(Engine& eng) = 0;
     virtual void OnFixedUpdate(Engine& eng, float fixedDt) = 0;
     virtual void OnFrameUpdate(Engine& eng, float dt) = 0;
+    virtual void OnRenderOffscreen(Engine&) {}
     virtual void OnRenderWorld(Engine& eng) = 0;
     virtual void OnRenderUI(Engine& eng) = 0;
     virtual void OnAction(Engine& eng, const EngineAction& action) = 0;

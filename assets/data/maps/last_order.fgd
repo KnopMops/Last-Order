@@ -1,0 +1,95 @@
+// Last Order - Chapter 2 entity definitions for TrenchBroom (Generic game, Valve220 format)
+// Scale: 32 map units = 1 meter. Textures: assets/sprites/3d/*.png (name without extension).
+// Special textures: clip (collision only), trigger (invisible), nodraw (invisible face).
+
+@SolidClass = worldspawn : "World"
+[
+	script(string) : "Act scenario JSON (relative to assets)" : "data/chapter2/act1.json"
+	fog_color(string) : "Fog color RGB 0..1" : "0.035 0.045 0.07"
+	fog_start(float) : "Fog start (m)" : 5
+	fog_end(float) : "Fog end (m)" : 26
+	ambient_sky(string) : "Ambient from above" : "0.075 0.085 0.12"
+	ambient_ground(string) : "Ambient from below" : "0.03 0.03 0.04"
+	sky_light(string) : "Extra light where the sky is visible" : "0.11 0.13 0.19"
+]
+
+@PointClass size(-8 -8 0, 8 8 56) color(0 255 0) = info_player_start : "Player start"
+[
+	angle(integer) : "Yaw (0 = east, 90 = north)" : 0
+]
+
+@PointClass size(-4 -4 -4, 4 4 4) color(255 220 120) = light : "Light (baked unless dynamic)"
+[
+	_color(string) : "Color RGB 0..1" : "1 0.85 0.6"
+	radius(float) : "Radius (m)" : 5
+	intensity(float) : "Intensity" : 1
+	group(string) : "Group (power = turns on with generator)" : ""
+	style(choices) : "Style" : "steady" = [ "steady" : "Steady" "flicker" : "Flicker" "blink" : "Blink" "pulse" : "Pulse" ]
+	dynamic(choices) : "Dynamic (not baked)" : 0 = [ 0 : "No" 1 : "Yes" ]
+]
+
+@SolidClass = func_door : "Hinged physical door"
+[
+	targetname(target_source) : "Name"
+	hinge(string) : "Hinge X Y (map units)"
+	open_angle(float) : "Open angle (deg)" : 100
+	both_ways(choices) : "Swing away from player" : 1 = [ 0 : "No" 1 : "Yes" ]
+	lock(string) : "Required item id" : ""
+	locked_event(string) : "Event when locked" : ""
+	unlock_event(string) : "Event on unlock" : ""
+	label(string) : "Prompt label" : "Дверь"
+]
+
+@SolidClass = prop_physics : "Dynamic rigid body"
+[
+	mass(float) : "Mass (kg)" : 10
+	label(string) : "Prompt label" : "Предмет"
+]
+
+@SolidClass = func_interact : "Usable brush"
+[
+	event(string) : "Event"
+	label(string) : "Prompt label"
+	solid(choices) : "Solid" : 1 = [ 0 : "No" 1 : "Yes" ]
+]
+
+@SolidClass = trigger_event : "Volume trigger"
+[
+	event(string) : "Event"
+	once(choices) : "Once" : 1 = [ 0 : "No" 1 : "Yes" ]
+]
+
+@SolidClass = func_mirror : "Mirror (face with motel_mirror_glass reflects)"
+[
+	look_event(string) : "Event when the player looks into it" : ""
+]
+
+@PointClass size(-8 -8 0, 8 8 60) color(80 0 0) = mirror_phantom : "Figure visible only in mirrors"
+[
+	angle(integer) : "Yaw" : 0
+	flag(string) : "Visible only if flag set" : ""
+	hide_flag(string) : "Hidden once flag set" : ""
+]
+
+@PointClass size(-4 -4 -4, 4 4 4) color(0 200 255) = item_pickup : "Pickup item (defined in act JSON)"
+[
+	item(string) : "Item id"
+	angle(integer) : "Yaw" : 0
+	require_flag(string) : "Appears only when flag set" : ""
+]
+
+@PointClass size(-8 -8 -8, 8 8 8) color(120 60 200) = hide_spot : "Hiding spot (origin = eye position)"
+[
+	angle(integer) : "Look yaw" : 0
+	label(string) : "Prompt label" : "Укрытие"
+]
+
+@PointClass size(-4 -4 -4, 4 4 4) color(255 120 0) = sound_emitter : "Positional repeating sound"
+[
+	sound(string) : "Sound path (relative to assets)"
+	interval(float) : "Interval (s)" : 10
+	volume(float) : "Volume" : 0.6
+	radius(float) : "Audible radius (m)" : 12
+	flag(string) : "Only when flag set" : ""
+	hide_flag(string) : "Silenced when flag set" : ""
+]

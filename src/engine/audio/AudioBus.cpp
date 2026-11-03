@@ -66,6 +66,17 @@ void AudioBus::PlaySfx(const std::string& relativeWavPath, float baseVolume) {
     Sound s = m_assets->GetSound(relativeWavPath);
     if (s.stream.buffer != nullptr) {
         SetSoundVolume(s, std::clamp(baseVolume * m_sfxVol, 0.0f, 1.0f));
+        SetSoundPan(s, 0.5f);
+        PlaySound(s);
+    }
+}
+
+void AudioBus::PlaySfxSpatial(const std::string& relativeWavPath, float baseVolume, float pan) {
+    if (!m_assets) return;
+    Sound s = m_assets->GetSound(relativeWavPath);
+    if (s.stream.buffer != nullptr) {
+        SetSoundVolume(s, std::clamp(baseVolume * m_sfxVol, 0.0f, 1.0f));
+        SetSoundPan(s, std::clamp(pan, 0.0f, 1.0f));
         PlaySound(s);
     }
 }

@@ -80,6 +80,7 @@ void Engine::Run(IGame& game, bool singleFrameSmokeTest) {
         m_renderer.Update(dt, m_time.GetTotalRealTime(), m_settings.Get());
         m_audio.Update(dt, m_settings.Get());
 
+        game.OnRenderOffscreen(*this);
         m_renderer.BeginWorldPass();
         game.OnRenderWorld(*this);
         m_renderer.EndWorldPass(m_lighting, m_time.GetTotalRealTime());

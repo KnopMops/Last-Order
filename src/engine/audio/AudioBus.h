@@ -16,6 +16,7 @@ public:
     void StopAmbient();
 
     void PlaySfx(const std::string& relativeWavPath, float baseVolume = 0.8f);
+    void PlaySfxSpatial(const std::string& relativeWavPath, float baseVolume, float pan);
     void PlayScreamerStinger(const std::string& stingerFilename, float silenceAfterSec = 4.0f);
 
 private:

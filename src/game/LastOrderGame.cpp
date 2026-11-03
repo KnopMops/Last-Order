@@ -636,6 +636,7 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
         return;
     }
     if (m_screen == GameScreen::Chapter2_Motel3D) {
+        if (!m_settingsUI.IsOpen()) m_motel3D.FixedUpdate(eng, fixedDt);
         return;
     }
 
@@ -817,6 +818,17 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
 }
 
 void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
+    if (m_pendingChapter2) {
+        m_pendingChapter2 = false;
+        m_screen = GameScreen::Chapter2_Motel3D;
+        eng.Renderer().SetHighRes3DMode(true);
+        eng.Renderer().SetSkip2DLightmap(true);
+        m_motel3D.Init(eng, 1);
+#if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
+        if (!m_chapter2TourDir.empty()) m_motel3D.StartTour(m_chapter2TourDir);
+#endif
+        return;
+    }
     if (m_currentNight == 3 && eng.State().HasFlag("n3_fridge_checked") && eng.State().HasFlag("n3_mirror_key_found")) {
         eng.State().SetFlag("n3_artifacts_ready");
     }
@@ -1534,6 +1546,12 @@ void LastOrderGame::TriggerScreamer(engine::core::Engine& eng, const std::string
 
     eng.Audio().PlaySfx("audio/sfx/sfx_blackout_burst.wav", 1.0f);
     eng.Audio().PlaySfx("audio/sfx/sfx_heavy_knock.wav", 1.0f);
+}
+
+void LastOrderGame::OnRenderOffscreen(engine::core::Engine& eng) {
+    if (m_screen == GameScreen::Chapter2_Motel3D) {
+        m_motel3D.RenderOffscreen(eng);
+    }
 }
 
 void LastOrderGame::OnRenderWorld(engine::core::Engine& eng) {

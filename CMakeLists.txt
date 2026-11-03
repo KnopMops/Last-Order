@@ -18,6 +18,34 @@ FetchContent_Declare(
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 FetchContent_MakeAvailable(json)
+set(USE_AVX2 OFF CACHE BOOL "" FORCE)
+set(USE_AVX512 OFF CACHE BOOL "" FORCE)
+set(USE_LZCNT OFF CACHE BOOL "" FORCE)
+set(USE_TZCNT OFF CACHE BOOL "" FORCE)
+set(USE_F16C OFF CACHE BOOL "" FORCE)
+set(USE_FMADD OFF CACHE BOOL "" FORCE)
+set(INTERPROCEDURAL_OPTIMIZATION OFF CACHE BOOL "" FORCE)
+set(OVERRIDE_CXX_FLAGS OFF CACHE BOOL "" FORCE)
+set(ENABLE_ALL_WARNINGS OFF CACHE BOOL "" FORCE)
+set(CPP_RTTI_ENABLED ON CACHE BOOL "" FORCE)
+set(CPP_EXCEPTIONS_ENABLED ON CACHE BOOL "" FORCE)
+set(DEBUG_RENDERER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
+set(PROFILER_IN_DEBUG_AND_RELEASE OFF CACHE BOOL "" FORCE)
+set(ENABLE_OBJECT_STREAM OFF CACHE BOOL "" FORCE)
+set(TARGET_UNIT_TESTS OFF CACHE BOOL "" FORCE)
+set(TARGET_HELLO_WORLD OFF CACHE BOOL "" FORCE)
+set(TARGET_PERFORMANCE_TEST OFF CACHE BOOL "" FORCE)
+set(TARGET_SAMPLES OFF CACHE BOOL "" FORCE)
+set(TARGET_VIEWER OFF CACHE BOOL "" FORCE)
+set(USE_STATIC_MSVC_RUNTIME_LIBRARY OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    JoltPhysics
+    URL https://github.com/jrouwe/JoltPhysics/archive/refs/tags/v5.2.0.tar.gz
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    SOURCE_SUBDIR Build
+)
+FetchContent_MakeAvailable(JoltPhysics)
+target_compile_options(Jolt PRIVATE -O2)
 execute_process(
     COMMAND git rev-parse --short HEAD
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -39,9 +67,14 @@ add_library(lo_engine STATIC
     src/engine/dialogue/DialogueSystem.cpp
     src/engine/dialogue/DialogueUI.cpp
     src/engine/core/Engine.cpp
+    src/engine/3d/QuakeMap.cpp
+    src/engine/3d/Physics3D.cpp
+    src/engine/3d/Lighting3D.cpp
+    src/engine/3d/LightBaker.cpp
+    src/engine/3d/CameraFPS.cpp
 )
 target_include_directories(lo_engine PUBLIC src)
-target_link_libraries(lo_engine PUBLIC raylib nlohmann_json::nlohmann_json)
+target_link_libraries(lo_engine PUBLIC raylib nlohmann_json::nlohmann_json Jolt)
 set(APP_ICON_OBJ "${CMAKE_CURRENT_BINARY_DIR}/app_icon.obj")
 add_custom_command(
     OUTPUT "${APP_ICON_OBJ}"
@@ -63,7 +96,9 @@ set(GAME_SOURCES
     src/game/systems/ChaseMinigame.cpp
     src/game/systems/EndlessDirector.cpp
     src/game/systems/SaveSystem.cpp
-    src/game/chapter2/FPSCamera.cpp
+    src/game/chapter2/MotelLevel.cpp
+    src/game/chapter2/Chapter2Script.cpp
+    src/game/chapter2/ItemVisuals.cpp
     src/game/chapter2/MotelWorld3D.cpp
 )
 add_executable(last_order ${GAME_SOURCES})

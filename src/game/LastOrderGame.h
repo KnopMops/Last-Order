@@ -29,15 +29,19 @@ enum class GameScreen {
 
 class LastOrderGame : public engine::core::IGame {
 public:
+    void RequestChapter2Tour(const std::string& outputDir) { m_pendingChapter2 = true; m_chapter2TourDir = outputDir; }
     void OnInit(engine::core::Engine& eng) override;
     void OnFixedUpdate(engine::core::Engine& eng, float fixedDt) override;
     void OnFrameUpdate(engine::core::Engine& eng, float dt) override;
+    void OnRenderOffscreen(engine::core::Engine& eng) override;
     void OnRenderWorld(engine::core::Engine& eng) override;
     void OnRenderUI(engine::core::Engine& eng) override;
     void OnAction(engine::core::Engine& eng, const engine::core::EngineAction& action) override;
     void OnShutdown(engine::core::Engine& eng) override;
 
 private:
+    bool m_pendingChapter2 = false;
+    std::string m_chapter2TourDir;
     void StartNewShift(engine::core::Engine& eng, int nightNumber, bool withTutorial);
     void StartEndlessShift(engine::core::Engine& eng);
     void StartMinigame(engine::core::Engine& eng, systems::MinigameType type);
