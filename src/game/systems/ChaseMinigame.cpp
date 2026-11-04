@@ -317,25 +317,35 @@ void ChaseMinigame::UpdateHighwayChase3D(engine::core::Engine& eng, float dt) {
     if (m_flashlightActive > 0.0f) m_flashlightActive = std::max(0.0f, m_flashlightActive - dt);
     if (m_skidCooldown > 0.0f) m_skidCooldown = std::max(0.0f, m_skidCooldown - dt);
 
-    if (IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT)) {
-        if (m_targetLane > -0.5f) {
-            m_targetLane -= 1.0f;
-            if (m_skidCooldown <= 0.0f) {
-                m_skidCooldown = 1.2f;
-                eng.Audio().PlaySfx("audio/sfx/sfx_car_skid.wav", 0.45f);
-            }
+    bool steerLeft = IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT);
+    bool steerRight = IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT);
+    bool tapLeft = IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT);
+    bool tapRight = IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT);
+
+    if (tapLeft) {
+        m_targetLane = std::min(1.0f, m_targetLane + 1.0f);
+        if (m_skidCooldown <= 0.0f) {
+            m_skidCooldown = 0.35f;
+            eng.Audio().PlaySfx("audio/sfx/sfx_car_skid.wav", 0.45f);
         }
-    }
-    if (IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT)) {
-        if (m_targetLane < 0.5f) {
-            m_targetLane += 1.0f;
-            if (m_skidCooldown <= 0.0f) {
-                m_skidCooldown = 1.2f;
-                eng.Audio().PlaySfx("audio/sfx/sfx_car_skid.wav", 0.45f);
-            }
+    } else if (tapRight) {
+        m_targetLane = std::max(-1.0f, m_targetLane - 1.0f);
+        if (m_skidCooldown <= 0.0f) {
+            m_skidCooldown = 0.35f;
+            eng.Audio().PlaySfx("audio/sfx/sfx_car_skid.wav", 0.45f);
         }
+    } else if (steerLeft) {
+        m_targetLane = std::min(1.0f, m_targetLane + 5.5f * dt);
+    } else if (steerRight) {
+        m_targetLane = std::max(-1.0f, m_targetLane - 5.5f * dt);
     }
-    m_playerLane += (m_targetLane - m_playerLane) * std::min(1.0f, dt * 7.5f);
+
+    float mouseDeltaX = GetMouseDelta().x;
+    if (std::abs(mouseDeltaX) > 1.2f) {
+        m_targetLane = std::clamp(m_targetLane - mouseDeltaX * 0.008f, -1.0f, 1.0f);
+    }
+
+    m_playerLane += (m_targetLane - m_playerLane) * std::min(1.0f, dt * 16.0f);
 
     bool wantsGas = IsKeyDown(KEY_W) || IsKeyDown(KEY_UP) || IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT) || IsMouseButtonDown(MOUSE_LEFT_BUTTON);
     bool wantsBrake = IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_SPACE) || IsMouseButtonDown(MOUSE_RIGHT_BUTTON);
@@ -343,18 +353,18 @@ void ChaseMinigame::UpdateHighwayChase3D(engine::core::Engine& eng, float dt) {
 
     float targetSpeed = 46.0f;
     if (m_stumbleTimer > 0.0f) {
-        targetSpeed = 22.0f;
+        targetSpeed = 24.0f;
     } else if (wantsGas) {
-        targetSpeed = 74.0f;
+        targetSpeed = 76.0f;
         m_pantTimer += dt;
         if (m_pantTimer >= 2.0f) {
             m_pantTimer = 0.0f;
             eng.Audio().PlaySfx("audio/sfx/sfx_car_engine_start.wav", 0.35f);
         }
     } else if (wantsBrake) {
-        targetSpeed = 20.0f;
+        targetSpeed = 22.0f;
     }
-    m_playerSpeed += (targetSpeed - m_playerSpeed) * std::min(1.0f, dt * 3.0f);
+    m_playerSpeed += (targetSpeed - m_playerSpeed) * std::min(1.0f, dt * 3.5f);
 
     if (IsKeyPressed(KEY_F) && m_flashlightCooldown <= 0.0f) {
         m_flashlightActive = 0.9f;
@@ -415,6 +425,8 @@ void ChaseMinigame::UpdateHighwayChase3D(engine::core::Engine& eng, float dt) {
     if (m_playerDist >= 1000.0f) {
         m_state = ChaseState::Victory;
         eng.Audio().PlaySfx("audio/sfx/sfx_chase_gate_escape.wav", 1.0f);
+        eng.Audio().PlaySfx("audio/sfx/sfx_radio_click.wav", 0.9f);
+        eng.Audio().PlaySfx("audio/sfx/sfx_phone_whisper.wav", 0.65f);
         eng.Renderer().TriggerFlash(Color{255, 250, 240, 255}, 1.0f);
     }
 }
@@ -766,9 +778,40 @@ void ChaseMinigame::RenderUI(engine::core::Engine& eng) const {
     }
 
     if (m_state == ChaseState::Victory) {
+        if (m_type == MinigameType::Night5_HighwayChase3D) {
+            DrawRectangle(0, 0, 1280, 720, Color{8, 10, 16, 245});
+            DrawRectangle(140, 45, 1000, 630, Color{22, 17, 22, 252});
+            DrawRectangleLinesEx(Rectangle{140, 45, 1000, 630}, 2.5f, Color{196, 122, 59, 255});
+
+            engine::graphics::TextLayout::DrawCentered(font, "ГЛАВА 2: МОТЕЛЬ «86 КМ» — ФИНАЛ", 640.0f, 75.0f, 26.0f, Color{244, 184, 96, 255}, 1.0f);
+            engine::graphics::TextLayout::DrawCentered(font, "МОСТ ЧЕРЕЗ РЕКУ БЕЗДНЫ ПРЕОДОЛЁН", 640.0f, 106.0f, 18.0f, Color{180, 200, 220, 240}, 1.0f);
+
+            DrawRectangle(180, 135, 920, 250, Color{12, 15, 20, 255});
+            DrawRectangleLinesEx(Rectangle{180, 135, 920, 250}, 1.5f, Color{80, 240, 120, 220});
+            DrawTextEx(font, "[РАДИОПРИЁМНИК «ВОЛГИ» — 94.5 FM — ЭФИР МИХАИЛА]", Vector2{200, 148}, 18.0f, 1.0f, Color{80, 240, 120, 255});
+
+            const char* radioMsg = "«...Ты слышишь меня?! Слава богу, ты прорвался через мост! Твари привязаны к аномалии мотеля — текущую воду они пересечь не способны. В зеркале заднего вида тень уже растаяла в утреннем тумане.\n\nНо кошмар ещё не окончен. Передатчик, сводящий с ума весь район и поднявший мертвецов... он на вершине сопки. Старая ретрансляционная станция «Маяк-86». Пока её генераторы вещают в эфир — мы в ловушке. Шоссе поднимается прямо к сопке. Я жду тебя у развилки к станции...»";
+            engine::graphics::TextLayout::DrawWrapped(font, radioMsg, engine::math::Rect{200.0f, 182.0f, 880.0f, 185.0f}, 17.0f, 2.0f, Color{225, 235, 225, 255});
+
+            DrawRectangle(180, 400, 920, 95, Color{28, 20, 24, 255});
+            DrawRectangleLinesEx(Rectangle{180, 400, 920, 95}, 1.5f, Color{244, 184, 96, 255});
+            DrawTextEx(font, "СЛЕДУЮЩАЯ ЧАСТЬ: ГЛАВА 3 — РАДИОСТАНЦИЯ «МАЯК-86»", Vector2{200, 412}, 20.0f, 1.0f, Color{244, 184, 96, 255});
+            DrawTextEx(font, "Впереди: заброшенные аппаратные залы, тайна советского эксперимента и глушение сигнала.", Vector2{200, 442}, 16.0f, 1.0f, Color{210, 200, 190, 240});
+            DrawTextEx(font, "СТАТУС: ГЛАВА 2 УСПЕШНО ЗАВЕРШЕНА", Vector2{200, 468}, 16.0f, 1.0f, Color{80, 240, 120, 255});
+
+            DrawRectangle(180, 510, 920, 60, Color{14, 12, 18, 255});
+            DrawRectangleLines(180, 510, 920, 60, Color{107, 51, 34, 255});
+            char statsBuf[160];
+            std::snprintf(statsBuf, sizeof(statsBuf), "Состояние машины: %d%%  |  Пройдено: 1000 м  |  Собрано канистр топлива: %d / 5", static_cast<int>(m_carIntegrity), m_shardsCollected);
+            engine::graphics::TextLayout::DrawCentered(font, statsBuf, 640.0f, 530.0f, 18.0f, Color{244, 184, 96, 240}, 1.0f);
+
+            engine::graphics::TextLayout::DrawCentered(font, "[ENTER / ПРОБЕЛ / КЛИК] — Сохранить прогресс и перейти в главное меню", 640.0f, 625.0f, 21.0f, Color{244, 184, 96, 255}, 1.0f);
+            return;
+        }
+
         DrawRectangle(0, 0, 1280, 720, Color{10, 13, 26, 235});
         DrawRectangle(260, 180, 760, 340, Color{36, 22, 20, 250});
-        DrawRectangleLinesEx(Rectangle{260, 180, 760, 340}, 3.0f, Color{244, 184, 96, 255});
+        DrawRectangleLinesEx(Rectangle{260, 180, 760, 340}, 3.0f, Color{196, 122, 59, 255});
         engine::graphics::TextLayout::DrawCentered(font, "МОСТ ПРЕОДОЛЁН! ТРАССА 86 СВОБОДНА!", 640.0f, 230.0f, 28.0f, Color{244, 184, 96, 255}, 1.0f);
         engine::graphics::TextLayout::DrawCentered(font, "Тварь с яростным воплем растворилась в стене бури позади.", 640.0f, 290.0f, 20.0f, Color{232, 227, 217, 255}, 1.0f);
         engine::graphics::TextLayout::DrawCentered(font, "ГЛАВА 2 УСПЕШНО ЗАВЕРШЕНА", 640.0f, 350.0f, 24.0f, Color{80, 240, 120, 255}, 1.0f);
