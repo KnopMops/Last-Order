@@ -6,8 +6,10 @@
 #include "game/chapter2/Chapter2Script.h"
 #include "game/chapter2/ItemVisuals.h"
 #include "game/chapter2/MotelLevel.h"
+#include "game/chapter2/Vehicle3D.h"
 #include "game/ui/SettingsOverlay.h"
 #include "raylib.h"
+#include <deque>
 #include <optional>
 #include <string>
 #include <vector>
@@ -20,7 +22,51 @@ enum class FocusKind {
     Prop,
     Interact,
     Item,
-    Hide
+    Hide,
+    Vehicle
+};
+
+enum class PlayerMode {
+    OnFoot,
+    Driving,
+    Dead
+};
+
+enum class StalkerState {
+    Inactive,
+    Emerging,
+    Hunting,
+    Searching,
+    Lurking,
+    Final,
+    Dying,
+    Dead
+};
+
+struct StalkerData {
+    StalkerState state = StalkerState::Inactive;
+    Vector3 pos{};
+    float timer = 0.0f;
+    float delay = 0.0f;
+    long long follow = 0;
+    float health = 100.0f;
+    float stagger = 0.0f;
+    float attackCooldown = 0.0f;
+    float stepTimer = 0.0f;
+    float growlTimer = 0.0f;
+    float lungeTimer = 0.0f;
+    float lunge = 0.0f;
+    float losCheck = 0.0f;
+    bool sees = false;
+    float hitFlash = 0.0f;
+    bool finalPhase = false;
+};
+
+struct AmbushData {
+    Vector3 pos{};
+    bool active = false;
+    bool done = false;
+    float timer = 0.0f;
 };
 
 struct RainDrop3D {
@@ -43,6 +89,7 @@ public:
 
     bool WantsReturnToMenu() const { return m_returnToMenu; }
     bool WantsHighwayChase() const { return m_startHighwayChase; }
+    bool WantsChapterComplete() const { return m_chapterComplete; }
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
     void StartTour(const std::string& outputDir);
 #endif
@@ -63,6 +110,45 @@ private:
     void TriggerScreamer(const std::string& texture, float duration, float shake) override;
     void EndAct(const std::string& text) override;
     void StartHighwayChase() override { m_startHighwayChase = true; }
+    void SetPowerDelayed(bool on, float delay) override;
+    void LockDoor(const std::string& name, const std::string& item, const std::string& lockedEvent,
+                  const std::string& unlockEvent) override;
+    void SetStalkerMode(const std::string& mode) override;
+    void SetCheckpoint(const std::string& name) override;
+    void EnterVehicle() override;
+    void AddAmmo(int rounds) override;
+    void CompleteChapter(float delay) override;
+
+    void SetupAction();
+    void ShutdownAction();
+    void UpdateActionTimers(float dt);
+    void UpdateDriving(float dt);
+    void UpdateDriveCamera(float dt);
+    void UpdateHeadlights();
+    void UpdateTrail();
+    void UpdateStalker(float dt);
+    void UpdateStalkerAudio(float dt);
+    bool MoveStalker(Vector3 target, float speed, float dt);
+    void SpawnStalker(Vector3 pos, StalkerState state, float delay);
+    Vector3 StalkerSpawnBehindPlayer(int crumbsBack) const;
+    void UpdateAmbushes(float dt);
+    void UpdatePistol(float dt);
+    void FirePistol();
+    void DamageCar(float amount);
+    void KillPlayer();
+    void UpdateDeath(float dt);
+    void Respawn();
+    bool ExitVehicle();
+    void DrawVehicle(const Shader* overrideShader);
+    void DrawTrees(const Shader* overrideShader, Vector3 viewPos);
+    void DrawStalker(const Camera3D& cam) const;
+    void DrawPistolViewmodel();
+    void DrawCockpit() const;
+    void RenderActionUI(engine::core::Engine& eng);
+    Vector3 PlayerAnchor() const;
+    const Camera3D& ViewCamera() const;
+    Vector3 ViewRight() const;
+    bool HasPistol() const;
 
     void UpdateFlashlight(float dt);
     void UpdateMovement(float dt);
@@ -155,6 +241,42 @@ private:
     bool m_returnToMenu = false;
     float m_time = 0.0f;
     std::string m_loadError;
+
+    PlayerMode m_mode = PlayerMode::OnFoot;
+    Vehicle3D m_car;
+    bool m_carReady = false;
+    float m_carHealth = 100.0f;
+    bool m_headlights = true;
+    int m_driveView = 0;
+    Camera3D m_driveCam{};
+    bool m_driveCamInit = false;
+    float m_camOrbit = 0.0f;
+    float m_camLift = 0.0f;
+    float m_skidCooldown = 0.0f;
+    float m_crashCooldown = 0.0f;
+    Vector3 m_carCheckpointPos{};
+    float m_carCheckpointHeading = 0.0f;
+    StalkerData m_stalker;
+    std::deque<Vector3> m_trail;
+    long long m_trailBase = 0;
+    std::vector<AmbushData> m_ambushes;
+    std::string m_checkpoint;
+    float m_deathTimer = 0.0f;
+    bool m_deadInCar = false;
+    int m_ammoMag = 0;
+    int m_ammoReserve = 0;
+    float m_fireCooldown = 0.0f;
+    float m_reloadTimer = 0.0f;
+    float m_muzzleTimer = 0.0f;
+    float m_recoil = 0.0f;
+    float m_powerSwitchTimer = -1.0f;
+    bool m_powerSwitchTarget = false;
+    bool m_chapterComplete = false;
+    float m_completeTimer = -1.0f;
+    float m_damageFlash = 0.0f;
+    std::vector<engine::render3d::DynamicLight> m_extraLights;
+    const ItemVisual* m_treeVisual = nullptr;
+    const ItemVisual* m_pistolVisual = nullptr;
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
     struct TourStop {
         std::string name;
@@ -167,6 +289,12 @@ private:
         int frames = 40;
     };
     void UpdateTour(engine::core::Engine& eng);
+    void UpdateDriveTest(engine::core::Engine& eng);
+    bool m_driveTest = false;
+    int m_driveFrames = 0;
+    int m_drivePhase = 0;
+    bool m_autoActive = false;
+    VehicleInput m_autoInput;
     std::vector<TourStop> m_tour;
     int m_tourIndex = -1;
     int m_tourFrames = 0;

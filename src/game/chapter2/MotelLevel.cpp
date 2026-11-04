@@ -261,8 +261,34 @@ bool MotelLevel::Load(engine::core::Engine& eng, engine::physics3d::Physics3D& p
 
     for (const MapEntity& e : map.Entities()) {
         const std::string& cls = e.ClassName();
-        if (cls == "worldspawn") {
+        if (cls == "worldspawn" || cls == "func_group" || cls == "func_detail") {
             for (const auto& brush : e.brushes) addStaticBrush(brush, true);
+        } else if (cls == "func_illusionary") {
+            for (const auto& brush : e.brushes) addStaticBrush(brush, false);
+        } else if (cls == "prop_tree") {
+            TreeObject tree;
+            tree.position = e.GetOrigin();
+            tree.yaw = QuakeYawToWorld(e.GetFloat("angle", 0.0f));
+            tree.scale = std::clamp(e.GetFloat("scale", 1.0f), 0.3f, 3.0f);
+            float trunk = 0.17f * tree.scale;
+            std::vector<Vector3> hull;
+            for (int i = 0; i < 8; ++i) {
+                hull.push_back(Vector3{tree.position.x + ((i & 1) ? trunk : -trunk), tree.position.y + ((i & 2) ? 6.5f * tree.scale : -0.2f),
+                                       tree.position.z + ((i & 4) ? trunk : -trunk)});
+            }
+            physics.AddStaticHull(hull);
+            m_trees.push_back(tree);
+        } else if (cls == "info_marker") {
+            MarkerObject marker;
+            marker.name = e.Get("targetname");
+            marker.position = e.GetOrigin();
+            marker.yaw = QuakeYawToWorld(e.GetFloat("angle", 0.0f));
+            m_markers.push_back(marker);
+        } else if (cls == "path_road") {
+            RoadNode node;
+            node.position = e.GetOrigin();
+            node.s = e.GetFloat("s", 0.0f);
+            m_road.push_back(node);
         } else if (cls == "func_interact") {
             InteractObject obj;
             obj.event = e.Get("event");
@@ -328,6 +354,7 @@ bool MotelLevel::Load(engine::core::Engine& eng, engine::physics3d::Physics3D& p
             m_phantoms.push_back(p);
         }
     }
+    std::sort(m_road.begin(), m_road.end(), [](const RoadNode& a, const RoadNode& b) { return a.s < b.s; });
     physics.FinalizeStatic();
 
     std::vector<BakeLight> bakeLights;
@@ -393,7 +420,7 @@ bool MotelLevel::Load(engine::core::Engine& eng, engine::physics3d::Physics3D& p
 
     for (const MapEntity& e : map.Entities()) {
         const std::string& cls = e.ClassName();
-        if (cls != "func_door" && cls != "prop_physics") continue;
+        if (cls != "func_door" && cls != "prop_physics" && cls != "func_vehicle") continue;
         std::vector<Vector3> points;
         for (const auto& brush : e.brushes) {
             auto v = QuakeMap::BuildVertices(brush);
@@ -402,7 +429,27 @@ bool MotelLevel::Load(engine::core::Engine& eng, engine::physics3d::Physics3D& p
         if (points.size() < 4) continue;
         BoundingBox bounds = EntityBounds(e);
 
-        if (cls == "func_door") {
+        if (cls == "func_vehicle") {
+            VehicleObject& v = m_vehicle;
+            v.name = e.Get("targetname", "vehicle");
+            v.label = e.Get("label", "Машина");
+            v.event = e.Get("event");
+            v.spawnHeading = -e.GetFloat("angle", 0.0f) * DEG2RAD;
+            Vector3 origin{};
+            v.body = physics.AddKinematicHull(points, origin);
+            v.spawnOrigin = origin;
+            v.localMin = Vector3Subtract(bounds.min, origin);
+            v.localMax = Vector3Subtract(bounds.max, origin);
+            std::map<std::string, MeshBuilder> builders;
+            for (const auto& brush : e.brushes) {
+                for (const auto& poly : QuakeMap::BuildPolygons(brush)) {
+                    if (IsInvisibleTexture(poly.texture)) continue;
+                    AppendPolygon(builders, poly, texSizeOf(poly.texture), baker, origin);
+                }
+            }
+            finishBatches(builders, v.batches);
+            v.present = v.body != INVALID_BODY;
+        } else if (cls == "func_door") {
             DoorObject door;
             door.name = e.Get("targetname");
             door.label = e.Get("label", "Дверь");
@@ -469,6 +516,11 @@ void MotelLevel::Unload() {
     };
     release(m_static);
     for (DoorObject& d : m_doors) release(d.batches);
+    release(m_vehicle.batches);
+    m_vehicle = VehicleObject{};
+    m_trees.clear();
+    m_markers.clear();
+    m_road.clear();
     for (PropObject& p : m_props) release(p.batches);
     for (MirrorObject& m : m_mirrors) {
         UnloadMesh(m.surface.mesh);
@@ -492,6 +544,13 @@ void MotelLevel::Unload() {
 std::string MotelLevel::SurfaceForBody(BodyHandle body) const {
     auto it = m_surfaces.find(body);
     return it != m_surfaces.end() ? it->second : std::string{};
+}
+
+const MarkerObject* MotelLevel::FindMarker(const std::string& name) const {
+    for (const MarkerObject& m : m_markers) {
+        if (m.name == name) return &m;
+    }
+    return nullptr;
 }
 
 int MotelLevel::FindDoorByBody(BodyHandle body) const {

@@ -8,6 +8,7 @@ void AudioBus::Init(assets::AssetManager* assets) {
 }
 
 void AudioBus::Shutdown() {
+    StopAllLoops();
     StopAmbient();
 }
 
@@ -33,6 +34,50 @@ void AudioBus::Update(float dt, const core::GameSettings& settings) {
         float targetVol = (m_postScareSilenceTimer > 0.0f) ? 0.0f : (m_ambientBaseVolume * m_ambientVol);
         SetMusicVolume(m_ambientStream, targetVol);
     }
+
+    for (auto& [key, loop] : m_loops) {
+        UpdateMusicStream(loop.stream);
+        if (!IsMusicStreamPlaying(loop.stream)) PlayMusicStream(loop.stream);
+        SetMusicVolume(loop.stream, std::clamp(loop.baseVolume * m_sfxVol, 0.0f, 1.0f));
+        SetMusicPitch(loop.stream, std::clamp(loop.pitch, 0.25f, 3.0f));
+    }
+}
+
+void AudioBus::SetLoop(const std::string& key, const std::string& relativePath, float baseVolume, float pitch) {
+    if (!m_assets) return;
+    auto it = m_loops.find(key);
+    if (it != m_loops.end() && it->second.path != relativePath) {
+        StopLoop(key);
+        it = m_loops.end();
+    }
+    if (it == m_loops.end()) {
+        LoopChannel loop;
+        std::string fullPath = m_assets->GetBaseDir() + "/" + relativePath;
+        loop.stream = LoadMusicStream(fullPath.c_str());
+        if (loop.stream.stream.buffer == nullptr) return;
+        loop.stream.looping = true;
+        loop.path = relativePath;
+        PlayMusicStream(loop.stream);
+        it = m_loops.emplace(key, loop).first;
+    }
+    it->second.baseVolume = baseVolume;
+    it->second.pitch = pitch;
+}
+
+void AudioBus::StopLoop(const std::string& key) {
+    auto it = m_loops.find(key);
+    if (it == m_loops.end()) return;
+    StopMusicStream(it->second.stream);
+    UnloadMusicStream(it->second.stream);
+    m_loops.erase(it);
+}
+
+void AudioBus::StopAllLoops() {
+    for (auto& [key, loop] : m_loops) {
+        StopMusicStream(loop.stream);
+        UnloadMusicStream(loop.stream);
+    }
+    m_loops.clear();
 }
 
 void AudioBus::PlayAmbient(const std::string& relativeOggPath, float baseVolume) {

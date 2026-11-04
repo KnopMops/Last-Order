@@ -38,6 +38,7 @@ public:
 
     BodyHandle AddStaticHull(const std::vector<Vector3>& worldPoints);
     BodyHandle AddDynamicHull(const std::vector<Vector3>& worldPoints, float mass, Vector3& outOrigin);
+    BodyHandle AddKinematicHull(const std::vector<Vector3>& worldPoints, Vector3& outOrigin);
     BodyHandle AddDoor(const std::vector<Vector3>& worldPoints, Vector3 hingePoint, float mass,
                        float minAngle, float maxAngle, Vector3& outOrigin);
     void FinalizeStatic();
@@ -55,10 +56,13 @@ public:
     Vector3 GetBodyAngularVelocity(BodyHandle body) const;
     void AddImpulse(BodyHandle body, Vector3 impulse);
     void WakeBody(BodyHandle body);
+    void MoveKinematic(BodyHandle body, const Matrix& transform, float dt);
+    void TeleportBody(BodyHandle body, const Matrix& transform);
 
     RayHit CastRay(Vector3 origin, Vector3 direction, float maxDistance, BodyHandle ignore = INVALID_BODY) const;
     bool IsStaticOccluded(Vector3 from, Vector3 to) const;
     float CastStaticDistance(Vector3 origin, Vector3 direction, float maxDistance) const;
+    RayHit CastStaticRay(Vector3 origin, Vector3 direction, float maxDistance) const;
 
     void CreateCharacter(Vector3 feetPosition, const CharacterConfig& config);
     void UpdateCharacter(float dt, Vector3 desiredHorizontalVelocity, bool wantCrouch, BodyHandle ignoreBody);

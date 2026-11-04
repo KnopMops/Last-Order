@@ -3,6 +3,7 @@
 #include "engine/core/SettingsSystem.h"
 #include "raylib.h"
 #include <string>
+#include <unordered_map>
 
 namespace engine::audio {
 
@@ -21,12 +22,24 @@ public:
     void PlaySfxSpatial(const std::string& relativeWavPath, float baseVolume, float pan);
     void PlayScreamerStinger(const std::string& stingerFilename, float silenceAfterSec = 4.0f);
 
+    void SetLoop(const std::string& key, const std::string& relativePath, float baseVolume, float pitch = 1.0f);
+    void StopLoop(const std::string& key);
+    void StopAllLoops();
+
 private:
     assets::AssetManager* m_assets = nullptr;
     Music m_ambientStream{};
     std::string m_currentAmbientPath;
     float m_ambientBaseVolume = 0.7f;
     float m_postScareSilenceTimer = 0.0f;
+
+    struct LoopChannel {
+        Music stream{};
+        std::string path;
+        float baseVolume = 0.0f;
+        float pitch = 1.0f;
+    };
+    std::unordered_map<std::string, LoopChannel> m_loops;
 
     float m_masterVol = 0.95f;
     float m_ambientVol = 0.75f;

@@ -20,6 +20,7 @@ struct ItemVisual {
 class ItemVisualLibrary {
 public:
     void Init(Shader shader, Texture2D keyTagTexture);
+    void SetTexture(const std::string& name, Texture2D texture) { m_textures[name] = texture; }
     void Shutdown();
     const ItemVisual& Get(const std::string& model, Color tint);
     void Draw(const ItemVisual& visual, Matrix world, const Shader* overrideShader = nullptr) const;
@@ -31,6 +32,7 @@ private:
     Shader m_shader{};
     Texture2D m_keyTag{};
     std::unordered_map<std::string, ItemVisual> m_cache;
+    std::unordered_map<std::string, Texture2D> m_textures;
 };
 
 }

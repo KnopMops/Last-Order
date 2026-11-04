@@ -114,6 +114,36 @@ struct Phantom {
     std::string hideFlag;
 };
 
+struct VehicleObject {
+    std::string name;
+    std::string label;
+    std::string event;
+    BodyHandle body = INVALID_BODY;
+    std::vector<RenderBatch> batches;
+    Vector3 spawnOrigin{};
+    float spawnHeading = 0.0f;
+    Vector3 localMin{};
+    Vector3 localMax{};
+    bool present = false;
+};
+
+struct TreeObject {
+    Vector3 position{};
+    float yaw = 0.0f;
+    float scale = 1.0f;
+};
+
+struct MarkerObject {
+    std::string name;
+    Vector3 position{};
+    float yaw = 0.0f;
+};
+
+struct RoadNode {
+    Vector3 position{};
+    float s = 0.0f;
+};
+
 struct LevelEnvironment {
     Vector3 ambientSky{0.075f, 0.085f, 0.12f};
     Vector3 ambientGround{0.03f, 0.03f, 0.04f};
@@ -145,6 +175,11 @@ public:
     std::vector<SoundEmitter>& Sounds() { return m_sounds; }
     const std::vector<Phantom>& Phantoms() const { return m_phantoms; }
     const LevelEnvironment& Environment() const { return m_env; }
+    VehicleObject& Vehicle() { return m_vehicle; }
+    const VehicleObject& Vehicle() const { return m_vehicle; }
+    const std::vector<TreeObject>& Trees() const { return m_trees; }
+    const std::vector<RoadNode>& Road() const { return m_road; }
+    const MarkerObject* FindMarker(const std::string& name) const;
 
     Vector3 PlayerStart() const { return m_playerStart; }
     float PlayerStartYaw() const { return m_playerYaw; }
@@ -170,6 +205,10 @@ private:
     std::vector<LightObject> m_lights;
     std::vector<SoundEmitter> m_sounds;
     std::vector<Phantom> m_phantoms;
+    VehicleObject m_vehicle;
+    std::vector<TreeObject> m_trees;
+    std::vector<MarkerObject> m_markers;
+    std::vector<RoadNode> m_road;
     std::unordered_map<BodyHandle, std::string> m_surfaces;
     std::unordered_map<std::string, Texture2D> m_textureCache;
     LevelEnvironment m_env;

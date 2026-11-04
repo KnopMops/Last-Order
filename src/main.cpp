@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    std::string title = std::string("Последний заказ (Last Order) v") + game::GetGameVersion();
+    std::string title = std::string("Последний заказ (Last Order) ") + game::GetVersionBuildString();
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
     title += " [DEBUG BUILD]";
 #endif
@@ -41,6 +41,7 @@ int main(int argc, char** argv) {
         std::string arg = argv[i];
         if (arg == "--chapter2") game.RequestChapter2Tour("");
         if (arg == "--ch2-tour" && i + 1 < argc) game.RequestChapter2Tour(argv[i + 1]);
+        if (arg == "--ch2-drive") game.RequestChapter2Tour("@drive");
     }
 #endif
     engine.Run(game, smokeTest);

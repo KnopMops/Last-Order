@@ -91,6 +91,39 @@ ItemVisual ItemVisualLibrary::Build(const std::string& model, Color tint) {
         AddPart(v, GenMeshCylinder(0.008f, 0.014f, 8), Color{240, 240, 240, 255},
                 MatrixMultiply(MatrixTranslate(0.0f, -0.007f, 0.0f), MatrixMultiply(MatrixRotateX(PI * 0.5f), MatrixTranslate(0.02f, -0.008f, 0.0f))), white);
         v.inspectDistance = 0.3f;
+    } else if (model == "pistol") {
+        Color blued{44, 46, 52, 255};
+        Color grip{70, 44, 30, 255};
+        AddPart(v, GenMeshCube(0.16f, 0.03f, 0.026f), blued, MatrixTranslate(0.0f, 0.028f, 0.0f), white);
+        AddPart(v, GenMeshCube(0.14f, 0.02f, 0.022f), Scale(blued, 0.8f), MatrixTranslate(-0.005f, 0.004f, 0.0f), white);
+        AddPart(v, GenMeshCube(0.036f, 0.085f, 0.03f), grip,
+                MatrixMultiply(MatrixTranslate(0.0f, -0.04f, 0.0f), MatrixMultiply(MatrixRotateZ(-0.24f), MatrixTranslate(-0.052f, 0.0f, 0.0f))), white);
+        AddPart(v, GenMeshCube(0.04f, 0.004f, 0.012f), blued, MatrixTranslate(0.0f, -0.028f, 0.0f), white);
+        AddPart(v, GenMeshCube(0.004f, 0.026f, 0.012f), blued, MatrixTranslate(0.02f, -0.016f, 0.0f), white);
+        AddPart(v, GenMeshCylinder(0.006f, 0.012f, 8), Color{12, 12, 14, 255},
+                MatrixMultiply(MatrixRotateZ(-PI * 0.5f), MatrixTranslate(0.08f, 0.03f, 0.0f)), white);
+        AddPart(v, GenMeshCube(0.008f, 0.008f, 0.006f), steel, MatrixTranslate(0.07f, 0.046f, 0.0f), white);
+        v.inspectDistance = 0.34f;
+    } else if (model == "ammo") {
+        AddPart(v, GenMeshCube(0.075f, 0.045f, 0.04f), tint, MatrixIdentity(), white);
+        AddPart(v, GenMeshCube(0.076f, 0.018f, 0.041f), Color{220, 205, 160, 255}, MatrixTranslate(0.0f, 0.005f, 0.0f), white);
+        for (int i = 0; i < 3; ++i) {
+            AddPart(v, GenMeshCylinder(0.0045f, 0.026f, 8), brass, MatrixTranslate(-0.02f + 0.02f * static_cast<float>(i), 0.022f, 0.0f), white);
+        }
+        v.inspectDistance = 0.28f;
+    } else if (model == "tree_pine") {
+        auto tex = [&](const char* name) {
+            auto it = m_textures.find(name);
+            return it != m_textures.end() ? it->second : white;
+        };
+        AddPart(v, GenMeshCylinder(0.17f, 6.6f, 6), WHITE, MatrixIdentity(), tex("bark"));
+        const float layers[4][3] = {{1.75f, 2.5f, 1.4f}, {1.35f, 2.2f, 2.7f}, {0.95f, 2.0f, 3.9f}, {0.55f, 1.7f, 5.0f}};
+        for (int i = 0; i < 4; ++i) {
+            Color shade = Scale(WHITE, 0.8f + 0.08f * static_cast<float>(i));
+            AddPart(v, GenMeshCone(layers[i][0], layers[i][1], 7), shade,
+                    MatrixMultiply(MatrixRotateY(0.45f * static_cast<float>(i)), MatrixTranslate(0.0f, layers[i][2], 0.0f)), tex("pine"));
+        }
+        v.inspectDistance = 9.0f;
     } else {
         AddPart(v, GenMeshCube(0.06f, 0.06f, 0.06f), tint, MatrixIdentity(), white);
     }

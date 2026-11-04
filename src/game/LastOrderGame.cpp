@@ -944,6 +944,17 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
             StartMinigame(eng, systems::MinigameType::Night5_HighwayChase3D);
             return;
         }
+        if (m_motel3D.WantsChapterComplete()) {
+            m_motel3D.Shutdown(eng);
+            eng.State().SetFlag("chapter2_completed");
+            SaveKeyMoment(eng, "Глава 2: сущность у поста ДПС уничтожена");
+            eng.Renderer().SetHighRes3DMode(false);
+            eng.Renderer().SetSkip2DLightmap(false);
+            m_screen = GameScreen::MainMenu;
+            m_mainMenu.Init(eng);
+            EnableCursor();
+            return;
+        }
         if (m_motel3D.WantsReturnToMenu()) {
             m_motel3D.Shutdown(eng);
             eng.Renderer().SetHighRes3DMode(false);

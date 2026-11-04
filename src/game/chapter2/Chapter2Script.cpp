@@ -141,7 +141,12 @@ void Chapter2Script::Execute(const json& a, IScriptHost& host, std::optional<Vec
     } else if (type == "flicker") {
         host.Flicker(a.value("time", 1.5f));
     } else if (type == "power") {
-        host.SetPower(a.value("on", true));
+        float delay = a.value("delay", 0.0f);
+        if (delay > 0.0f) {
+            host.SetPowerDelayed(a.value("on", true), delay);
+        } else {
+            host.SetPower(a.value("on", true));
+        }
     } else if (type == "unlock") {
         host.UnlockDoor(a.value("target", std::string{}));
     } else if (type == "open_door") {
@@ -162,6 +167,19 @@ void Chapter2Script::Execute(const json& a, IScriptHost& host, std::optional<Vec
         host.EndAct(a.value("text", std::string{}));
     } else if (type == "highway_chase") {
         host.StartHighwayChase();
+    } else if (type == "lock_door") {
+        host.LockDoor(a.value("target", std::string{}), a.value("item", std::string{}), a.value("locked_event", std::string{}),
+                      a.value("unlock_event", std::string{}));
+    } else if (type == "stalker") {
+        host.SetStalkerMode(a.value("mode", std::string{}));
+    } else if (type == "checkpoint") {
+        host.SetCheckpoint(a.value("name", std::string{}));
+    } else if (type == "enter_vehicle") {
+        host.EnterVehicle();
+    } else if (type == "ammo") {
+        host.AddAmmo(a.value("amount", 8));
+    } else if (type == "chapter_complete") {
+        host.CompleteChapter(a.value("delay", 8.0f));
     } else if (type == "event") {
         RunEvent(a.value("name", std::string{}), host, source);
     }

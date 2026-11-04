@@ -38,6 +38,14 @@ public:
     virtual void TriggerScreamer(const std::string& texture, float duration, float shake) = 0;
     virtual void EndAct(const std::string& text) = 0;
     virtual void StartHighwayChase() {}
+    virtual void SetPowerDelayed(bool on, float delay) { (void)delay; SetPower(on); }
+    virtual void LockDoor(const std::string& name, const std::string& item, const std::string& lockedEvent,
+                          const std::string& unlockEvent) { (void)name; (void)item; (void)lockedEvent; (void)unlockEvent; }
+    virtual void SetStalkerMode(const std::string& mode) { (void)mode; }
+    virtual void SetCheckpoint(const std::string& name) { (void)name; }
+    virtual void EnterVehicle() {}
+    virtual void AddAmmo(int rounds) { (void)rounds; }
+    virtual void CompleteChapter(float delay) { (void)delay; }
 };
 
 class Chapter2Script {
@@ -49,6 +57,7 @@ public:
 
     bool HasFlag(const std::string& flag) const { return m_flags.count(flag) > 0; }
     void SetFlag(const std::string& flag) { m_flags.insert(flag); }
+    void ClearFlag(const std::string& flag) { m_flags.erase(flag); }
     bool HasItem(const std::string& item) const;
     void GiveItem(const std::string& item);
     void TakeItem(const std::string& item);

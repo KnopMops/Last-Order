@@ -87,8 +87,45 @@
         80
       ],
       "inspect_title": "КЛЮЧИ ОТ ДЕЖУРНОЙ «ВОЛГИ»",
-      "inspect_text": "Связка ключей с брелоком ГАЗ-24. Подходят к машине у входа мотеля.",
+      "inspect_text": "Связка ключей с брелоком ГАЗ-24. Подходят к «Волге» на парковке мотеля.",
       "event": "got_car_keys"
+    },
+    "key_entrance": {
+      "name": "Ключ от входа",
+      "model": "key",
+      "color": [
+        80,
+        110,
+        190
+      ],
+      "inspect_title": "КЛЮЧ ОТ ВХОДНОЙ ДВЕРИ",
+      "inspect_text": "Массивный ключ с биркой «ВХОД».\nЕщё минуту назад его не было на доске.",
+      "event": "got_key_entrance"
+    },
+    "pistol": {
+      "name": "ПМ",
+      "model": "pistol",
+      "color": [
+        62,
+        64,
+        72
+      ],
+      "inspect_title": "ПИСТОЛЕТ МАКАРОВА",
+      "inspect_text": "Табельный ПМ, в магазине 8 патронов.\nНа рукояти нацарапано: «86 — НЕ ДАЙ ЕЙ ДОЙТИ ДО ГОРОДА».",
+      "event": "got_pistol"
+    },
+    "ammo": {
+      "name": "Патроны 9×18",
+      "model": "ammo",
+      "color": [
+        150,
+        110,
+        60
+      ],
+      "inspect_title": "ПАТРОНЫ 9×18 ПМ",
+      "inspect_text": "Картонная пачка, 16 патронов. Пригодится.",
+      "event": "got_ammo",
+      "consumable": true
     }
   },
   "events": {
@@ -108,62 +145,6 @@
       }
     ],
     "near_motel": [
-      {
-        "when": {
-          "flag": "trap_sprung"
-        },
-        "do": [
-          {
-            "type": "message",
-            "text": "Тварь рыщет во тьме у крыльца! Скорее назад в мотель к сейфу под стойкой (код 1986)!",
-            "time": 3.5
-          }
-        ]
-      },
-      {
-        "when": {
-          "flag": "tape_played",
-          "not_flag": "has_car_keys"
-        },
-        "do": [
-          {
-            "type": "set_flag",
-            "name": "trap_sprung"
-          },
-          {
-            "type": "sfx",
-            "path": "audio/screamers/sfx_screamer_visceral.wav",
-            "volume": 1.0
-          },
-          {
-            "type": "sfx",
-            "path": "audio/screamers/sfx_sc_09_shadow_roar.wav",
-            "volume": 1.0
-          },
-          {
-            "type": "shake",
-            "amount": 9.5,
-            "time": 1.2
-          },
-          {
-            "type": "flicker",
-            "time": 2.5
-          },
-          {
-            "type": "sanity",
-            "delta": -15
-          },
-          {
-            "type": "message",
-            "text": "ЭТО ЛОВУШКА! Огромная тень взревела во дворе, перекрыв дорогу! Пешком не уйти! Скорее назад — откройте сейф под стойкой (код: 1986), хватайте ключи от машины и бегите к «Волге»!",
-            "time": 7.0
-          },
-          {
-            "type": "objective",
-            "text": "Заберите ключи от машины из сейфа под стойкой регистрации (код: 1986)"
-          }
-        ]
-      },
       {
         "when": {
           "flag": "near_motel_intro"
@@ -187,26 +168,56 @@
     "car": [
       {
         "when": {
-          "flag": "has_car_keys"
+          "flag": "car_started"
+        },
+        "do": [
+          {
+            "type": "enter_vehicle"
+          }
+        ]
+      },
+      {
+        "when": {
+          "item": "car_keys"
+        },
+        "do": [
+          {
+            "type": "enter_vehicle"
+          },
+          {
+            "type": "checkpoint",
+            "name": "car"
+          },
+          {
+            "type": "shake",
+            "amount": 4.0,
+            "time": 0.6
+          },
+          {
+            "type": "message",
+            "text": "Мотор взревел! Гоните прочь от мотеля по трассе М-86 — пост ДПС в километре! [W] Газ  [A/D] Руль",
+            "time": 6.0
+          },
+          {
+            "type": "objective",
+            "text": "Доберитесь до поста ДПС (1 км по трассе)"
+          }
+        ]
+      },
+      {
+        "when": {
+          "flag": "tape_played"
         },
         "do": [
           {
             "type": "sfx",
-            "path": "audio/sfx/sfx_car_engine_start.wav",
-            "volume": 1.0
-          },
-          {
-            "type": "shake",
-            "amount": 5.5,
-            "time": 0.8
+            "path": "audio/sfx/sfx_car_starter_dead.wav",
+            "volume": 0.7
           },
           {
             "type": "message",
-            "text": "Ключ зажигания повёрнут! Мотор взревел, фары прорезают тьму — ПОГОНЯ НАЧАЛАСЬ!",
+            "text": "Без ключей не завести! Ключи от «Волги» — в сейфе под стойкой (код 1986).",
             "time": 4.0
-          },
-          {
-            "type": "highway_chase"
           }
         ]
       },
@@ -219,8 +230,8 @@
           },
           {
             "type": "message",
-            "text": "Без ключей зажигания из сейфа мотор не завести! Вернитесь к стойке регистрации и откройте сейф (код: 1986)!",
-            "time": 4.5
+            "text": "Машина заглохла намертво, а ключ зажигания куда-то пропал.",
+            "time": 3.5
           }
         ]
       }
@@ -375,7 +386,8 @@
     "radio": [
       {
         "when": {
-          "item": "cassette"
+          "item": "cassette",
+          "flag": "mirror_seen"
         },
         "do": [
           {
@@ -383,13 +395,31 @@
             "name": "tape_played"
           },
           {
+            "type": "set_flag",
+            "name": "blackout"
+          },
+          {
             "type": "take_item",
             "item": "cassette"
           },
           {
+            "type": "clear_flag",
+            "name": "power"
+          },
+          {
             "type": "sfx",
-            "path": "audio/sfx/sfx_fuse_insert.wav",
+            "path": "audio/sfx/sfx_radio_click.wav",
+            "volume": 0.8
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_phone_whisper.wav",
             "volume": 1.0
+          },
+          {
+            "type": "sfx",
+            "path": "audio/screamers/sfx_sc_08_tv_static_shriek.wav",
+            "volume": 0.9
           },
           {
             "type": "shake",
@@ -398,29 +428,67 @@
           },
           {
             "type": "flicker",
-            "time": 2.0
+            "time": 1.8
           },
           {
             "type": "power",
-            "on": false
+            "on": false,
+            "delay": 1.7
           },
           {
-            "type": "close_door",
-            "target": "door_lobby"
+            "type": "lock_door",
+            "target": "door_lobby",
+            "item": "key_entrance",
+            "locked_event": "door_lobby_locked",
+            "unlock_event": "door_lobby_unlocked"
           },
           {
-            "type": "sfx",
-            "path": "audio/sfx/sfx_door_close_latch.wav",
-            "volume": 1.0
+            "type": "sanity",
+            "delta": -10
           },
           {
             "type": "message",
-            "text": "ЗАПИСЬ МИХАИЛА: «...Они окружили мотель! Код сейфа под стойкой — 1986! Ключи от 'Волги' там! Заводи и...» *ТРЕСК!* Магнитофон искрит, пробки выбило! Свет погас, входная дверь захлопнулась! Но код 1986 вы запомнили!",
-            "time": 8.0
+            "text": "ЗАПИСЬ МИХАИЛА: «...Они окружили мотель. Ключ от входа — на доске, ключи от „Волги“ — в сейфе под стойкой, код 1986. Но сначала верни свет — в темноте ОНО сильнее...» *ТРЕСК!* Пробки выбило, входная дверь захлопнулась и заперлась!",
+            "time": 9.0
           },
           {
             "type": "objective",
-            "text": "Проверьте входную дверь мотеля"
+            "text": "Свет погас! Снова запустите генератор во дворе (служебная дверь за стойкой)"
+          }
+        ]
+      },
+      {
+        "when": {
+          "item": "cassette",
+          "flag": "power"
+        },
+        "do": [
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_radio_click.wav",
+            "volume": 0.6
+          },
+          {
+            "type": "message",
+            "text": "Магнитофон зажёвывает плёнку... Сначала разберитесь с номером 102 — на доске появился новый ключ.",
+            "time": 4.5
+          }
+        ]
+      },
+      {
+        "when": {
+          "item": "cassette"
+        },
+        "do": [
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_radio_click.wav",
+            "volume": 0.6
+          },
+          {
+            "type": "message",
+            "text": "Без электричества магнитофон мёртв. Запустите генератор во дворе.",
+            "time": 4.0
           }
         ]
       },
@@ -431,8 +499,8 @@
         "do": [
           {
             "type": "message",
-            "text": "Магнитофон сгорел и чадит. Михаил успел назвать код от сейфа под стойкой: 1986.",
-            "time": 4.0
+            "text": "Магнитофон сгорел. Михаил успел сказать: ключ от входа на доске, ключи от машины в сейфе (код 1986).",
+            "time": 4.5
           }
         ]
       },
@@ -618,6 +686,64 @@
             "type": "message",
             "text": "Генератор ровно гудит.",
             "time": 2.5
+          }
+        ]
+      },
+      {
+        "when": {
+          "flag": "blackout"
+        },
+        "do": [
+          {
+            "type": "clear_flag",
+            "name": "blackout"
+          },
+          {
+            "type": "set_flag",
+            "name": "power"
+          },
+          {
+            "type": "set_flag",
+            "name": "power_restored"
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_generator_start.wav",
+            "volume": 1.0
+          },
+          {
+            "type": "power",
+            "on": true
+          },
+          {
+            "type": "flicker",
+            "time": 1.4
+          },
+          {
+            "type": "shake",
+            "amount": 3.0,
+            "time": 0.6
+          },
+          {
+            "type": "sanity",
+            "delta": -10
+          },
+          {
+            "type": "checkpoint",
+            "name": "generator"
+          },
+          {
+            "type": "stalker",
+            "mode": "hunt"
+          },
+          {
+            "type": "message",
+            "text": "Рубильник поднят — генератор взревел, в мотеле зажёгся свет... У забора из темноты поднимается ОНО! БЕГИТЕ!",
+            "time": 6.0
+          },
+          {
+            "type": "objective",
+            "text": "Возьмите ключ от входа с доски и ключи от машины из сейфа (код 1986)"
           }
         ]
       },
@@ -859,14 +985,14 @@
         "do": [
           {
             "type": "message",
-            "text": "Сейф пуст. Ключи от машины уже у вас в руках.",
+            "text": "Сейф пуст. Ключи от машины уже у вас.",
             "time": 3.0
           }
         ]
       },
       {
         "when": {
-          "flag": "tape_played"
+          "flag": "power_restored"
         },
         "do": [
           {
@@ -889,17 +1015,29 @@
           },
           {
             "type": "shake",
-            "amount": 4.0,
-            "time": 0.5
+            "amount": 3.0,
+            "time": 0.4
           },
           {
             "type": "message",
-            "text": "Код 1986 подошёл! Замок щёлкнул — ключи от машины у вас! Тень ломится в двери — БЕГИТЕ К МАШИНЕ У ВХОДА И ЖМИТЕ ГАЗ!",
-            "time": 6.5
+            "text": "Код 1986 — щелчок! Ключи от «Волги» у вас!",
+            "time": 4.0
           },
           {
-            "type": "objective",
-            "text": "Бегите к машине у входа мотеля и заведите двигатель!"
+            "type": "event",
+            "name": "escape_objective"
+          }
+        ]
+      },
+      {
+        "when": {
+          "flag": "blackout"
+        },
+        "do": [
+          {
+            "type": "message",
+            "text": "В темноте не разглядеть кодовый замок. Сначала верните свет — генератор во дворе.",
+            "time": 4.0
           }
         ]
       },
@@ -907,8 +1045,252 @@
         "do": [
           {
             "type": "message",
-            "text": "Тяжёлый стальной сейф заперт на кодовый замок. Сначала вставьте кассету в магнитофон на стойке.",
+            "text": "Тяжёлый стальной сейф заперт на кодовый замок. Кода вы не знаете.",
+            "time": 4.0
+          }
+        ]
+      }
+    ],
+    "got_key_entrance": [
+      {
+        "when": {
+          "item": "car_keys"
+        },
+        "do": [
+          {
+            "type": "objective",
+            "text": "Откройте входную дверь и бегите к «Волге» на парковке!"
+          }
+        ]
+      },
+      {
+        "do": [
+          {
+            "type": "objective",
+            "text": "Заберите ключи от машины из сейфа под стойкой (код 1986)"
+          }
+        ]
+      }
+    ],
+    "escape_objective": [
+      {
+        "when": {
+          "item": "key_entrance"
+        },
+        "do": [
+          {
+            "type": "objective",
+            "text": "Откройте входную дверь и бегите к «Волге» на парковке!"
+          }
+        ]
+      },
+      {
+        "do": [
+          {
+            "type": "objective",
+            "text": "Возьмите ключ от входа с доски за стойкой"
+          }
+        ]
+      }
+    ],
+    "door_lobby_locked": [
+      {
+        "when": {
+          "flag": "power_restored"
+        },
+        "do": [
+          {
+            "type": "message",
+            "text": "Заперто! Ключ от входа висит на доске за стойкой — хватайте его!",
+            "time": 3.5
+          }
+        ]
+      },
+      {
+        "do": [
+          {
+            "type": "message",
+            "text": "Дверь захлопнулась и заперлась. В темноте ключа не найти — сначала верните свет.",
+            "time": 3.5
+          }
+        ]
+      }
+    ],
+    "door_lobby_unlocked": [
+      {
+        "when": {
+          "item": "car_keys"
+        },
+        "do": [
+          {
+            "type": "message",
+            "text": "Замок поддался — дверь открыта!",
+            "time": 2.5
+          },
+          {
+            "type": "objective",
+            "text": "Бегите к «Волге» на парковке и заводите мотор!"
+          }
+        ]
+      },
+      {
+        "do": [
+          {
+            "type": "message",
+            "text": "Замок поддался — дверь открыта!",
+            "time": 2.5
+          },
+          {
+            "type": "objective",
+            "text": "Ключи от машины — в сейфе под стойкой (код 1986)"
+          }
+        ]
+      }
+    ],
+    "highway_enter": [
+      {
+        "when": {
+          "flag": "highway_msg"
+        },
+        "do": []
+      },
+      {
+        "when": {
+          "flag": "car_started"
+        },
+        "do": [
+          {
+            "type": "set_flag",
+            "name": "highway_msg"
+          },
+          {
+            "type": "message",
+            "text": "Трасса М-86. Не сбавляйте скорость — ОНО бежит следом!",
+            "time": 4.0
+          }
+        ]
+      }
+    ],
+    "post_arrive": [
+      {
+        "when": {
+          "flag": "post_reached"
+        },
+        "do": []
+      },
+      {
+        "when": {
+          "flag": "car_started"
+        },
+        "do": [
+          {
+            "type": "set_flag",
+            "name": "post_reached"
+          },
+          {
+            "type": "stalker",
+            "mode": "lurk"
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_sting_dread.wav",
+            "volume": 0.7
+          },
+          {
+            "type": "message",
+            "text": "Пост ДПС. В будке горит свет, шлагбаум опущен... Тварь отстала. Выйдите из машины [E] и найдите оружие!",
+            "time": 6.0
+          },
+          {
+            "type": "objective",
+            "text": "Найдите оружие в будке поста ДПС"
+          }
+        ]
+      }
+    ],
+    "got_pistol": [
+      {
+        "do": [
+          {
+            "type": "set_flag",
+            "name": "has_pistol"
+          },
+          {
+            "type": "ammo",
+            "amount": 8
+          },
+          {
+            "type": "checkpoint",
+            "name": "post"
+          },
+          {
+            "type": "stalker",
+            "mode": "final"
+          },
+          {
+            "type": "sfx",
+            "path": "audio/screamers/sfx_sc_12_chase_breath.wav",
+            "volume": 1.0
+          },
+          {
+            "type": "message",
+            "text": "ПМ заряжен. Снаружи что-то хрипит... ОНО пришло за вами. Цельтесь в голову!",
             "time": 5.0
+          },
+          {
+            "type": "objective",
+            "text": "Убейте сущность!  [ЛКМ] Огонь  [R] Перезарядка"
+          }
+        ]
+      }
+    ],
+    "got_ammo": [
+      {
+        "do": [
+          {
+            "type": "ammo",
+            "amount": 16
+          },
+          {
+            "type": "message",
+            "text": "+16 патронов 9×18",
+            "time": 2.5
+          }
+        ]
+      }
+    ],
+    "stalker_killed": [
+      {
+        "do": [
+          {
+            "type": "set_flag",
+            "name": "stalker_dead"
+          },
+          {
+            "type": "sanity",
+            "delta": 40
+          },
+          {
+            "type": "sfx",
+            "path": "audio/sfx/sfx_sting_dread.wav",
+            "volume": 0.6
+          },
+          {
+            "type": "message",
+            "text": "ОНО рассыпается чёрным пеплом под дождём. Тишина... только мотор «Волги» остывает.",
+            "time": 6.0
+          },
+          {
+            "type": "objective",
+            "text": ""
+          },
+          {
+            "type": "end_act",
+            "text": "ГЛАВА 2 ЗАВЕРШЕНА — РАССВЕТ НАД ТРАССОЙ М-86"
+          },
+          {
+            "type": "chapter_complete",
+            "delay": 9.5
           }
         ]
       }

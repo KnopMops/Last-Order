@@ -154,6 +154,13 @@ JPH::RefConst<JPH::Shape> MakeHull(const std::vector<Vector3>& points, Vector3 o
     return result.Get();
 }
 
+void SplitTransform(const Matrix& m, JPH::RVec3& position, JPH::Quat& rotation) {
+    JPH::Mat44 rot(JPH::Vec4(m.m0, m.m1, m.m2, 0.0f), JPH::Vec4(m.m4, m.m5, m.m6, 0.0f),
+                   JPH::Vec4(m.m8, m.m9, m.m10, 0.0f), JPH::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    rotation = rot.GetQuaternion().Normalized();
+    position = JPH::RVec3(m.m12, m.m13, m.m14);
+}
+
 Vector3 Centroid(const std::vector<Vector3>& points) {
     Vector3 c{0.0f, 0.0f, 0.0f};
     for (const Vector3& p : points) {
@@ -256,6 +263,20 @@ BodyHandle Physics3D::AddDynamicHull(const std::vector<Vector3>& worldPoints, fl
     settings.mLinearDamping = 0.2f;
     settings.mAngularDamping = 0.4f;
     JPH::BodyID id = m_impl->Bodies().CreateAndAddBody(settings, JPH::EActivation::DontActivate);
+    if (id.IsInvalid()) return INVALID_BODY;
+    m_impl->bodies.push_back(id);
+    return FromId(id);
+}
+
+BodyHandle Physics3D::AddKinematicHull(const std::vector<Vector3>& worldPoints, Vector3& outOrigin) {
+    if (!m_impl || worldPoints.size() < 4) return INVALID_BODY;
+    outOrigin = Centroid(worldPoints);
+    auto shape = MakeHull(worldPoints, outOrigin);
+    if (!shape) return INVALID_BODY;
+    JPH::BodyCreationSettings settings(shape, JPH::RVec3(outOrigin.x, outOrigin.y, outOrigin.z), JPH::Quat::sIdentity(),
+                                       JPH::EMotionType::Kinematic, Layers::MOVING);
+    settings.mFriction = 0.5f;
+    JPH::BodyID id = m_impl->Bodies().CreateAndAddBody(settings, JPH::EActivation::Activate);
     if (id.IsInvalid()) return INVALID_BODY;
     m_impl->bodies.push_back(id);
     return FromId(id);
@@ -377,6 +398,23 @@ void Physics3D::WakeBody(BodyHandle body) {
     m_impl->Bodies().ActivateBody(ToId(body));
 }
 
+void Physics3D::MoveKinematic(BodyHandle body, const Matrix& transform, float dt) {
+    if (!m_impl || body == INVALID_BODY || dt <= 0.0f) return;
+    JPH::RVec3 position;
+    JPH::Quat rotation;
+    SplitTransform(transform, position, rotation);
+    m_impl->Bodies().MoveKinematic(ToId(body), position, rotation, dt);
+}
+
+void Physics3D::TeleportBody(BodyHandle body, const Matrix& transform) {
+    if (!m_impl || body == INVALID_BODY) return;
+    JPH::RVec3 position;
+    JPH::Quat rotation;
+    SplitTransform(transform, position, rotation);
+    m_impl->Bodies().SetPositionAndRotation(ToId(body), position, rotation, JPH::EActivation::Activate);
+    m_impl->Bodies().SetLinearAndAngularVelocity(ToId(body), JPH::Vec3::sZero(), JPH::Vec3::sZero());
+}
+
 RayHit Physics3D::CastRay(Vector3 origin, Vector3 direction, float maxDistance, BodyHandle ignore) const {
     RayHit out;
     if (!m_impl) return out;
@@ -404,10 +442,10 @@ bool Physics3D::IsStaticOccluded(Vector3 from, Vector3 to) const {
     JPH::Vec3 delta(to.x - from.x, to.y - from.y, to.z - from.z);
     JPH::RRayCast ray(JPH::RVec3(from.x, from.y, from.z), delta);
     JPH::RayCastResult result;
-    result.mFraction = 0.999f;
     StaticOnlyBroadPhase broadFilter;
     StaticOnlyObjects objectFilter;
-    return m_impl->system->GetNarrowPhaseQuery().CastRay(ray, result, broadFilter, objectFilter);
+    if (!m_impl->system->GetNarrowPhaseQuery().CastRay(ray, result, broadFilter, objectFilter)) return false;
+    return result.mFraction < 0.999f;
 }
 
 float Physics3D::CastStaticDistance(Vector3 origin, Vector3 direction, float maxDistance) const {
@@ -418,6 +456,26 @@ float Physics3D::CastStaticDistance(Vector3 origin, Vector3 direction, float max
     StaticOnlyObjects objectFilter;
     if (!m_impl->system->GetNarrowPhaseQuery().CastRay(ray, result, broadFilter, objectFilter)) return maxDistance;
     return result.mFraction * maxDistance;
+}
+
+RayHit Physics3D::CastStaticRay(Vector3 origin, Vector3 direction, float maxDistance) const {
+    RayHit out;
+    if (!m_impl) return out;
+    JPH::RRayCast ray(JPH::RVec3(origin.x, origin.y, origin.z), ToJ(direction) * maxDistance);
+    JPH::RayCastResult result;
+    StaticOnlyBroadPhase broadFilter;
+    StaticOnlyObjects objectFilter;
+    if (!m_impl->system->GetNarrowPhaseQuery().CastRay(ray, result, broadFilter, objectFilter)) return out;
+    out.hit = true;
+    out.distance = result.mFraction * maxDistance;
+    JPH::RVec3 point = ray.GetPointOnRay(result.mFraction);
+    out.point = Vector3{static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), static_cast<float>(point.GetZ())};
+    out.body = FromId(result.mBodyID);
+    JPH::BodyLockRead lock(m_impl->system->GetBodyLockInterface(), result.mBodyID);
+    if (lock.Succeeded()) {
+        out.normal = FromJ(lock.GetBody().GetWorldSpaceSurfaceNormal(result.mSubShapeID2, point));
+    }
+    return out;
 }
 
 void Physics3D::CreateCharacter(Vector3 feetPosition, const CharacterConfig& config) {

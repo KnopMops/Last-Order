@@ -90,6 +90,8 @@ void MotelWorld3D::Init(engine::core::Engine& eng, int) {
     }
 
     m_itemVisuals.Init(m_lighting.LitShader(), eng.Assets().GetTexture("sprites/3d/motel_key_tag.png"));
+    m_itemVisuals.SetTexture("bark", eng.Assets().GetTexture("sprites/3d/motel_bark.png"));
+    m_itemVisuals.SetTexture("pine", eng.Assets().GetTexture("sprites/3d/motel_pine.png"));
     CharacterConfig cfg;
     m_physics.CreateCharacter(Vector3Add(m_level.PlayerStart(), Vector3{0.0f, 0.05f, 0.0f}), cfg);
     m_camera.Init(m_level.PlayerStartYaw(), -0.05f, 72.0f);
@@ -128,11 +130,13 @@ void MotelWorld3D::Init(engine::core::Engine& eng, int) {
     m_rainAmbientVolume = m_script.AmbientVolume();
     m_phantomTex = eng.Assets().GetTexture("sprites/3d/motel_phantom.png");
     eng.Renderer().SetSanityStress(0.0f);
+    SetupAction();
     DisableCursor();
     m_script.RunEvent(m_script.StartEvent(), *this);
 }
 
 void MotelWorld3D::Shutdown(engine::core::Engine& eng) {
+    ShutdownAction();
     if (m_reflectionRT.id != 0) {
         UnloadRenderTexture(m_reflectionRT);
         m_reflectionRT = RenderTexture2D{};
@@ -164,11 +168,11 @@ void MotelWorld3D::PlaySound(const std::string& path, float volume, std::optiona
         m_eng->Audio().PlaySfx(path, volume);
         return;
     }
-    Vector3 listener = m_camera.GetCamera().position;
+    Vector3 listener = ViewCamera().position;
     Vector3 delta = Vector3Subtract(*at, listener);
     float dist = Vector3Length(delta);
     float att = std::clamp(1.0f - dist / 22.0f, 0.08f, 1.0f);
-    float side = dist > 0.2f ? Vector3DotProduct(Vector3Scale(delta, 1.0f / dist), m_camera.GetRight()) : 0.0f;
+    float side = dist > 0.2f ? Vector3DotProduct(Vector3Scale(delta, 1.0f / dist), ViewRight()) : 0.0f;
     m_eng->Audio().PlaySfxSpatial(path, volume * att, 0.5f - 0.42f * side);
 }
 
@@ -256,6 +260,7 @@ void MotelWorld3D::Update(engine::core::Engine& eng, float dt) {
         return;
     }
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
+    if (m_driveTest) UpdateDriveTest(eng);
     if (m_tourIndex >= 0) {
         UpdateTour(eng);
         UpdateFlashlight(dt);
@@ -268,6 +273,14 @@ void MotelWorld3D::Update(engine::core::Engine& eng, float dt) {
     if (m_messageTimer > 0.0f) m_messageTimer -= dt;
     if (m_objectiveFlash > 0.0f) m_objectiveFlash -= dt;
     if (m_endActTimer > 0.0f) m_endActTimer -= dt;
+    UpdateActionTimers(dt);
+    {
+        Vector3 anchor = PlayerAnchor();
+        bool indoor = m_mode != PlayerMode::Driving && anchor.z <= 0.0f && anchor.z >= -13.8f && anchor.x >= -21.0f && anchor.x <= 8.5f;
+        float targetRainVol = indoor ? 0.0f : 0.28f;
+        m_rainAmbientVolume += (targetRainVol - m_rainAmbientVolume) * std::clamp(dt * 3.5f, 0.0f, 1.0f);
+        eng.Audio().SetAmbientBaseVolume(m_rainAmbientVolume);
+    }
 
     if (m_settingsUI.IsOpen()) {
         m_settingsUI.Update(eng);
@@ -301,6 +314,16 @@ void MotelWorld3D::Update(engine::core::Engine& eng, float dt) {
         return;
     }
 
+    if (m_mode == PlayerMode::Dead) {
+        UpdateDeath(dt);
+        UpdateRain(dt);
+        return;
+    }
+    if (m_mode == PlayerMode::Driving) {
+        UpdateDriving(dt);
+        return;
+    }
+
     m_camera.ApplyMouseLook(GetMouseDelta(), 0.0022f);
     if (m_hiddenSpot >= 0) {
         const HideSpot& spot = m_level.HideSpots()[m_hiddenSpot];
@@ -317,11 +340,9 @@ void MotelWorld3D::Update(engine::core::Engine& eng, float dt) {
     UpdateSoundEmitters(dt);
     UpdateRain(dt);
     UpdateSanity(dt);
-    Vector3 charPos = m_physics.GetCharacterPosition();
-    bool indoor = (charPos.z <= 0.0f && charPos.z >= -13.8f && charPos.x >= -21.0f && charPos.x <= 8.5f);
-    float targetRainVol = indoor ? 0.0f : 0.28f;
-    m_rainAmbientVolume += (targetRainVol - m_rainAmbientVolume) * std::clamp(dt * 3.5f, 0.0f, 1.0f);
-    eng.Audio().SetAmbientBaseVolume(m_rainAmbientVolume);
+    UpdatePistol(dt);
+    UpdateTrail();
+    UpdateStalker(dt);
 }
 
 void MotelWorld3D::UpdateFlashlight(float dt) {
@@ -465,7 +486,12 @@ void MotelWorld3D::UpdateFocus() {
     float limit = hit.hit ? hit.distance : USE_DISTANCE + 0.8f;
     float best = USE_DISTANCE;
 
-    if (hit.hit && hit.distance <= USE_DISTANCE) {
+    if (hit.hit && hit.distance <= USE_DISTANCE + 0.4f && m_carReady && hit.body == m_level.Vehicle().body) {
+        m_focusKind = FocusKind::Vehicle;
+        m_focusIndex = 0;
+        m_focusLabel = "Сесть за руль: " + m_level.Vehicle().label;
+        best = hit.distance;
+    } else if (hit.hit && hit.distance <= USE_DISTANCE) {
         int door = m_level.FindDoorByBody(hit.body);
         int prop = m_level.FindPropByBody(hit.body);
         int inter = m_level.FindInteractByBody(hit.body);
@@ -623,6 +649,9 @@ void MotelWorld3D::HandleUse() {
             m_inspectZoom = 1.0f;
             break;
         }
+        case FocusKind::Vehicle:
+            m_script.RunEvent(m_level.Vehicle().event, *this, m_car.Position());
+            break;
         case FocusKind::Hide:
             if (m_hiddenSpot >= 0) {
                 m_hiddenSpot = -1;
@@ -639,7 +668,7 @@ void MotelWorld3D::HandleUse() {
 }
 
 void MotelWorld3D::UpdateTriggers() {
-    Vector3 p = Vector3Add(m_physics.GetCharacterPosition(), Vector3{0.0f, 0.9f, 0.0f});
+    Vector3 p = Vector3Add(PlayerAnchor(), Vector3{0.0f, 0.9f, 0.0f});
     for (TriggerObject& t : m_level.Triggers()) {
         bool inside = PointInBox(p, t.bounds);
         if (inside && !t.inside && !(t.once && t.fired)) {
@@ -681,7 +710,7 @@ void MotelWorld3D::UpdateSoundEmitters(float dt) {
 }
 
 void MotelWorld3D::RespawnDrop(RainDrop3D& drop, bool anyHeight) {
-    Vector3 c = m_camera.GetCamera().position;
+    Vector3 c = ViewCamera().position;
     float angle = Rand01() * 2.0f * PI;
     float r = std::sqrt(Rand01()) * RAIN_RADIUS;
     drop.pos = Vector3{c.x + std::cos(angle) * r, c.y + (anyHeight ? (Rand01() * 9.0f - 2.0f) : (5.0f + Rand01() * 3.0f)), c.z + std::sin(angle) * r};
@@ -692,7 +721,7 @@ void MotelWorld3D::RespawnDrop(RainDrop3D& drop, bool anyHeight) {
 }
 
 void MotelWorld3D::UpdateRain(float dt) {
-    Vector3 c = m_camera.GetCamera().position;
+    Vector3 c = ViewCamera().position;
     for (RainDrop3D& d : m_rain) {
         d.pos.y -= d.speed * dt;
         d.pos.x -= d.speed * 0.1f * dt;
@@ -726,6 +755,7 @@ void MotelWorld3D::UpdateSanity(float dt) {
 
 void MotelWorld3D::FixedUpdate(engine::core::Engine&, float fixedDt) {
     if (!m_ready || m_inspectMode || m_settingsUI.IsOpen()) return;
+    if (m_carReady && m_mode == PlayerMode::Driving) m_physics.MoveKinematic(m_level.Vehicle().body, m_car.Transform(), fixedDt);
     if (m_carriedProp >= 0) {
         PropObject& prop = m_level.Props()[m_carriedProp];
         const Camera3D& cam = m_camera.GetCamera();
@@ -789,6 +819,9 @@ std::vector<DynamicLight> MotelWorld3D::GatherLights(Vector3 viewPos) const {
         if (d > 24.0f) continue;
         candidates.push_back({d, DynamicLight{l.position, Vector3Scale(l.color, level), l.radius}});
     }
+    for (const DynamicLight& l : m_extraLights) {
+        candidates.push_back({Vector3Distance(viewPos, l.position) - l.radius - 4.0f, l});
+    }
     std::sort(candidates.begin(), candidates.end(), [](const Candidate& a, const Candidate& b) { return a.score < b.score; });
     std::vector<DynamicLight> out;
     for (const Candidate& c : candidates) {
@@ -807,6 +840,9 @@ SceneEnvironment MotelWorld3D::BuildEnvironment() const {
     env.fogStart = le.fogStart;
     env.fogEnd = le.fogEnd;
     env.powerLevel = CurrentPowerLevel();
+    float highway = std::clamp((PlayerAnchor().x - 12.0f) / 20.0f, 0.0f, 1.0f);
+    env.fogStart = Lerp(env.fogStart, 9.0f, highway);
+    env.fogEnd = Lerp(env.fogEnd, 44.0f, highway);
     if (m_screamerActive) {
         float f = std::clamp(m_screamerTimer / std::max(0.01f, m_screamerDuration), 0.0f, 1.0f);
         env.ambientSky = Vector3Add(env.ambientSky, Vector3{1.4f * f, 1.5f * f, 1.8f * f});
@@ -890,16 +926,19 @@ void MotelWorld3D::DrawScene(const Shader* overrideShader, bool reflectionPass) 
     }
     if (overrideShader == nullptr) m_lighting.SetObjectParams(2.0f, Vector3{0.0f, 0.0f, 0.0f}, 0.0f);
 
+    DrawVehicle(overrideShader);
+    DrawTrees(overrideShader, ViewCamera().position);
+
     if (reflectionPass) {
         DrawPhantoms(true);
-
     } else {
         DrawPhantoms(false);
+        if (overrideShader == nullptr) DrawStalker(ViewCamera());
     }
 }
 
 void MotelWorld3D::DrawPhantoms(bool reflectionPass) const {
-    const Camera3D& currentCam = reflectionPass ? m_reflectionCam : m_camera.GetCamera();
+    const Camera3D& currentCam = reflectionPass ? m_reflectionCam : ViewCamera();
     for (const Phantom& p : m_level.Phantoms()) {
         if (!p.flag.empty() && !m_script.HasFlag(p.flag)) continue;
         if (!p.hideFlag.empty() && m_script.HasFlag(p.hideFlag)) continue;
@@ -964,7 +1003,7 @@ void MotelWorld3D::DrawViewmodel() const {
 
 void MotelWorld3D::RenderOffscreen(engine::core::Engine&) {
     if (!m_ready) return;
-    const Camera3D& cam = m_camera.GetCamera();
+    const Camera3D& cam = ViewCamera();
     SceneEnvironment env = BuildEnvironment();
     Shader depth = m_lighting.DepthShader();
 
@@ -975,6 +1014,7 @@ void MotelWorld3D::RenderOffscreen(engine::core::Engine&) {
     }
 
     m_activeMirror = -1;
+    if (m_mode != PlayerMode::OnFoot) return;
     float bestDist = 8.0f;
     Vector3 fwd = m_camera.GetForward();
     const auto& mirrors = m_level.Mirrors();
@@ -1018,7 +1058,7 @@ void MotelWorld3D::RenderOffscreen(engine::core::Engine&) {
 
 void MotelWorld3D::Render3D(engine::core::Engine&) {
     if (!m_ready) return;
-    const Camera3D& cam = m_camera.GetCamera();
+    const Camera3D& cam = ViewCamera();
     SceneEnvironment env = BuildEnvironment();
     ClearBackground(Color{static_cast<unsigned char>(env.fogColor.x * 255.0f), static_cast<unsigned char>(env.fogColor.y * 255.0f),
                           static_cast<unsigned char>(env.fogColor.z * 255.0f), 255});
@@ -1050,7 +1090,15 @@ void MotelWorld3D::Render3D(engine::core::Engine&) {
         DrawBillboard(cam, m_screamerTex, Vector3{-19.92f, 1.6f, -6.75f}, 1.5f, Color{255, 255, 255, 240});
         rlDrawRenderBatchActive();
     }
-    DrawViewmodel();
+    if (m_mode == PlayerMode::OnFoot) {
+        if (HasPistol()) {
+            DrawPistolViewmodel();
+        } else {
+            DrawViewmodel();
+        }
+    } else if (m_mode == PlayerMode::Driving && m_driveView == 1) {
+        DrawCockpit();
+    }
     EndMode3D();
 }
 
@@ -1135,11 +1183,11 @@ void MotelWorld3D::RenderUI(engine::core::Engine& eng) {
         DrawRectangle(static_cast<int>(cx) - 120, 640, static_cast<int>(240.0f * m_breath / 100.0f), 10,
                       m_holdingBreath ? Color{120, 190, 240, 240} : Color{90, 110, 130, 200});
         DrawLabel(font, "[ПРОБЕЛ] Задержать дыхание   [E] Выйти", cx - 170.0f, 656.0f, 17.0f, Color{196, 178, 156, 230});
-    } else {
+    } else if (m_mode == PlayerMode::OnFoot && !HasPistol()) {
         DrawCircle(static_cast<int>(cx), static_cast<int>(cy), 2.0f, m_focusKind != FocusKind::None ? Color{255, 220, 150, 240} : Color{220, 210, 200, 150});
     }
 
-    if (!m_focusLabel.empty()) {
+    if (!m_focusLabel.empty() && m_mode == PlayerMode::OnFoot) {
         std::string prompt = "[E] " + m_focusLabel;
         Vector2 size = MeasureTextEx(font, prompt.c_str(), 19.0f, 1.0f);
         float px = cx - size.x * 0.5f;
@@ -1163,14 +1211,16 @@ void MotelWorld3D::RenderUI(engine::core::Engine& eng) {
         DrawLabel(font, "ЦЕЛЬ: " + m_objective, 24.0f, 20.0f, 18.0f, c);
     }
 
-    DrawRectangle(20, 646, 250, 56, Color{12, 9, 14, 190});
-    std::string flashLabel = m_flashOn ? "Фонарик [F]" : "Фонарик выкл [F]";
-    DrawLabel(font, flashLabel, 30.0f, 652.0f, 15.0f, m_flashOn ? Color{244, 220, 140, 240} : Color{140, 130, 120, 200});
-    Color batCol = m_battery > 40.0f ? Color{70, 200, 120, 230} : (m_battery > 15.0f ? Color{230, 180, 50, 230} : Color{230, 60, 50, 230});
-    DrawRectangle(150, 656, static_cast<int>(108.0f * m_battery / 100.0f), 8, batCol);
-    DrawRectangleLines(150, 656, 108, 8, Color{170, 160, 150, 180});
-    DrawRectangle(30, 676, static_cast<int>(228.0f * m_stamina / 100.0f), 4, Color{80, 160, 220, 210});
-    DrawRectangle(30, 686, static_cast<int>(228.0f * m_sanity / 100.0f), 4, Color{190, 80, 120, 210});
+    if (m_mode == PlayerMode::OnFoot) {
+        DrawRectangle(20, 646, 250, 56, Color{12, 9, 14, 190});
+        std::string flashLabel = m_flashOn ? "Фонарик [F]" : "Фонарик выкл [F]";
+        DrawLabel(font, flashLabel, 30.0f, 652.0f, 15.0f, m_flashOn ? Color{244, 220, 140, 240} : Color{140, 130, 120, 200});
+        Color batCol = m_battery > 40.0f ? Color{70, 200, 120, 230} : (m_battery > 15.0f ? Color{230, 180, 50, 230} : Color{230, 60, 50, 230});
+        DrawRectangle(150, 656, static_cast<int>(108.0f * m_battery / 100.0f), 8, batCol);
+        DrawRectangleLines(150, 656, 108, 8, Color{170, 160, 150, 180});
+        DrawRectangle(30, 676, static_cast<int>(228.0f * m_stamina / 100.0f), 4, Color{80, 160, 220, 210});
+        DrawRectangle(30, 686, static_cast<int>(228.0f * m_sanity / 100.0f), 4, Color{190, 80, 120, 210});
+    }
 
     float ix = 290.0f;
     for (const std::string& id : m_script.Inventory()) {
@@ -1183,8 +1233,10 @@ void MotelWorld3D::RenderUI(engine::core::Engine& eng) {
         ix += size.x + 26.0f;
     }
 
-    DrawLabel(font, "[WASD] Шаг  [SHIFT] Бег  [CTRL] Присед  [ПКМ] Фокус луча  [E] Действие  [ESC] Меню",
-              UI_W - 640.0f, 700.0f, 14.0f, Color{170, 160, 150, 170});
+    if (m_mode == PlayerMode::OnFoot && !HasPistol()) {
+        DrawLabel(font, "[WASD] Шаг  [SHIFT] Бег  [CTRL] Присед  [ПКМ] Фокус луча  [E] Действие  [ESC] Меню",
+                  UI_W - 640.0f, 700.0f, 14.0f, Color{170, 160, 150, 170});
+    }
 
     if (m_endActTimer > 0.0f && !m_endActText.empty()) {
         float a = std::clamp(std::min(m_endActTimer, 9.0f - m_endActTimer), 0.0f, 1.0f);
@@ -1209,11 +1261,18 @@ void MotelWorld3D::RenderUI(engine::core::Engine& eng) {
             DrawTexturePro(m_screamerTex, src, dst, Vector2{0.0f, 0.0f}, 0.0f, Color{255, 255, 255, static_cast<unsigned char>(255 * alpha)});
         }
     }
+    RenderActionUI(eng);
 }
 
 
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
 void MotelWorld3D::StartTour(const std::string& outputDir) {
+    if (outputDir == "@drive") {
+        m_driveTest = true;
+        m_driveFrames = 0;
+        m_drivePhase = 0;
+        return;
+    }
     m_tourDir = outputDir;
     m_tour = {
         {"tour_01_start", {-3.7f, 0.0f, 12.2f}, 20.0f, 2.0f},
@@ -1229,7 +1288,21 @@ void MotelWorld3D::StartTour(const std::string& outputDir) {
         {"tour_11_mirror", {-18.6f, 0.25f, -1.6f}, -90.0f, 0.0f, true, "door_bath102"},
         {"tour_12_room101_power", {-6.0f, 0.25f, -4.6f}, -120.0f, -10.0f, true},
         {"tour_13_no_flash", {-4.6f, 0.25f, -7.0f}, -90.0f, 0.0f, false, "", false},
+        {"tour_14_car", {-3.7f, 0.05f, 15.5f}, 0.0f, -8.0f, true},
+        {"tour_15_highway_start", {36.0f, 0.05f, 20.0f}, 90.0f, 0.0f, true},
     };
+    const auto& road = m_level.Road();
+    for (size_t k : {road.size() / 4, road.size() / 2, (road.size() * 3) / 4}) {
+        if (k + 1 >= road.size()) continue;
+        Vector3 a = road[k].position;
+        Vector3 b = road[k + 1].position;
+        float yaw = std::atan2(b.x - a.x, -(b.z - a.z)) * RAD2DEG;
+        m_tour.push_back({"tour_16_road_" + std::to_string(k), Vector3Add(a, Vector3{0.0f, 0.05f, 0.0f}), yaw, -2.0f, true});
+    }
+    if (const MarkerObject* post = m_level.FindMarker("checkpoint_post")) {
+        m_tour.push_back({"tour_17_post_inside", post->position, 180.0f, -12.0f, true});
+        m_tour.push_back({"tour_18_post_outside", Vector3Add(post->position, Vector3{-14.0f, -0.05f, -11.0f}), 55.0f, 2.0f, true});
+    }
     m_tourIndex = 0;
     m_tourFrames = 0;
 }
