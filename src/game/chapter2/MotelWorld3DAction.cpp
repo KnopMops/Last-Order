@@ -22,6 +22,12 @@ constexpr float STALKER_REACH = 0.95f;
 constexpr float CAR_EYE_HEIGHT = 1.3f;
 constexpr int MAG_SIZE = 8;
 constexpr float DEATH_TIME = 4.2f;
+constexpr float KO_FAKE_DEATH_TIME = 2.6f;
+constexpr float KO_TURN_START = 1.1f;
+constexpr float KO_TURN_END = 1.75f;
+constexpr float KO_STRIKE = 2.05f;
+constexpr float KO_BLACKOUT = 0.3f;
+constexpr float KO_END = 3.4f;
 constexpr const char* ENGINE_LOOP = "audio/sfx/sfx_car_engine_loop.wav";
 constexpr const char* HEART_LOOP = "audio/sfx/sfx_heartbeat_dread.wav";
 constexpr const char* SND_SHOT = "audio/sfx/sfx_pistol_shot.wav";
@@ -526,7 +532,8 @@ bool MotelWorld3D::MoveStalker(Vector3 target, float speed, float dt) {
 
 void MotelWorld3D::UpdateStalker(float dt) {
     StalkerData& st = m_stalker;
-    if (st.state == StalkerState::Inactive || st.state == StalkerState::Dead || st.state == StalkerState::Lurking) {
+    if (st.state == StalkerState::Inactive || st.state == StalkerState::Dead || st.state == StalkerState::Lurking ||
+        st.state == StalkerState::Ambush) {
         UpdateStalkerAudio(dt);
         return;
     }
@@ -550,10 +557,14 @@ void MotelWorld3D::UpdateStalker(float dt) {
         return;
     }
     if (st.state == StalkerState::Dying) {
-        if (st.timer > 2.6f) {
-            st.state = StalkerState::Dead;
-            m_eng->Audio().StopLoop("heart");
-            m_script.RunEvent("stalker_killed", *this);
+        if (st.timer > KO_FAKE_DEATH_TIME) {
+            if (m_mode == PlayerMode::OnFoot) {
+                StartKnockout();
+            } else {
+                st.state = StalkerState::Dead;
+                m_eng->Audio().StopLoop("heart");
+                m_script.RunEvent("stalker_killed", *this);
+            }
         }
         return;
     }
@@ -769,6 +780,7 @@ void MotelWorld3D::FirePistol() {
                 PlaySound(SND_DEATH, 1.0f, std::nullopt);
                 PlaySound(SND_VISCERAL, 0.8f, std::nullopt);
                 Shake(6.0f, 1.2f);
+                ShowMessage("ОНО рассыпается чёрным пеплом... Тишина.", 3.0f);
             } else {
                 PlaySound(SND_SCREECH, 0.85f, st.pos);
                 if (head) ShowMessage("В голову! ОНО шатается!", 1.4f);
@@ -795,6 +807,86 @@ void MotelWorld3D::KillPlayer() {
     AddSanity(-20.0f);
 }
 
+void MotelWorld3D::StartKnockout() {
+    StalkerData& st = m_stalker;
+    st.state = StalkerState::Ambush;
+    st.timer = 0.0f;
+    st.hitFlash = 0.0f;
+    m_knockoutTime = 0.0f;
+    m_knockoutBlack = 0.0f;
+    m_hiddenSpot = -1;
+    m_carriedProp = -1;
+    m_reloadTimer = 0.0f;
+    m_focusKind = FocusKind::None;
+    m_focusLabel.clear();
+    m_moveVelocity = Vector3{0.0f, 0.0f, 0.0f};
+
+    Vector3 feet = m_physics.GetCharacterPosition();
+    Vector3 back = Vector3Negate(m_camera.GetFlatForward());
+    float room = m_physics.CastStaticDistance(Vector3Add(feet, Vector3{0.0f, 1.2f, 0.0f}), back, 1.6f);
+    float dist = std::clamp(room - 0.35f, 0.6f, 1.25f);
+    st.pos = Vector3Add(feet, Vector3Scale(back, dist));
+
+    m_knockoutYawFrom = m_camera.GetYaw();
+    m_knockoutPitchFrom = m_camera.GetPitch();
+    m_knockoutYawTo = std::atan2(back.x, -back.z);
+    m_eng->Audio().StopLoop("heart");
+    PlaySound(SND_BREATH, 1.0f, st.pos);
+}
+
+void MotelWorld3D::UpdateKnockout(float dt) {
+    float prev = m_knockoutTime;
+    m_knockoutTime += dt;
+    float t = m_knockoutTime;
+    auto crossed = [&](float mark) { return prev < mark && t >= mark; };
+    StalkerData& st = m_stalker;
+    st.timer = t;
+
+    float yaw = m_knockoutYawFrom;
+    float pitch = m_knockoutPitchFrom;
+    if (t >= KO_TURN_START) {
+        float k = std::clamp((t - KO_TURN_START) / (KO_TURN_END - KO_TURN_START), 0.0f, 1.0f);
+        k = k * k * (3.0f - 2.0f * k);
+        float delta = std::remainder(m_knockoutYawTo - m_knockoutYawFrom, 2.0f * PI);
+        yaw = m_knockoutYawFrom + delta * k;
+        pitch = m_knockoutPitchFrom + (0.12f - m_knockoutPitchFrom) * k;
+    }
+    if (crossed(KO_TURN_START)) {
+        PlaySound("audio/sfx/sfx_sting_dread.wav", 0.9f, std::nullopt);
+        Shake(2.0f, 0.5f);
+    }
+    if (t >= KO_TURN_END && t < KO_STRIKE) {
+        Vector3 player = m_physics.GetCharacterPosition();
+        Vector3 toPlayer = Vector3Subtract(player, st.pos);
+        toPlayer.y = 0.0f;
+        float d = Vector3Length(toPlayer);
+        if (d > 0.55f) st.pos = Vector3Add(st.pos, Vector3Scale(toPlayer, std::min(d - 0.55f, dt * 2.5f) / d));
+    }
+    if (crossed(KO_TURN_END)) PlaySound(SND_ROAR, 1.0f, st.pos);
+    if (crossed(KO_STRIKE)) {
+        PlaySound(SND_HIT, 1.0f, std::nullopt);
+        PlaySound(SND_VISCERAL, 1.0f, std::nullopt);
+        TriggerScreamer(TEX_CAUGHT, 0.35f, 14.0f);
+        Shake(14.0f, 0.7f);
+        m_flashOn = false;
+    }
+    if (t >= KO_STRIKE) {
+        float fall = std::clamp((t - KO_STRIKE) / 0.5f, 0.0f, 1.0f);
+        pitch = 0.12f + (-1.1f - 0.12f) * fall;
+        yaw += 0.35f * fall;
+        m_knockoutBlack = std::clamp((t - KO_STRIKE) / KO_BLACKOUT, 0.0f, 1.0f);
+    }
+    if (crossed(KO_END)) {
+        st.state = StalkerState::Dead;
+        m_script.RunEvent("stalker_killed", *this);
+    }
+
+    m_camera.SetLookAngles(yaw, pitch);
+    UpdateFlashlight(dt);
+    m_physics.UpdateCharacter(dt, Vector3{0.0f, 0.0f, 0.0f}, false, INVALID_BODY);
+    m_camera.Update(dt, m_physics.GetCharacterPosition(), engine::camera3d::CameraMotion{});
+}
+
 void MotelWorld3D::UpdateDeath(float dt) {
     m_deathTimer += dt;
     if (m_deathTimer >= DEATH_TIME) Respawn();
@@ -810,6 +902,8 @@ void MotelWorld3D::Respawn() {
     m_flashOn = true;
     m_screamerActive = false;
     m_screamerTimer = 0.0f;
+    m_knockoutTime = -1.0f;
+    m_knockoutBlack = 0.0f;
     m_trail.clear();
     m_trailBase = 0;
     m_moveVelocity = Vector3{0.0f, 0.0f, 0.0f};
@@ -912,13 +1006,13 @@ void MotelWorld3D::DrawStalker(const Camera3D& cam) const {
     const StalkerData& st = m_stalker;
     bool visible = st.delay <= 0.0f && (st.state == StalkerState::Emerging || st.state == StalkerState::Hunting ||
                                          st.state == StalkerState::Searching || st.state == StalkerState::Final ||
-                                         st.state == StalkerState::Dying);
+                                         st.state == StalkerState::Dying || st.state == StalkerState::Ambush);
     if (visible) {
         float rise = st.state == StalkerState::Emerging ? std::clamp(st.timer / 2.2f, 0.0f, 1.0f) : 1.0f;
         float alpha = 1.0f;
         Vector3 feet = st.pos;
         if (st.state == StalkerState::Dying) {
-            float k = std::clamp(st.timer / 2.6f, 0.0f, 1.0f);
+            float k = std::clamp(st.timer / KO_FAKE_DEATH_TIME, 0.0f, 1.0f);
             alpha = 1.0f - k;
             feet.y -= k * 1.2f;
         }
@@ -1036,7 +1130,7 @@ void MotelWorld3D::RenderActionUI(engine::core::Engine& eng) {
         DrawRectangleLines(static_cast<int>(UI_W) - 180, 676, 150, 8, Color{170, 160, 150, 180});
         DrawLabel(font, "[W/S] Газ/Тормоз  [A/D] Руль  [ПРОБЕЛ] Ручник  [V] Камера  [F] Фары  [E] Выйти  [Мышь] Обзор",
                   24.0f, 700.0f, 14.0f, Color{170, 160, 150, 190});
-    } else if (m_mode == PlayerMode::OnFoot && HasPistol()) {
+    } else if (m_mode == PlayerMode::OnFoot && HasPistol() && m_knockoutTime < 0.0f) {
         DrawRectangle(static_cast<int>(UI_W) - 200, 640, 180, 56, Color{12, 9, 14, 200});
         char buf[48];
         std::snprintf(buf, sizeof(buf), "ПМ  %d / %d", m_ammoMag, m_ammoReserve);

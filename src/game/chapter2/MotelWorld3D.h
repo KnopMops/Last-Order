@@ -40,6 +40,7 @@ enum class StalkerState {
     Lurking,
     Final,
     Dying,
+    Ambush,
     Dead
 };
 
@@ -136,6 +137,8 @@ private:
     void FirePistol();
     void DamageCar(float amount);
     void KillPlayer();
+    void StartKnockout();
+    void UpdateKnockout(float dt);
     void UpdateDeath(float dt);
     void Respawn();
     bool ExitVehicle();
@@ -156,7 +159,7 @@ private:
     void HandleUse();
     void UseDoor(int index, bool forceOpen);
     void UpdateTriggers();
-    void UpdateMirrorEvents();
+    void UpdateMirrorEvents(float dt);
     void UpdateSoundEmitters(float dt);
     void UpdateRain(float dt);
     void UpdateSanity(float dt);
@@ -263,6 +266,11 @@ private:
     std::string m_checkpoint;
     float m_deathTimer = 0.0f;
     bool m_deadInCar = false;
+    float m_knockoutTime = -1.0f;
+    float m_knockoutYawFrom = 0.0f;
+    float m_knockoutYawTo = 0.0f;
+    float m_knockoutPitchFrom = 0.0f;
+    float m_knockoutBlack = 0.0f;
     int m_ammoMag = 0;
     int m_ammoReserve = 0;
     float m_fireCooldown = 0.0f;

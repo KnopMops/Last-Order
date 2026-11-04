@@ -23,6 +23,11 @@ constexpr float RUN_SPEED = 4.4f;
 constexpr float CROUCH_SPEED = 1.25f;
 constexpr int RAIN_DROPS = 420;
 constexpr float RAIN_RADIUS = 13.0f;
+constexpr float MIRROR_REVEAL_DIST = 2.4f;
+constexpr float MIRROR_PHANTOM_START = 0.3f;
+constexpr float MIRROR_PHANTOM_FULL = 0.9f;
+constexpr float MIRROR_REVEAL_TIME = 2.0f;
+constexpr float MIRROR_ROOM_DEPTH = 2.9f;
 
 float Rand01() {
     return static_cast<float>(std::rand()) / static_cast<float>(RAND_MAX);
@@ -324,6 +329,12 @@ void MotelWorld3D::Update(engine::core::Engine& eng, float dt) {
         return;
     }
 
+    if (m_knockoutTime >= 0.0f) {
+        UpdateKnockout(dt);
+        UpdateRain(dt);
+        return;
+    }
+
     m_camera.ApplyMouseLook(GetMouseDelta(), 0.0022f);
     if (m_hiddenSpot >= 0) {
         const HideSpot& spot = m_level.HideSpots()[m_hiddenSpot];
@@ -336,7 +347,7 @@ void MotelWorld3D::Update(engine::core::Engine& eng, float dt) {
     UpdateFocus();
     HandleUse();
     UpdateTriggers();
-    UpdateMirrorEvents();
+    UpdateMirrorEvents(dt);
     UpdateSoundEmitters(dt);
     UpdateRain(dt);
     UpdateSanity(dt);
@@ -555,7 +566,7 @@ void MotelWorld3D::UpdateFocus() {
         if (mir.fired || mir.lookEvent.empty()) continue;
         Vector3 toM = Vector3Subtract(mir.center, cam.position);
         float d = Vector3Length(toM);
-        if (d <= 4.2f && Vector3DotProduct(dir, Vector3Scale(toM, 1.0f / d)) > 0.72f && d < best) {
+        if (d <= MIRROR_REVEAL_DIST && Vector3DotProduct(dir, Vector3Scale(toM, 1.0f / d)) > 0.72f && d < best) {
             m_focusKind = FocusKind::Interact;
             m_focusIndex = -999;
             m_focusLabel = "Осмотреть зеркало";
@@ -625,8 +636,7 @@ void MotelWorld3D::HandleUse() {
             if (m_focusIndex == -999) {
                 for (auto& mir : m_level.Mirrors()) {
                     if (!mir.fired && !mir.lookEvent.empty()) {
-                        mir.fired = true;
-                        m_script.RunEvent(mir.lookEvent, *this, mir.center);
+                        mir.lookTime = std::max(mir.lookTime, MIRROR_PHANTOM_START);
                         break;
                     }
                 }
@@ -679,19 +689,31 @@ void MotelWorld3D::UpdateTriggers() {
     }
 }
 
-void MotelWorld3D::UpdateMirrorEvents() {
+void MotelWorld3D::UpdateMirrorEvents(float dt) {
     const Camera3D& cam = m_camera.GetCamera();
     Vector3 fwd = m_camera.GetForward();
     for (MirrorObject& m : m_level.Mirrors()) {
         if (m.fired || m.lookEvent.empty()) continue;
         Vector3 toMirror = Vector3Subtract(m.center, cam.position);
         float dist = Vector3Length(toMirror);
-        if (dist > 4.8f || dist < 0.1f) continue;
-        if (Vector3DotProduct(Vector3Subtract(cam.position, m.center), m.normal) <= 0.0f) continue;
-        if (Vector3DotProduct(fwd, Vector3Scale(toMirror, 1.0f / dist)) < 0.65f) continue;
-        if (m_physics.IsStaticOccluded(cam.position, Vector3Add(m.center, Vector3Scale(m.normal, 0.08f)))) continue;
-        m.fired = true;
-        m_script.RunEvent(m.lookEvent, *this, m.center);
+        bool looking = dist <= MIRROR_REVEAL_DIST && dist >= 0.1f &&
+                       Vector3DotProduct(Vector3Subtract(cam.position, m.center), m.normal) > 0.0f &&
+                       Vector3DotProduct(fwd, Vector3Scale(toMirror, 1.0f / std::max(dist, 0.1f))) >= 0.7f &&
+                       !m_physics.IsStaticOccluded(cam.position, Vector3Add(m.center, Vector3Scale(m.normal, 0.08f)));
+        if (looking) {
+            m.lookTime += dt;
+        } else if (m.lookTime < MIRROR_PHANTOM_START) {
+            m.lookTime = std::max(0.0f, m.lookTime - dt);
+        }
+        if (!m.stingPlayed && m.lookTime >= MIRROR_PHANTOM_START) {
+            m.stingPlayed = true;
+            PlaySound("audio/sfx/sfx_sting_dread.wav", 0.55f, std::nullopt);
+            Flicker(0.6f);
+        }
+        if (m.lookTime >= MIRROR_REVEAL_TIME) {
+            m.fired = true;
+            m_script.RunEvent(m.lookEvent, *this, m.center);
+        }
     }
 }
 
@@ -902,7 +924,9 @@ void MotelWorld3D::DrawScene(const Shader* overrideShader, bool reflectionPass) 
             DrawMesh(b.mesh, m, t);
         }
     }
-    for (const PropObject& p : m_level.Props()) {
+    for (size_t i = 0; i < m_level.Props().size(); ++i) {
+        if (reflectionPass && static_cast<int>(i) == m_carriedProp) continue;
+        const PropObject& p = m_level.Props()[i];
         Matrix t = m_physics.GetBodyTransform(p.body);
         for (const RenderBatch& b : p.batches) {
             Material m = b.material;
@@ -945,6 +969,21 @@ void MotelWorld3D::DrawPhantoms(bool reflectionPass) const {
         bool isMirrorPhantom = (p.position.x > -19.0f && p.position.z > -3.0f);
         if (reflectionPass != isMirrorPhantom) continue;
         Vector3 base = p.position;
+        float reveal = 1.0f;
+        if (isMirrorPhantom) {
+            if (m_activeMirror < 0) continue;
+            const MirrorObject& mir = m_level.Mirrors()[m_activeMirror];
+            if (mir.lookEvent.empty()) continue;
+            reveal = std::clamp((mir.lookTime - MIRROR_PHANTOM_START) / (MIRROR_PHANTOM_FULL - MIRROR_PHANTOM_START), 0.0f, 1.0f);
+            if (reveal <= 0.0f) continue;
+            Vector3 feet = m_physics.GetCharacterPosition();
+            Vector3 side = Vector3Normalize(Vector3CrossProduct(Vector3{0.0f, 1.0f, 0.0f}, mir.normal));
+            float sideSign = Vector3DotProduct(Vector3Subtract(p.position, feet), side) >= 0.0f ? 1.0f : -1.0f;
+            float fromMirror = Vector3DotProduct(Vector3Subtract(feet, mir.center), mir.normal);
+            float behind = std::clamp(MIRROR_ROOM_DEPTH - fromMirror, 0.35f, 0.9f);
+            base = Vector3Add(feet, Vector3Add(Vector3Scale(mir.normal, behind), Vector3Scale(side, sideSign * 0.5f)));
+            base.y = p.position.y;
+        }
         float sway = std::sin(m_time * 1.1f) * 0.02f;
         bool horrific = m_script.HasFlag("mirror_seen") || m_script.HasFlag("corridor_whisper_done");
         float jitter = horrific ? (std::sin(m_time * 55.0f) > 0.35f ? 0.035f : -0.035f) : 0.0f;
@@ -954,6 +993,7 @@ void MotelWorld3D::DrawPhantoms(bool reflectionPass) const {
             Rectangle src{0.0f, 0.0f, static_cast<float>(m_phantomTex.width), static_cast<float>(m_phantomTex.height)};
             Vector2 size{1.15f, 2.3f};
             Color tint = horrific ? Color{255, 230, 230, 250} : Color{215, 220, 230, 240};
+            tint.a = static_cast<unsigned char>(tint.a * reveal);
             DrawBillboardRec(currentCam, m_phantomTex, src, center, size, tint);
             rlDrawRenderBatchActive();
             if (horrific) {
@@ -1090,7 +1130,7 @@ void MotelWorld3D::Render3D(engine::core::Engine&) {
         DrawBillboard(cam, m_screamerTex, Vector3{-19.92f, 1.6f, -6.75f}, 1.5f, Color{255, 255, 255, 240});
         rlDrawRenderBatchActive();
     }
-    if (m_mode == PlayerMode::OnFoot) {
+    if (m_mode == PlayerMode::OnFoot && m_knockoutBlack <= 0.0f) {
         if (HasPistol()) {
             DrawPistolViewmodel();
         } else {
@@ -1183,17 +1223,22 @@ void MotelWorld3D::RenderUI(engine::core::Engine& eng) {
         DrawRectangle(static_cast<int>(cx) - 120, 640, static_cast<int>(240.0f * m_breath / 100.0f), 10,
                       m_holdingBreath ? Color{120, 190, 240, 240} : Color{90, 110, 130, 200});
         DrawLabel(font, "[ПРОБЕЛ] Задержать дыхание   [E] Выйти", cx - 170.0f, 656.0f, 17.0f, Color{196, 178, 156, 230});
-    } else if (m_mode == PlayerMode::OnFoot && !HasPistol()) {
+    } else if (m_mode == PlayerMode::OnFoot && !HasPistol() && m_knockoutTime < 0.0f) {
         DrawCircle(static_cast<int>(cx), static_cast<int>(cy), 2.0f, m_focusKind != FocusKind::None ? Color{255, 220, 150, 240} : Color{220, 210, 200, 150});
     }
 
-    if (!m_focusLabel.empty() && m_mode == PlayerMode::OnFoot) {
+    bool knockout = m_knockoutTime >= 0.0f;
+    if (!m_focusLabel.empty() && m_mode == PlayerMode::OnFoot && !knockout) {
         std::string prompt = "[E] " + m_focusLabel;
         Vector2 size = MeasureTextEx(font, prompt.c_str(), 19.0f, 1.0f);
         float px = cx - size.x * 0.5f;
         float py = cy + 30.0f;
         DrawRectangle(static_cast<int>(px - 12.0f), static_cast<int>(py - 5.0f), static_cast<int>(size.x + 24.0f), static_cast<int>(size.y + 10.0f), Color{14, 10, 18, 200});
         DrawLabel(font, prompt, px, py, 19.0f, Color{244, 196, 120, 255});
+    }
+
+    if (m_knockoutBlack > 0.0f) {
+        DrawRectangle(0, 0, static_cast<int>(UI_W), static_cast<int>(UI_H), Color{0, 0, 0, static_cast<unsigned char>(255.0f * m_knockoutBlack)});
     }
 
     if (m_messageTimer > 0.0f && !m_message.empty()) {
@@ -1211,7 +1256,7 @@ void MotelWorld3D::RenderUI(engine::core::Engine& eng) {
         DrawLabel(font, "ЦЕЛЬ: " + m_objective, 24.0f, 20.0f, 18.0f, c);
     }
 
-    if (m_mode == PlayerMode::OnFoot) {
+    if (m_mode == PlayerMode::OnFoot && !knockout) {
         DrawRectangle(20, 646, 250, 56, Color{12, 9, 14, 190});
         std::string flashLabel = m_flashOn ? "Фонарик [F]" : "Фонарик выкл [F]";
         DrawLabel(font, flashLabel, 30.0f, 652.0f, 15.0f, m_flashOn ? Color{244, 220, 140, 240} : Color{140, 130, 120, 200});
@@ -1224,6 +1269,7 @@ void MotelWorld3D::RenderUI(engine::core::Engine& eng) {
 
     float ix = 290.0f;
     for (const std::string& id : m_script.Inventory()) {
+        if (knockout) break;
         const ItemDefinition* def = m_script.FindItem(id);
         std::string name = def ? def->name : id;
         Vector2 size = MeasureTextEx(font, name.c_str(), 15.0f, 1.0f);

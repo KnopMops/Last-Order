@@ -67,6 +67,8 @@ struct MirrorObject {
     float planeDistance = 0.0f;
     std::string lookEvent;
     bool fired = false;
+    float lookTime = 0.0f;
+    bool stingPlayed = false;
 };
 
 struct ItemObject {

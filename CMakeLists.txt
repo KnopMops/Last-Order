@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(last_order VERSION 2.0.0 LANGUAGES C CXX)
+project(last_order VERSION 2.0.1 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -117,12 +117,12 @@ add_executable(last_order ${GAME_SOURCES})
 set_target_properties(last_order PROPERTIES OUTPUT_NAME "Last Order")
 target_link_libraries(last_order PRIVATE lo_engine)
 target_link_options(last_order PRIVATE -mwindows -static -static-libgcc -static-libstdc++)
-target_compile_definitions(last_order PRIVATE LO_ENABLE_DEBUG=0 LO_ASSET_DIR="${CMAKE_SOURCE_DIR}/assets" LO_GAME_VERSION="2.0.0" LO_COMMIT_HASH="${GIT_COMMIT_HASH}" LO_BUILD_ID="${GIT_BUILD_COUNT}")
+target_compile_definitions(last_order PRIVATE LO_ENABLE_DEBUG=0 LO_ASSET_DIR="${CMAKE_SOURCE_DIR}/assets" LO_GAME_VERSION="2.0.1" LO_COMMIT_HASH="${GIT_COMMIT_HASH}" LO_BUILD_ID="${GIT_BUILD_COUNT}")
 add_executable(last_order_debug ${GAME_SOURCES})
 set_target_properties(last_order_debug PROPERTIES OUTPUT_NAME "Last Order_debug")
 target_link_libraries(last_order_debug PRIVATE lo_engine)
 target_link_options(last_order_debug PRIVATE -static -static-libgcc -static-libstdc++)
-target_compile_definitions(last_order_debug PRIVATE LO_ENABLE_DEBUG=1 LO_ASSET_DIR="${CMAKE_SOURCE_DIR}/assets" LO_GAME_VERSION="2.0.0" LO_COMMIT_HASH="${GIT_COMMIT_HASH}" LO_BUILD_ID="${GIT_BUILD_COUNT}")
+target_compile_definitions(last_order_debug PRIVATE LO_ENABLE_DEBUG=1 LO_ASSET_DIR="${CMAKE_SOURCE_DIR}/assets" LO_GAME_VERSION="2.0.1" LO_COMMIT_HASH="${GIT_COMMIT_HASH}" LO_BUILD_ID="${GIT_BUILD_COUNT}")
 add_custom_command(TARGET last_order POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_SOURCE_DIR}/release"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "$<TARGET_FILE:last_order>" "${CMAKE_SOURCE_DIR}/release/"
