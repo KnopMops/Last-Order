@@ -1,0 +1,18 @@
+{
+  "name": "front_door_escape",
+  "duration": 6.5,
+  "camera_tracks": [
+    { "time": 0.0, "pos": [0.0, 1.6, -1.5], "target": [0.0, 1.6, 2.0], "fov": 68 },
+    { "time": 2.5, "pos": [0.0, 1.6, 1.0], "target": [0.0, 1.6, 6.0], "fov": 65 },
+    { "time": 5.0, "pos": [0.0, 1.7, 5.0], "target": [0.0, 1.7, 12.0], "fov": 60 },
+    { "time": 6.5, "pos": [0.0, 1.7, 8.0], "target": [0.0, 1.7, 20.0], "fov": 55 }
+  ],
+  "events": [
+    { "time": 0.0, "type": "sfx", "param": "audio/sfx/sfx_ch3_padlock_open.wav", "volume": 0.9 },
+    { "time": 0.8, "type": "subtitle", "text": "Последний замок падает. Дверь открыта!", "duration": 2.0 },
+    { "time": 1.5, "type": "sfx", "param": "audio/sfx/sfx_door_open.wav", "volume": 1.0 },
+    { "time": 2.8, "type": "subtitle", "text": "Свежий утренний воздух... Сущность не может выйти на свет!", "duration": 3.0 },
+    { "time": 5.2, "type": "fade_out", "duration": 1.3 }
+  ]
+}
+

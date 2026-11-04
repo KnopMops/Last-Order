@@ -645,6 +645,10 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
         if (!m_settingsUI.IsOpen()) m_motel3D.FixedUpdate(eng, fixedDt);
         return;
     }
+    if (m_screen == GameScreen::Chapter3_House3D) {
+        if (!m_settingsUI.IsOpen()) m_house3D.FixedUpdate(eng, fixedDt);
+        return;
+    }
 
     if (m_settingsUI.IsOpen() || m_sanity.IsGameOver() ||
         m_screen == GameScreen::MainMenu || m_screen == GameScreen::Paused) {
@@ -921,6 +925,12 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
                 eng.Renderer().SetSkip2DLightmap(true);
                 m_motel3D.Init(eng, 1);
                 break;
+            case ui::MenuCommand::StartChapter3_House3D:
+                m_screen = GameScreen::Chapter3_House3D;
+                eng.Renderer().SetHighRes3DMode(true);
+                eng.Renderer().SetSkip2DLightmap(true);
+                m_house3D.Init(eng);
+                break;
             case ui::MenuCommand::OpenSettings:
                 m_settingsUI.Open();
                 break;
@@ -957,6 +967,34 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         }
         if (m_motel3D.WantsReturnToMenu()) {
             m_motel3D.Shutdown(eng);
+            eng.Renderer().SetHighRes3DMode(false);
+            eng.Renderer().SetSkip2DLightmap(false);
+            m_screen = GameScreen::MainMenu;
+            m_mainMenu.Init(eng);
+            EnableCursor();
+        }
+        return;
+    }
+
+    if (m_screen == GameScreen::Chapter3_House3D) {
+        if (m_settingsUI.IsOpen()) {
+            m_settingsUI.Update(eng);
+            return;
+        }
+        m_house3D.Update(eng, dt);
+        if (m_house3D.WantsChapterComplete()) {
+            m_house3D.Shutdown(eng);
+            eng.State().SetFlag("chapter3_completed");
+            SaveKeyMoment(eng, "Глава 3: побег из дома смотрителя завершен");
+            eng.Renderer().SetHighRes3DMode(false);
+            eng.Renderer().SetSkip2DLightmap(false);
+            m_screen = GameScreen::MainMenu;
+            m_mainMenu.Init(eng);
+            EnableCursor();
+            return;
+        }
+        if (m_house3D.WantsReturnToMenu()) {
+            m_house3D.Shutdown(eng);
             eng.Renderer().SetHighRes3DMode(false);
             eng.Renderer().SetSkip2DLightmap(false);
             m_screen = GameScreen::MainMenu;
@@ -1578,6 +1616,9 @@ void LastOrderGame::OnRenderOffscreen(engine::core::Engine& eng) {
     if (m_screen == GameScreen::Chapter2_Motel3D) {
         m_motel3D.RenderOffscreen(eng);
     }
+    if (m_screen == GameScreen::Chapter3_House3D) {
+        m_house3D.RenderOffscreen(eng);
+    }
 }
 
 void LastOrderGame::OnRenderWorld(engine::core::Engine& eng) {
@@ -1591,6 +1632,10 @@ void LastOrderGame::OnRenderWorld(engine::core::Engine& eng) {
     }
     if (m_screen == GameScreen::Chapter2_Motel3D) {
         m_motel3D.Render3D(eng);
+        return;
+    }
+    if (m_screen == GameScreen::Chapter3_House3D) {
+        m_house3D.Render3D(eng);
         return;
     }
 
@@ -1653,6 +1698,11 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     }
     if (m_screen == GameScreen::Chapter2_Motel3D) {
         m_motel3D.RenderUI(eng);
+        m_settingsUI.Render(eng);
+        return;
+    }
+    if (m_screen == GameScreen::Chapter3_House3D) {
+        m_house3D.RenderUI(eng);
         m_settingsUI.Render(eng);
         return;
     }

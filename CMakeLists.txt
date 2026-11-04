@@ -112,6 +112,12 @@ set(GAME_SOURCES
     src/game/chapter2/MotelWorld3D.cpp
     src/game/chapter2/MotelWorld3DAction.cpp
     src/game/chapter2/Vehicle3D.cpp
+    src/game/chapter3/Cutscene3D.cpp
+    src/game/chapter3/ItemRandomizer.cpp
+    src/game/chapter3/WeaponAssembly.cpp
+    src/game/chapter3/GrannyAI.cpp
+    src/game/chapter3/EscapeManager.cpp
+    src/game/chapter3/HouseWorld3D.cpp
 )
 add_executable(last_order ${GAME_SOURCES})
 set_target_properties(last_order PROPERTIES OUTPUT_NAME "Last Order")

@@ -1,0 +1,18 @@
+{
+  "name": "entity_knockout",
+  "duration": 3.5,
+  "camera_tracks": [
+    { "time": 0.0, "pos": [0.0, 1.6, 0.0], "target": [0.0, 1.6, 1.0], "fov": 70 },
+    { "time": 0.5, "pos": [0.0, 1.5, 0.0], "target": [0.0, 1.8, 0.8], "fov": 80 },
+    { "time": 1.5, "pos": [0.0, 0.5, 0.0], "target": [0.0, 0.0, 0.5], "fov": 85 },
+    { "time": 3.5, "pos": [0.0, 0.2, 0.0], "target": [0.0, 0.0, 0.5], "fov": 90 }
+  ],
+  "events": [
+    { "time": 0.0, "type": "shake", "duration": 0.8, "volume": 5.0 },
+    { "time": 0.05, "type": "sfx", "param": "audio/sfx/sfx_screamer_night1.wav", "volume": 1.0 },
+    { "time": 0.6, "type": "fade_out", "duration": 0.4 },
+    { "time": 1.0, "type": "sfx", "param": "audio/sfx/sfx_ch3_item_drop.wav", "volume": 0.8 },
+    { "time": 1.2, "type": "subtitle", "text": "Удар в темноте... Сознание меркнет.", "duration": 2.0 }
+  ]
+}
+

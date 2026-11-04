@@ -402,3 +402,4 @@ if __name__ == "__main__":
     gen_shotgun_parts(TEX_DIR)
     gen_audio()
     print("ALL CHAPTER 3 ASSETS GENERATED SUCCESSFULLY!")
+

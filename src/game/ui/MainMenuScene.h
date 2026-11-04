@@ -18,6 +18,7 @@ enum class MenuCommand {
     StartNight5_Finale,
     StartEndlessMode,
     StartChapter2_Motel3D,
+    StartChapter3_House3D,
     OpenSettings,
     QuitGame
 };

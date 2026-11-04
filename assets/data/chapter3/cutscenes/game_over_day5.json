@@ -1,0 +1,19 @@
+{
+  "name": "game_over_day5",
+  "duration": 6.5,
+  "camera_tracks": [
+    { "time": 0.0, "pos": [0.0, 0.4, 0.0], "target": [0.0, 1.8, 0.5], "fov": 85 },
+    { "time": 2.5, "pos": [0.0, 0.3, -1.0], "target": [0.0, 1.8, 0.0], "fov": 80 },
+    { "time": 4.5, "pos": [0.0, 0.2, -3.0], "target": [0.0, 1.8, -1.5], "fov": 75 },
+    { "time": 6.5, "pos": [0.0, 0.1, -5.0], "target": [0.0, 1.8, -3.0], "fov": 70 }
+  ],
+  "events": [
+    { "time": 0.0, "type": "shake", "duration": 1.0, "volume": 3.0 },
+    { "time": 0.1, "type": "sfx", "param": "audio/sfx/sfx_ch3_creak_wood_02.wav", "volume": 1.0 },
+    { "time": 0.8, "type": "subtitle", "text": "Пятый день... Силы покинули вас.", "duration": 2.5 },
+    { "time": 3.0, "type": "sfx", "param": "audio/sfx/sfx_stalker_breathe.wav", "volume": 1.0 },
+    { "time": 3.5, "type": "subtitle", "text": "Тьма смыкается. ВЫ СТАЛИ ЧАСТЬЮ ЭФИРА...", "duration": 2.8 },
+    { "time": 5.2, "type": "fade_out", "duration": 1.3 }
+  ]
+}
+

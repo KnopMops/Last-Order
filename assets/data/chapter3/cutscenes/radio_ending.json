@@ -1,0 +1,19 @@
+{
+  "name": "radio_ending",
+  "duration": 7.0,
+  "camera_tracks": [
+    { "time": 0.0, "pos": [0.0, 5.2, 0.0], "target": [1.5, 5.0, 0.0], "fov": 65 },
+    { "time": 2.5, "pos": [0.8, 5.3, 0.0], "target": [1.5, 5.1, 0.0], "fov": 55 },
+    { "time": 4.5, "pos": [0.0, 5.5, 0.0], "target": [0.0, 7.0, 0.0], "fov": 75 },
+    { "time": 7.0, "pos": [0.0, 6.0, 0.0], "target": [0.0, 15.0, 0.0], "fov": 80 }
+  ],
+  "events": [
+    { "time": 0.0, "type": "sfx", "param": "audio/sfx/sfx_radio_tune.wav", "volume": 0.9 },
+    { "time": 0.5, "type": "subtitle", "text": "Частота 94.5 FM зафиксирована. Каскад ламп накаляется...", "duration": 3.0 },
+    { "time": 3.0, "type": "sfx", "param": "audio/sfx/sfx_ch3_shotgun_blast.wav", "volume": 1.0 },
+    { "time": 3.2, "type": "shake", "duration": 2.5, "volume": 5.0 },
+    { "time": 3.5, "type": "subtitle", "text": "ЭМ-ИМПУЛЬС СЖИГАЕТ ЭФИР! СУЩНОСТЬ РАСТВОРЯЕТСЯ В ПЕПЕЛ!", "duration": 3.5 },
+    { "time": 5.8, "type": "fade_out", "duration": 1.2 }
+  ]
+}
+
