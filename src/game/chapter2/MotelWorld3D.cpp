@@ -125,6 +125,8 @@ void MotelWorld3D::Init(engine::core::Engine& eng, int) {
     for (auto& d : m_rain) RespawnDrop(d, true);
 
     if (!m_script.AmbientPath().empty()) eng.Audio().PlayAmbient(m_script.AmbientPath(), m_script.AmbientVolume());
+    m_rainAmbientVolume = m_script.AmbientVolume();
+    m_phantomTex = eng.Assets().GetTexture("sprites/3d/motel_phantom.png");
     eng.Renderer().SetSanityStress(0.0f);
     DisableCursor();
     m_script.RunEvent(m_script.StartEvent(), *this);
@@ -219,6 +221,7 @@ void MotelWorld3D::AddBattery(float amount) {
 }
 
 void MotelWorld3D::SetAmbient(const std::string& path, float volume) {
+    m_rainAmbientVolume = volume;
     if (m_eng && !path.empty()) m_eng->Audio().PlayAmbient(path, volume);
 }
 
@@ -302,6 +305,11 @@ void MotelWorld3D::Update(engine::core::Engine& eng, float dt) {
     UpdateSoundEmitters(dt);
     UpdateRain(dt);
     UpdateSanity(dt);
+    Vector3 charPos = m_physics.GetCharacterPosition();
+    bool indoor = (charPos.z <= 0.0f && charPos.z >= -13.8f && charPos.x >= -21.0f && charPos.x <= 8.5f);
+    float targetRainVol = indoor ? 0.0f : 0.28f;
+    m_rainAmbientVolume += (targetRainVol - m_rainAmbientVolume) * std::clamp(dt * 3.5f, 0.0f, 1.0f);
+    eng.Audio().SetAmbientBaseVolume(m_rainAmbientVolume);
 }
 
 void MotelWorld3D::UpdateFlashlight(float dt) {
@@ -851,54 +859,44 @@ void MotelWorld3D::DrawScene(const Shader* overrideShader, bool reflectionPass) 
 
     if (reflectionPass) {
         DrawPhantoms(true);
-        DrawPlayerProxy();
+
     } else {
         DrawPhantoms(false);
     }
 }
 
 void MotelWorld3D::DrawPhantoms(bool reflectionPass) const {
+    const Camera3D& currentCam = reflectionPass ? m_reflectionCam : m_camera.GetCamera();
     for (const Phantom& p : m_level.Phantoms()) {
         if (!p.flag.empty() && !m_script.HasFlag(p.flag)) continue;
         if (!p.hideFlag.empty() && m_script.HasFlag(p.hideFlag)) continue;
         bool isMirrorPhantom = (p.position.x > -19.0f && p.position.z > -3.0f);
         if (reflectionPass != isMirrorPhantom) continue;
         Vector3 base = p.position;
-        float sway = std::sin(m_time * 0.9f) * 0.02f;
-        Vector3 fwd{std::sin(p.yaw), 0.0f, -std::cos(p.yaw)};
-        Vector3 right{std::cos(p.yaw), 0.0f, std::sin(p.yaw)};
+        float sway = std::sin(m_time * 1.1f) * 0.02f;
         bool horrific = m_script.HasFlag("mirror_seen") || m_script.HasFlag("corridor_whisper_done");
         float jitter = horrific ? (std::sin(m_time * 55.0f) > 0.35f ? 0.035f : -0.035f) : 0.0f;
-        DrawCapsule(Vector3{base.x, base.y + 0.25f, base.z}, Vector3{base.x + sway + jitter * 0.5f, base.y + 1.5f, base.z}, 0.22f, 8, 4, Color{10, 8, 12, 255});
-        Vector3 head{base.x + sway + fwd.x * 0.03f + jitter, base.y + 1.78f, base.z + fwd.z * 0.03f + jitter * 0.5f};
-        Color skinColor = horrific ? Color{195, 185, 175, 255} : Color{168, 160, 150, 255};
-        DrawSphereEx(head, 0.14f, 8, 8, skinColor);
-        for (float s : {-1.0f, 1.0f}) {
-            Vector3 eye = Vector3Add(head, Vector3Add(Vector3Scale(fwd, 0.115f), Vector3Add(Vector3Scale(right, 0.045f * s), Vector3{0.0f, 0.02f, 0.0f})));
-            DrawSphereEx(eye, 0.034f, 6, 6, BLACK);
-            Vector3 pupil = Vector3Add(eye, Vector3Scale(fwd, 0.015f));
-            DrawSphereEx(pupil, 0.012f, 4, 4, Color{255, 25, 25, 255});
-            Vector3 arm = Vector3Add(base, Vector3Scale(right, 0.27f * s));
-            Vector3 armTarget = horrific ? Vector3Add(arm, Vector3Add(Vector3Scale(fwd, 0.42f), Vector3{0.0f, 0.1f, 0.0f}))
-                                         : Vector3{arm.x, base.y + 0.55f, arm.z};
-            DrawCapsule(Vector3{arm.x, base.y + 1.45f, arm.z}, armTarget, 0.065f, 6, 3, Color{10, 8, 12, 255});
-        }
-        if (horrific) {
-            Vector3 jawTop = Vector3Add(head, Vector3Add(Vector3Scale(fwd, 0.11f), Vector3{0.0f, -0.04f, 0.0f}));
-            Vector3 jawBot = Vector3Add(jawTop, Vector3{0.0f, -0.16f, 0.0f});
-            DrawCapsule(jawTop, jawBot, 0.05f, 6, 3, BLACK);
+        Vector3 center{base.x + sway + jitter, base.y + 1.15f, base.z + jitter * 0.5f};
+        if (m_phantomTex.id != 0) {
+            rlDrawRenderBatchActive();
+            Rectangle src{0.0f, 0.0f, static_cast<float>(m_phantomTex.width), static_cast<float>(m_phantomTex.height)};
+            Vector2 size{1.15f, 2.3f};
+            Color tint = horrific ? Color{255, 230, 230, 250} : Color{215, 220, 230, 240};
+            DrawBillboardRec(currentCam, m_phantomTex, src, center, size, tint);
+            rlDrawRenderBatchActive();
+            if (horrific) {
+                Vector3 headPos{center.x, center.y + 0.65f, center.z};
+                Vector3 toCam = Vector3Normalize(Vector3Subtract(currentCam.position, headPos));
+                Vector3 right = Vector3Normalize(Vector3CrossProduct(currentCam.up, toCam));
+                Vector3 eyeL = Vector3Add(headPos, Vector3Add(Vector3Scale(right, -0.052f), Vector3Scale(toCam, 0.02f)));
+                Vector3 eyeR = Vector3Add(headPos, Vector3Add(Vector3Scale(right, 0.052f), Vector3Scale(toCam, 0.02f)));
+                float pulse = 0.5f + 0.5f * std::sin(m_time * 24.0f);
+                Color eyeCol{255, static_cast<unsigned char>(30 + 40 * pulse), static_cast<unsigned char>(30 + 40 * pulse), 255};
+                DrawSphereEx(eyeL, 0.018f, 4, 4, eyeCol);
+                DrawSphereEx(eyeR, 0.018f, 4, 4, eyeCol);
+            }
         }
     }
-}
-
-void MotelWorld3D::DrawPlayerProxy() const {
-    Vector3 feet = m_hiddenSpot >= 0 ? Vector3Subtract(m_level.HideSpots()[m_hiddenSpot].eye, Vector3{0.0f, 1.62f, 0.0f})
-                                      : m_physics.GetCharacterPosition();
-    float height = m_physics.IsCharacterCrouched() ? 1.0f : 1.55f;
-    DrawCapsule(Vector3{feet.x, feet.y + 0.3f, feet.z}, Vector3{feet.x, feet.y + height - 0.15f, feet.z}, 0.22f, 8, 4, Color{34, 30, 38, 255});
-    Vector3 fwd = m_camera.GetFlatForward();
-    DrawSphereEx(Vector3{feet.x - fwd.x * 0.02f, feet.y + height + 0.05f, feet.z - fwd.z * 0.02f}, 0.12f, 8, 8, Color{58, 40, 34, 255});
-    if (m_flash.enabled) DrawSphereEx(m_flash.position, 0.03f, 6, 6, Color{255, 245, 210, 255});
 }
 
 void MotelWorld3D::DrawViewmodel() const {
@@ -970,6 +968,7 @@ void MotelWorld3D::RenderOffscreen(engine::core::Engine&) {
     refl.position = reflectPoint(cam.position);
     refl.target = reflectPoint(cam.target);
     refl.up = reflectDir(cam.up);
+    m_reflectionCam = refl;
 
     BeginTextureMode(m_reflectionRT);
     ClearBackground(Color{static_cast<unsigned char>(env.fogColor.x * 255.0f), static_cast<unsigned char>(env.fogColor.y * 255.0f),

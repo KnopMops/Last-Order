@@ -83,7 +83,6 @@ private:
 
     void DrawScene(const Shader* overrideShader, bool reflectionPass);
     void DrawPhantoms(bool reflectionPass) const;
-    void DrawPlayerProxy() const;
     void DrawViewmodel() const;
     void DrawInspectOverlay(engine::core::Engine& eng);
     bool ItemVisible(const ItemObject& item) const;
@@ -97,6 +96,7 @@ private:
     engine::core::Engine* m_eng = nullptr;
 
     RenderTexture2D m_reflectionRT{};
+    Camera3D m_reflectionCam{};
     int m_activeMirror = -1;
 
     engine::render3d::Flashlight m_flash;
@@ -141,6 +141,8 @@ private:
     float m_screamerDuration = 0.8f;
     float m_screamerRedFlash = 0.0f;
     Texture2D m_screamerTex{};
+    Texture2D m_phantomTex{};
+    float m_rainAmbientVolume = 0.28f;
 
     std::vector<RainDrop3D> m_rain;
     int m_stepIndex = 0;

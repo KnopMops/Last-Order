@@ -14,6 +14,8 @@ public:
 
     void PlayAmbient(const std::string& relativeOggPath, float baseVolume = 0.7f);
     void StopAmbient();
+    void SetAmbientBaseVolume(float baseVolume);
+    float GetAmbientBaseVolume() const;
 
     void PlaySfx(const std::string& relativeWavPath, float baseVolume = 0.8f);
     void PlaySfxSpatial(const std::string& relativeWavPath, float baseVolume, float pan);

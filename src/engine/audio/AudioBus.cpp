@@ -61,6 +61,14 @@ void AudioBus::StopAmbient() {
     }
 }
 
+void AudioBus::SetAmbientBaseVolume(float baseVolume) {
+    m_ambientBaseVolume = std::clamp(baseVolume, 0.0f, 1.0f);
+}
+
+float AudioBus::GetAmbientBaseVolume() const {
+    return m_ambientBaseVolume;
+}
+
 void AudioBus::PlaySfx(const std::string& relativeWavPath, float baseVolume) {
     if (!m_assets) return;
     Sound s = m_assets->GetSound(relativeWavPath);

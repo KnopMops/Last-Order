@@ -2,7 +2,7 @@
   "title": "АКТ 1 — РЕГИСТРАТУРА И ДВОР",
   "ambient": {
     "path": "audio/bgm/amb_motel_storm_lp.wav",
-    "volume": 0.75
+    "volume": 0.28
   },
   "start_event": "intro",
   "sounds": {
