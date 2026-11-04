@@ -95,6 +95,9 @@ private:
     float m_stumbleTimer = 0.0f;
     float m_roadScroll = 0.0f;
     float m_pantTimer = 0.0f;
+    float m_carIntegrity = 100.0f;
+    bool m_isBraking = false;
+    float m_skidCooldown = 0.0f;
 
     std::vector<ChaseObstacle> m_obstacles;
 };

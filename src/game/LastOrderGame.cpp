@@ -296,7 +296,13 @@ void LastOrderGame::CompleteActiveMinigame(engine::core::Engine& eng) {
     } else if (t == systems::MinigameType::Night5_HighwayChase3D) {
         eng.State().SetFlag("n5_relic_collected");
         eng.State().SetFlag("n3_mirror_key_found");
+        eng.State().SetFlag("chapter2_completed");
         SaveKeyMoment(eng, "Погоня на шоссе пройдена");
+        eng.Renderer().SetSkip2DLightmap(false);
+        m_screen = GameScreen::MainMenu;
+        m_mainMenu.Init(eng);
+        EnableCursor();
+        return;
     } else if (t == systems::MinigameType::Night_JukeboxTuner2D) {
         eng.State().SetFlag("jukebox_playing");
         eng.Audio().PlayAmbient("audio/bgm/mus_jukebox_retro.wav", 0.85f);
@@ -933,6 +939,11 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
             return;
         }
         m_motel3D.Update(eng, dt);
+        if (m_motel3D.WantsHighwayChase()) {
+            m_motel3D.Shutdown(eng);
+            StartMinigame(eng, systems::MinigameType::Night5_HighwayChase3D);
+            return;
+        }
         if (m_motel3D.WantsReturnToMenu()) {
             m_motel3D.Shutdown(eng);
             eng.Renderer().SetHighRes3DMode(false);
@@ -953,7 +964,11 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         } else if (m_chaseMinigame.GetState() == systems::ChaseState::Caught) {
             if (IsKeyPressed(KEY_ESCAPE)) {
                 eng.Renderer().SetSkip2DLightmap(false);
-                m_screen = (m_currentNight == 0) ? GameScreen::EndlessMode : GameScreen::PlayingShift;
+                m_screen = (m_chaseMinigame.GetType() == systems::MinigameType::Night5_HighwayChase3D) ? GameScreen::MainMenu : ((m_currentNight == 0) ? GameScreen::EndlessMode : GameScreen::PlayingShift);
+                if (m_screen == GameScreen::MainMenu) {
+                    m_mainMenu.Init(eng);
+                    EnableCursor();
+                }
             }
         }
         return;

@@ -71,9 +71,12 @@ float AudioBus::GetAmbientBaseVolume() const {
 
 void AudioBus::PlaySfx(const std::string& relativeWavPath, float baseVolume) {
     if (!m_assets) return;
+    bool isScreamer = relativeWavPath.find("audio/screamers/") != std::string::npos;
+    float catVol = isScreamer ? m_stingerVol : m_sfxVol;
+    if (catVol <= 0.001f) return;
     Sound s = m_assets->GetSound(relativeWavPath);
     if (s.stream.buffer != nullptr) {
-        SetSoundVolume(s, std::clamp(baseVolume * m_sfxVol, 0.0f, 1.0f));
+        SetSoundVolume(s, std::clamp(baseVolume * catVol, 0.0f, 1.0f));
         SetSoundPan(s, 0.5f);
         PlaySound(s);
     }
@@ -81,9 +84,12 @@ void AudioBus::PlaySfx(const std::string& relativeWavPath, float baseVolume) {
 
 void AudioBus::PlaySfxSpatial(const std::string& relativeWavPath, float baseVolume, float pan) {
     if (!m_assets) return;
+    bool isScreamer = relativeWavPath.find("audio/screamers/") != std::string::npos;
+    float catVol = isScreamer ? m_stingerVol : m_sfxVol;
+    if (catVol <= 0.001f) return;
     Sound s = m_assets->GetSound(relativeWavPath);
     if (s.stream.buffer != nullptr) {
-        SetSoundVolume(s, std::clamp(baseVolume * m_sfxVol, 0.0f, 1.0f));
+        SetSoundVolume(s, std::clamp(baseVolume * catVol, 0.0f, 1.0f));
         SetSoundPan(s, std::clamp(pan, 0.0f, 1.0f));
         PlaySound(s);
     }
@@ -91,25 +97,26 @@ void AudioBus::PlaySfxSpatial(const std::string& relativeWavPath, float baseVolu
 
 void AudioBus::PlayScreamerStinger(const std::string& stingerFilename, float silenceAfterSec) {
     if (!m_assets) return;
+    if (m_stingerVol <= 0.001f) return;
     std::string folder = m_safeMode ? "audio/safe_mode/" : "audio/screamers/";
     Sound s = m_assets->GetSound(folder + stingerFilename);
     if (s.stream.buffer == nullptr) {
         s = m_assets->GetSound("audio/screamers/" + stingerFilename);
     }
     if (s.stream.buffer != nullptr) {
-        float vol = m_safeMode ? 0.50f : 1.0f;
-        SetSoundVolume(s, vol);
+        float vol = (m_safeMode ? 0.45f : 1.0f) * m_stingerVol;
+        SetSoundVolume(s, std::clamp(vol, 0.0f, 1.0f));
         PlaySound(s);
     }
     if (!m_safeMode) {
         Sound bang = m_assets->GetSound("audio/sfx/sfx_window_bang.wav");
         if (bang.stream.buffer != nullptr) {
-            SetSoundVolume(bang, 1.0f);
+            SetSoundVolume(bang, std::clamp(1.0f * m_stingerVol, 0.0f, 1.0f));
             PlaySound(bang);
         }
         Sound dread = m_assets->GetSound("audio/sfx/sfx_sting_dread.wav");
         if (dread.stream.buffer != nullptr) {
-            SetSoundVolume(dread, 1.0f);
+            SetSoundVolume(dread, std::clamp(1.0f * m_stingerVol, 0.0f, 1.0f));
             PlaySound(dread);
         }
     }

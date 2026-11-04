@@ -5,12 +5,18 @@ namespace game::ui {
 
 class SettingsOverlay {
 public:
-    void Open() { m_open = true; m_selectedRow = 0; }
+    void Open() {
+        m_open = true;
+        m_selectedRow = 0;
+        m_wantsQuitToMenu = false;
+    }
     void Close(engine::core::Engine& eng) {
         m_open = false;
         eng.Settings().Save();
     }
     bool IsOpen() const { return m_open; }
+    bool WantsQuitToMenu() const { return m_wantsQuitToMenu; }
+    void ClearQuitToMenu() { m_wantsQuitToMenu = false; }
 
     void Update(engine::core::Engine& eng);
     void Render(engine::core::Engine& eng) const;
@@ -20,8 +26,9 @@ private:
     void SetRowNormalizedValue(engine::core::Engine& eng, int row, float norm01);
 
     bool m_open = false;
+    bool m_wantsQuitToMenu = false;
     int m_selectedRow = 0;
-    static constexpr int TOTAL_ROWS = 7;
+    static constexpr int TOTAL_ROWS = 8;
 };
 
 }

@@ -1471,7 +1471,7 @@
 {
 "classname" "func_interact"
 "event" "radio"
-"label" "Радиоприёмник «Океан-214»"
+"label" "МАГНИТОФОН «Весна-302» (для кассет)"
 "solid" "1"
 {
 ( 179.2 153.6 42.56 ) ( 179.2 185.6 42.56 ) ( 179.2 153.6 10.56 ) motel_trim [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 0.5 0.5
@@ -1482,6 +1482,30 @@
 ( 150.4 153.6 42.56 ) ( 182.4 153.6 42.56 ) ( 150.4 185.6 42.56 ) motel_trim [ 1 0 0 0 ] [ 0 1 0 0 ] 0 0.5 0.5
 }
 }
+{
+"classname" "func_interact"
+"event" "safe_reception"
+"label" "СЕЙФ С КЛЮЧАМИ (код 1986)"
+"solid" "1"
+{
+( 138 214 10 ) ( 138 246 10 ) ( 138 214 -22 ) motel_metal [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 0.5 0.5
+( 114 214 10 ) ( 114 246 10 ) ( 114 214 42 ) motel_metal [ 0 -1 0 0 ] [ 0 0 -1 0 ] 0 0.5 0.5
+( 114 238 10 ) ( 114 238 42 ) ( 82 238 10 ) motel_metal [ -1 0 0 0 ] [ 0 0 -1 0 ] 0 0.5 0.5
+( 114 214 10 ) ( 114 214 42 ) ( 146 214 10 ) motel_metal [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 0.5 0.5
+( 114 214 34 ) ( 146 214 34 ) ( 114 182 34 ) motel_metal [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 0.5 0.5
+( 114 214 10 ) ( 146 214 10 ) ( 114 246 10 ) motel_metal [ 1 0 0 0 ] [ 0 1 0 0 ] 0 0.5 0.5
+}
+}
+{
+"classname" "light"
+"origin" "160 160 68"
+"_color" "1 0.7 0.35"
+"radius" "5.5"
+"intensity" "1.2"
+"style" "steady"
+}
+
+
 {
 "classname" "item_pickup"
 "origin" "115.2 247.68 59.2"
@@ -1748,15 +1772,7 @@
 ( -400 182.4 8 ) ( -368 182.4 8 ) ( -400 214.4 8 ) trigger [ 1 0 0 0 ] [ 0 1 0 0 ] 0 0.75 0.75
 }
 }
-{
-"classname" "sound_emitter"
-"origin" "-592 224 32"
-"sound" "audio/sfx/sfx_phantom_steps.wav"
-"interval" "23"
-"volume" "0.6"
-"radius" "14"
-"flag" "power"
-}
+
 {
 "classname" "item_pickup"
 "origin" "-288 22.4 28.8"
@@ -1922,15 +1938,7 @@
 ( -518.4 16 8 ) ( -486.4 16 8 ) ( -518.4 48 8 ) trigger [ 1 0 0 0 ] [ 0 1 0 0 ] 0 0.75 0.75
 }
 }
-{
-"classname" "sound_emitter"
-"origin" "-272 368 38.4"
-"sound" "audio/sfx/sfx_heavy_knock.wav"
-"interval" "31"
-"volume" "0.5"
-"radius" "10"
-"flag" "power"
-}
+
 {
 "classname" "func_interact"
 "event" "generator"
@@ -1988,7 +1996,7 @@
 {
 "classname" "func_interact"
 "event" "car"
-"label" "Ваша машина"
+"label" "МАШИНА У ВХОДА (побег)"
 "solid" "1"
 {
 ( -190.4 -348.8 14.4 ) ( -190.4 -316.8 14.4 ) ( -190.4 -348.8 -17.6 ) motel_car [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1

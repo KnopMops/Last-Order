@@ -269,6 +269,18 @@ void MotelWorld3D::Update(engine::core::Engine& eng, float dt) {
     if (m_objectiveFlash > 0.0f) m_objectiveFlash -= dt;
     if (m_endActTimer > 0.0f) m_endActTimer -= dt;
 
+    if (m_settingsUI.IsOpen()) {
+        m_settingsUI.Update(eng);
+        if (m_settingsUI.WantsQuitToMenu()) {
+            m_returnToMenu = true;
+            m_settingsUI.ClearQuitToMenu();
+        }
+        if (!m_settingsUI.IsOpen()) {
+            DisableCursor();
+        }
+        return;
+    }
+
     if (m_inspectMode) {
         Vector2 md = GetMouseDelta();
         m_inspectYaw += md.x * 0.012f;
@@ -284,7 +296,7 @@ void MotelWorld3D::Update(engine::core::Engine& eng, float dt) {
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
-        m_returnToMenu = true;
+        m_settingsUI.Open();
         EnableCursor();
         return;
     }
@@ -511,6 +523,19 @@ void MotelWorld3D::UpdateFocus() {
             m_focusLabel = "Спрятаться: " + spots[i].label;
         }
     }
+
+    for (size_t i = 0; i < m_level.Mirrors().size(); ++i) {
+        MirrorObject& mir = m_level.Mirrors()[i];
+        if (mir.fired || mir.lookEvent.empty()) continue;
+        Vector3 toM = Vector3Subtract(mir.center, cam.position);
+        float d = Vector3Length(toM);
+        if (d <= 4.2f && Vector3DotProduct(dir, Vector3Scale(toM, 1.0f / d)) > 0.72f && d < best) {
+            m_focusKind = FocusKind::Interact;
+            m_focusIndex = -999;
+            m_focusLabel = "Осмотреть зеркало";
+            best = d;
+        }
+    }
 }
 
 void MotelWorld3D::UseDoor(int index, bool forceOpen) {
@@ -571,6 +596,16 @@ void MotelWorld3D::HandleUse() {
             m_physics.WakeBody(m_level.Props()[m_carriedProp].body);
             break;
         case FocusKind::Interact: {
+            if (m_focusIndex == -999) {
+                for (auto& mir : m_level.Mirrors()) {
+                    if (!mir.fired && !mir.lookEvent.empty()) {
+                        mir.fired = true;
+                        m_script.RunEvent(mir.lookEvent, *this, mir.center);
+                        break;
+                    }
+                }
+                break;
+            }
             const InteractObject& obj = m_level.Interacts()[m_focusIndex];
             m_script.RunEvent(obj.event, *this, obj.center);
             break;
@@ -622,9 +657,9 @@ void MotelWorld3D::UpdateMirrorEvents() {
         if (m.fired || m.lookEvent.empty()) continue;
         Vector3 toMirror = Vector3Subtract(m.center, cam.position);
         float dist = Vector3Length(toMirror);
-        if (dist > 3.2f || dist < 0.1f) continue;
+        if (dist > 4.8f || dist < 0.1f) continue;
         if (Vector3DotProduct(Vector3Subtract(cam.position, m.center), m.normal) <= 0.0f) continue;
-        if (Vector3DotProduct(fwd, Vector3Scale(toMirror, 1.0f / dist)) < 0.82f) continue;
+        if (Vector3DotProduct(fwd, Vector3Scale(toMirror, 1.0f / dist)) < 0.65f) continue;
         if (m_physics.IsStaticOccluded(cam.position, Vector3Add(m.center, Vector3Scale(m.normal, 0.08f)))) continue;
         m.fired = true;
         m_script.RunEvent(m.lookEvent, *this, m.center);
@@ -684,15 +719,13 @@ void MotelWorld3D::UpdateSanity(float dt) {
     if (m_sanity < 40.0f) {
         m_whisperTimer -= dt;
         if (m_whisperTimer <= 0.0f) {
-            m_whisperTimer = 10.0f + Rand01() * 14.0f;
-            Vector3 behind = Vector3Subtract(m_camera.GetCamera().position, Vector3Scale(m_camera.GetFlatForward(), 2.0f));
-            PlaySound("audio/sfx/sfx_phone_whisper.wav", 0.55f, behind);
+            m_whisperTimer = 16.0f + Rand01() * 18.0f;
         }
     }
 }
 
 void MotelWorld3D::FixedUpdate(engine::core::Engine&, float fixedDt) {
-    if (!m_ready || m_inspectMode) return;
+    if (!m_ready || m_inspectMode || m_settingsUI.IsOpen()) return;
     if (m_carriedProp >= 0) {
         PropObject& prop = m_level.Props()[m_carriedProp];
         const Camera3D& cam = m_camera.GetCamera();
@@ -1079,6 +1112,11 @@ void MotelWorld3D::RenderUI(engine::core::Engine& eng) {
         DrawLabel(font, "ГЛАВА 2 НЕ ЗАГРУЖЕНА", cx - 150.0f, cy - 40.0f, 26.0f, Color{230, 80, 70, 255});
         DrawLabel(font, m_loadError, cx - 300.0f, cy, 18.0f, Color{220, 210, 200, 255});
         DrawLabel(font, "[ESC] Вернуться в меню", cx - 110.0f, cy + 40.0f, 18.0f, Color{180, 170, 160, 255});
+        return;
+    }
+
+    if (m_settingsUI.IsOpen()) {
+        m_settingsUI.Render(eng);
         return;
     }
 

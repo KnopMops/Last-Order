@@ -37,6 +37,7 @@ public:
     virtual void SetAmbient(const std::string& path, float volume) = 0;
     virtual void TriggerScreamer(const std::string& texture, float duration, float shake) = 0;
     virtual void EndAct(const std::string& text) = 0;
+    virtual void StartHighwayChase() {}
 };
 
 class Chapter2Script {

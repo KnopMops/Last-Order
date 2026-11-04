@@ -160,6 +160,8 @@ void Chapter2Script::Execute(const json& a, IScriptHost& host, std::optional<Vec
         host.TriggerScreamer(a.value("texture", std::string{}), a.value("duration", 0.8f), a.value("shake", 8.0f));
     } else if (type == "end_act") {
         host.EndAct(a.value("text", std::string{}));
+    } else if (type == "highway_chase") {
+        host.StartHighwayChase();
     } else if (type == "event") {
         RunEvent(a.value("name", std::string{}), host, source);
     }

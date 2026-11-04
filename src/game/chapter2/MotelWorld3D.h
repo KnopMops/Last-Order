@@ -6,6 +6,7 @@
 #include "game/chapter2/Chapter2Script.h"
 #include "game/chapter2/ItemVisuals.h"
 #include "game/chapter2/MotelLevel.h"
+#include "game/ui/SettingsOverlay.h"
 #include "raylib.h"
 #include <optional>
 #include <string>
@@ -41,6 +42,7 @@ public:
     void Shutdown(engine::core::Engine& eng);
 
     bool WantsReturnToMenu() const { return m_returnToMenu; }
+    bool WantsHighwayChase() const { return m_startHighwayChase; }
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
     void StartTour(const std::string& outputDir);
 #endif
@@ -60,6 +62,7 @@ private:
     void SetAmbient(const std::string& path, float volume) override;
     void TriggerScreamer(const std::string& texture, float duration, float shake) override;
     void EndAct(const std::string& text) override;
+    void StartHighwayChase() override { m_startHighwayChase = true; }
 
     void UpdateFlashlight(float dt);
     void UpdateMovement(float dt);
@@ -146,6 +149,8 @@ private:
 
     std::vector<RainDrop3D> m_rain;
     int m_stepIndex = 0;
+    game::ui::SettingsOverlay m_settingsUI;
+    bool m_startHighwayChase = false;
     bool m_ready = false;
     bool m_returnToMenu = false;
     float m_time = 0.0f;
