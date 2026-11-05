@@ -8,6 +8,11 @@ release/
 settings.json
 save_profile.json
 CHAPTER_2_*.md
+CHAPTER_*.md
+*STORY*.md
+*PLOT*.md
+*SPECIFICATION*.md
+docs/story/
 *.spec.md
 scratch/
 drive_*.png

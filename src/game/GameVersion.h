@@ -2,7 +2,7 @@
 #include <string>
 
 #ifndef LO_GAME_VERSION
-#define LO_GAME_VERSION "2.1.1"
+#define LO_GAME_VERSION "2.2.0"
 #endif
 
 #ifndef LO_COMMIT_HASH
@@ -28,7 +28,7 @@ inline std::string GetBuildId() {
 }
 
 inline std::string GetVersionBuildString() {
-    return std::string("2.1.1-") + LO_COMMIT_HASH;
+    return std::string("2.2.0-") + LO_COMMIT_HASH;
 }
 
 }
