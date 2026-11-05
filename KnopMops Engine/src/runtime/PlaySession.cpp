@@ -161,6 +161,10 @@ void PlaySession::Shutdown() {
     StopAmbient();
     FreeGpu();
     if (m_shader.id != 0) { UnloadShader(m_shader); m_shader = Shader{}; m_shaderOk = false; MemFree(m_material.maps); m_material = Material{}; }
+    if (m_tvTarget.id != 0) {
+        UnloadRenderTexture(m_tvTarget);
+        m_tvTarget = {};
+    }
     for (auto& kv : m_sounds) UnloadSound(kv.second);
     m_sounds.clear();
     m_running = false;
@@ -680,6 +684,9 @@ void PlaySession::SetCutsceneCamera(bool enabled, Vector3 pos, Vector3 lookAt) {
 }
 
 void PlaySession::PlayTvVideo(int tape, float duration) {
+    if (m_tvTarget.id == 0) {
+        m_tvTarget = LoadRenderTexture(320, 240);
+    }
     m_tvActive = true;
     m_tvTape = std::clamp(tape, 1, 3);
     m_tvTimer = 0.0f;
@@ -714,6 +721,241 @@ void PlaySession::StopTvVideo() {
             up->light.intensity = 0.0f;
         }
     }
+}
+
+void PlaySession::RenderTv3DScene(float dt) {
+    if (!m_tvActive) return;
+    if (m_tvTarget.id == 0) {
+        m_tvTarget = LoadRenderTexture(320, 240);
+        if (m_tvTarget.id == 0) return;
+    }
+
+    float t = m_tvTimer;
+    float prog = std::clamp(m_tvTimer / m_tvDuration, 0.0f, 1.0f);
+    m_tvFrame = std::clamp((int)(prog * 12.0f) + 1, 1, 12);
+
+    BeginTextureMode(m_tvTarget);
+    ClearBackground(Color{12, 10, 16, 255});
+
+    Camera3D tvCam{};
+    tvCam.up = Vector3{0, 1, 0};
+    tvCam.fovy = 65.0f;
+    tvCam.projection = CAMERA_PERSPECTIVE;
+
+    if (m_tvTape == 1) {
+        float bob = std::sin(t * 7.0f) * 0.04f;
+        if (t < 3.5f) {
+            float u = t / 3.5f;
+            tvCam.position = Vector3{-2.0f + u * 1.5f, 1.4f + bob, 4.0f - u * 2.5f};
+            tvCam.target = Vector3{0.0f, 1.3f, -2.0f};
+        } else if (t < 7.5f) {
+            float u = (t - 3.5f) / 4.0f;
+            tvCam.position = Vector3{-0.5f + u * 0.4f, 1.4f + bob * 0.5f, 1.5f - u * 1.6f};
+            tvCam.target = Vector3{0.0f, 1.4f, -0.8f};
+        } else if (t < 10.0f) {
+            float u = (t - 7.5f) / 2.5f;
+            float shake = std::sin(t * 40.0f) * 0.03f;
+            tvCam.position = Vector3{shake, 1.35f, 0.2f + u * 0.3f};
+            tvCam.target = Vector3{0.0f, 1.4f, -0.8f};
+        } else {
+            float u = (t - 10.0f) / 2.0f;
+            float shake = std::sin(t * 50.0f) * 0.06f;
+            tvCam.position = Vector3{0.3f, 0.7f - u * 0.3f + shake, 0.5f};
+            tvCam.target = Vector3{3.5f, 1.2f, 0.5f};
+        }
+
+        BeginMode3D(tvCam);
+        DrawCube(Vector3{0, 0, 0}, 8.0f, 0.1f, 10.0f, Color{45, 38, 35, 255});
+        DrawCube(Vector3{0, 3.0f, 0}, 8.0f, 0.1f, 10.0f, Color{30, 28, 32, 255});
+        DrawCube(Vector3{0, 1.5f, -5.0f}, 8.0f, 3.0f, 0.1f, Color{60, 48, 42, 255});
+        DrawCube(Vector3{-4.0f, 1.5f, 0}, 0.1f, 3.0f, 10.0f, Color{50, 42, 38, 255});
+        DrawCube(Vector3{4.0f, 1.5f, 0}, 0.1f, 3.0f, 10.0f, Color{40, 48, 55, 255});
+        DrawCube(Vector3{0, 1.5f, 5.0f}, 8.0f, 3.0f, 0.1f, Color{45, 38, 35, 255});
+
+        DrawCube(Vector3{-2.5f, 0.55f, 0.0f}, 1.2f, 1.1f, 6.0f, Color{75, 45, 25, 255});
+        DrawCube(Vector3{1.5f, 0.4f, 1.5f}, 1.2f, 0.8f, 1.2f, Color{65, 40, 25, 255});
+        DrawCube(Vector3{1.5f, 0.4f, -2.0f}, 1.2f, 0.8f, 1.2f, Color{65, 40, 25, 255});
+
+        DrawCube(Vector3{3.95f, 1.6f, 0.5f}, 0.05f, 1.8f, 3.5f, Color{18, 28, 45, 200});
+        DrawCube(Vector3{0.0f, 1.4f, -0.78f}, 1.4f, 1.8f, 0.05f, Color{90, 75, 45, 255});
+        DrawCube(Vector3{0.0f, 1.4f, -0.75f}, 1.2f, 1.6f, 0.02f, Color{70, 85, 95, 255});
+
+        if (t >= 6.5f && t < 10.0f) {
+            float rise = std::min(1.0f, (t - 6.5f) / 2.0f);
+            float zStep = -0.75f + (t > 8.0f ? (t - 8.0f) * 0.4f : 0.0f);
+            Vector3 entPos{0.0f, 0.2f + rise * 1.0f, zStep};
+            DrawCube(entPos, 0.45f, 1.3f, 0.3f, Color{15, 12, 18, 255});
+            DrawSphere(Vector3{entPos.x, entPos.y + 0.85f, entPos.z}, 0.22f, Color{22, 20, 25, 255});
+            DrawSphere(Vector3{entPos.x - 0.07f, entPos.y + 0.88f, entPos.z + 0.18f}, 0.04f, Color{240, 240, 255, 255});
+            DrawSphere(Vector3{entPos.x + 0.07f, entPos.y + 0.88f, entPos.z + 0.18f}, 0.04f, Color{240, 240, 255, 255});
+            float reach = std::min(0.6f, (t - 7.0f) * 0.3f);
+            DrawCube(Vector3{entPos.x - 0.28f, entPos.y + 0.4f, entPos.z + reach * 0.5f}, 0.12f, 0.12f, reach, Color{18, 15, 20, 255});
+            DrawCube(Vector3{entPos.x + 0.28f, entPos.y + 0.4f, entPos.z + reach * 0.5f}, 0.12f, 0.12f, reach, Color{18, 15, 20, 255});
+        }
+
+        if (t >= 10.0f) {
+            Vector3 wFace{4.05f, 1.4f, 0.5f};
+            DrawSphere(wFace, 0.38f, Color{210, 215, 225, 255});
+            DrawSphere(Vector3{wFace.x - 0.1f, wFace.y + 0.08f, wFace.z - 0.10f}, 0.08f, Color{10, 0, 0, 255});
+            DrawSphere(Vector3{wFace.x - 0.1f, wFace.y + 0.08f, wFace.z + 0.10f}, 0.08f, Color{10, 0, 0, 255});
+            DrawSphere(Vector3{wFace.x - 0.1f, wFace.y + 0.08f, wFace.z - 0.10f}, 0.03f, Color{255, 50, 40, 255});
+            DrawSphere(Vector3{wFace.x - 0.1f, wFace.y + 0.08f, wFace.z + 0.10f}, 0.03f, Color{255, 50, 40, 255});
+            DrawCube(Vector3{wFace.x - 0.12f, wFace.y - 0.14f, wFace.z}, 0.08f, 0.10f, 0.26f, Color{20, 0, 0, 255});
+            for (int f = -2; f <= 2; f++) {
+                DrawCube(Vector3{3.92f, 1.15f + (f % 2) * 0.05f, 0.5f + f * 0.09f}, 0.04f, 0.22f, 0.04f, Color{180, 185, 190, 255});
+            }
+        }
+        EndMode3D();
+
+    } else if (m_tvTape == 2) {
+        float bob = std::sin(t * 8.0f) * 0.05f;
+        if (t < 3.5f) {
+            float u = t / 3.5f;
+            tvCam.position = Vector3{0.0f, 4.0f - u * 2.8f + bob, 6.0f - u * 3.0f};
+            tvCam.target = Vector3{0.0f, 0.8f, 0.0f};
+        } else if (t < 7.5f) {
+            float u = (t - 3.5f) / 4.0f;
+            tvCam.position = Vector3{0.0f, 1.3f + bob * 0.4f, 3.0f - u * 3.5f};
+            tvCam.target = Vector3{0.0f, 1.1f, -4.0f};
+        } else if (t < 10.0f) {
+            float shake = std::sin(t * 30.0f) * 0.02f;
+            tvCam.position = Vector3{shake, 1.25f, -0.6f};
+            tvCam.target = Vector3{0.0f, 1.3f, -3.2f};
+        } else {
+            float u = (t - 10.0f) / 2.0f;
+            float fall = std::min(1.0f, u * 3.0f);
+            tvCam.position = Vector3{0.1f, 1.25f - fall * 1.05f, -0.6f};
+            tvCam.target = Vector3{0.0f + u * 0.4f, 0.2f, -1.8f};
+        }
+
+        BeginMode3D(tvCam);
+        DrawCube(Vector3{0, 0, 0}, 8.0f, 0.1f, 12.0f, Color{35, 32, 30, 255});
+        DrawCube(Vector3{0, 3.2f, 0}, 8.0f, 0.1f, 12.0f, Color{25, 22, 24, 255});
+        DrawCube(Vector3{-4.0f, 1.6f, 0}, 0.1f, 3.2f, 12.0f, Color{45, 40, 38, 255});
+        DrawCube(Vector3{4.0f, 1.6f, 0}, 0.1f, 3.2f, 12.0f, Color{45, 40, 38, 255});
+        DrawCube(Vector3{0, 1.6f, -6.0f}, 8.0f, 3.2f, 0.1f, Color{40, 36, 35, 255});
+
+        for (int st = 0; st < 6; st++) {
+            DrawCube(Vector3{0, 0.2f + st * 0.35f, 4.5f + st * 0.5f}, 2.4f, 0.35f, 0.6f, Color{55, 50, 48, 255});
+        }
+
+        DrawCube(Vector3{0.0f, 0.5f, -1.8f}, 1.4f, 0.8f, 5.0f, Color{45, 28, 18, 255});
+        for (int c = 0; c < 5; c++) {
+            DrawCube(Vector3{-0.3f, 0.95f, -3.8f + c * 0.9f}, 0.06f, 0.2f, 0.06f, Color{15, 12, 14, 255});
+            DrawSphere(Vector3{-0.3f, 1.08f, -3.8f + c * 0.9f}, 0.035f, Color{255, 150, 40, 255});
+            DrawCube(Vector3{0.3f, 0.95f, -3.8f + c * 0.9f}, 0.06f, 0.2f, 0.06f, Color{15, 12, 14, 255});
+            DrawSphere(Vector3{0.3f, 1.08f, -3.8f + c * 0.9f}, 0.035f, Color{255, 150, 40, 255});
+        }
+        DrawCube(Vector3{0.0f, 0.95f, -4.1f}, 0.08f, 0.25f, 0.08f, Color{15, 12, 14, 255});
+        DrawSphere(Vector3{0.0f, 1.12f, -4.1f}, 0.05f, Color{200, 60, 255, 255});
+
+        for (int p = 0; p < 5; p++) {
+            float zPos = -3.8f + p * 0.9f;
+            Vector3 pLeft{-1.1f, 0.65f, zPos};
+            DrawCube(pLeft, 0.45f, 1.1f, 0.35f, Color{18, 16, 20, 255});
+            DrawSphere(Vector3{pLeft.x, pLeft.y + 0.65f, pLeft.z}, 0.18f, Color{25, 22, 28, 255});
+            if (t >= 7.5f) {
+                DrawSphere(Vector3{pLeft.x + 0.08f, pLeft.y + 0.68f, pLeft.z + 0.14f}, 0.025f, Color{255, 220, 180, 255});
+            }
+
+            Vector3 pRight{1.1f, 0.65f, zPos};
+            DrawCube(pRight, 0.45f, 1.1f, 0.35f, Color{18, 16, 20, 255});
+            DrawSphere(Vector3{pRight.x, pRight.y + 0.65f, pRight.z}, 0.18f, Color{25, 22, 28, 255});
+            if (t >= 7.5f) {
+                DrawSphere(Vector3{pRight.x - 0.08f, pRight.y + 0.68f, pRight.z + 0.14f}, 0.025f, Color{255, 220, 180, 255});
+            }
+        }
+
+        float lunge = (t >= 10.0f) ? (t - 10.0f) * 2.2f : 0.0f;
+        Vector3 headBoss{0.0f, 0.75f + (t >= 10.0f ? 0.3f : 0.0f), -4.6f + lunge};
+        DrawCube(headBoss, 0.6f, 1.3f, 0.45f, Color{10, 8, 12, 255});
+        DrawSphere(Vector3{headBoss.x, headBoss.y + 0.8f, headBoss.z}, 0.26f, Color{200, 190, 180, 255});
+        DrawSphere(Vector3{headBoss.x - 0.08f, headBoss.y + 0.85f, headBoss.z + 0.22f}, 0.045f, Color{180, 0, 0, 255});
+        DrawSphere(Vector3{headBoss.x + 0.08f, headBoss.y + 0.85f, headBoss.z + 0.22f}, 0.045f, Color{180, 0, 0, 255});
+        if (t >= 9.5f) {
+            DrawCube(Vector3{headBoss.x, headBoss.y + 0.65f, headBoss.z + 0.24f}, 0.18f, 0.22f, 0.15f, Color{0, 0, 0, 255});
+        }
+        EndMode3D();
+
+    } else {
+        float t = m_tvTimer;
+        if (t < 3.5f) {
+            float u = t / 3.5f;
+            tvCam.position = Vector3{0.5f, 1.6f, 14.0f - u * 9.0f};
+            tvCam.target = Vector3{0.0f, 1.5f, 2.0f};
+        } else if (t < 7.5f) {
+            float u = (t - 3.5f) / 4.0f;
+            tvCam.position = Vector3{1.4f, 1.35f, 1.2f - u * 0.4f};
+            tvCam.target = Vector3{1.4f, 1.30f, 0.0f};
+        } else if (t < 10.0f) {
+            float u = (t - 7.5f) / 2.5f;
+            tvCam.position = Vector3{0.0f, 2.0f + u * 0.5f, 3.5f - u * 1.5f};
+            tvCam.target = Vector3{0.0f, 2.5f, -8.0f};
+        } else {
+            float u = (t - 10.0f) / 2.0f;
+            float shake = std::sin(t * 60.0f) * 0.05f;
+            tvCam.position = Vector3{shake, 1.5f, 1.5f};
+            tvCam.target = Vector3{0.0f, 1.8f, -12.0f + u * 6.0f};
+        }
+
+        BeginMode3D(tvCam);
+        DrawCube(Vector3{0, -0.2f, 0}, 14.0f, 0.3f, 28.0f, Color{28, 26, 25, 255});
+        for (float z = -12.0f; z <= 14.0f; z += 0.8f) {
+            DrawCube(Vector3{0, 0.02f, z}, 2.4f, 0.12f, 0.22f, Color{45, 35, 28, 255});
+        }
+        DrawCube(Vector3{-0.75f, 0.14f, 0}, 0.1f, 0.14f, 28.0f, Color{160, 165, 175, 255});
+        DrawCube(Vector3{0.75f, 0.14f, 0}, 0.1f, 0.14f, 28.0f, Color{160, 165, 175, 255});
+
+        DrawCube(Vector3{-1.8f, 2.5f, 5.0f}, 0.2f, 5.0f, 0.2f, Color{50, 52, 55, 255});
+        DrawCube(Vector3{-1.8f, 4.2f, 4.8f}, 0.45f, 1.1f, 0.35f, Color{25, 28, 30, 255});
+        bool semRed = (t >= 2.0f);
+        DrawSphere(Vector3{-1.8f, 4.5f, 4.6f}, 0.15f, semRed ? Color{255, 30, 20, 255} : Color{50, 10, 10, 255});
+        DrawSphere(Vector3{-1.8f, 3.9f, 4.6f}, 0.15f, semRed ? Color{10, 40, 20, 255} : Color{40, 255, 80, 255});
+
+        DrawCube(Vector3{0, 4.0f, -6.0f}, 16.0f, 8.0f, 1.5f, Color{38, 35, 40, 255});
+        DrawCube(Vector3{0, 5.2f, -5.8f}, 5.5f, 1.2f, 1.6f, Color{75, 68, 62, 255});
+        float gateOpen = (t >= 7.0f) ? std::min(2.4f, (t - 7.0f) * 1.0f) : 0.0f;
+        DrawCube(Vector3{-1.3f - gateOpen, 2.2f, -5.7f}, 2.6f, 4.4f, 0.3f, Color{65, 70, 75, 255});
+        DrawCube(Vector3{1.3f + gateOpen, 2.2f, -5.7f}, 2.6f, 4.4f, 0.3f, Color{65, 70, 75, 255});
+        float beacon = std::sin(t * 12.0f);
+        Color bCol = beacon > 0.0f ? Color{255, 180, 20, 255} : Color{80, 50, 10, 255};
+        DrawSphere(Vector3{-2.2f, 4.8f, -5.5f}, 0.2f, bCol);
+        DrawSphere(Vector3{2.2f, 4.8f, -5.5f}, 0.2f, bCol);
+
+        DrawCube(Vector3{1.4f, 1.25f, 0.0f}, 0.35f, 0.5f, 0.25f, Color{40, 44, 48, 255});
+        int codeStep = (t < 4.5f) ? 0 : (t < 5.3f) ? 1 : (t < 6.1f) ? 2 : (t < 6.9f) ? 3 : 4;
+        for (int b = 0; b < 4; b++) {
+            Color ledCol = (b < codeStep) ? Color{80, 255, 100, 255} : Color{30, 45, 30, 255};
+            DrawCube(Vector3{1.3f + b * 0.06f, 1.38f, 0.13f}, 0.04f, 0.04f, 0.02f, ledCol);
+        }
+
+        if (t >= 8.5f) {
+            float trainZ = -16.0f + (t - 8.5f) * 3.5f;
+            Vector3 trPos{0.0f, 1.8f, trainZ};
+            DrawCube(trPos, 2.6f, 3.2f, 6.0f, Color{22, 24, 28, 255});
+            DrawSphere(Vector3{0.0f, 2.6f, trPos.z + 3.05f}, 0.45f, Color{255, 250, 220, 255});
+            if (t >= 10.0f) {
+                DrawSphere(Vector3{0.0f, 2.0f, trPos.z + 5.0f}, 1.2f, Color{255, 255, 240, 90});
+            }
+            DrawCube(Vector3{0.0f, 0.4f, trPos.z + 3.2f}, 2.4f, 0.6f, 0.4f, Color{60, 20, 15, 255});
+        }
+        EndMode3D();
+    }
+
+    for (int y = 0; y < 240; y += 4) {
+        DrawRectangle(0, y, 320, 1, Color{0, 0, 0, 45});
+    }
+    float barPhase = std::fmod(m_tvGlitch * 0.4f, 1.0f);
+    int by = (int)(barPhase * 240);
+    DrawRectangle(0, by, 320, 8, Color{255, 255, 255, 30});
+
+    DrawText("14-NOV-1986", 14, 220, 10, Color{220, 220, 180, 200});
+    char tc[32];
+    int frames = (int)(m_tvTimer * 30.0f) % 30;
+    std::snprintf(tc, sizeof(tc), "03:%02d:%02d", (int)m_tvTimer + 14, frames);
+    DrawText(tc, 88, 220, 10, Color{220, 220, 180, 200});
+
+    EndTextureMode();
 }
 
 void PlaySession::AskCode(const std::string& prompt, const std::string& expected, std::function<void(bool, const std::string&)> cb) {
@@ -883,16 +1125,11 @@ void PlaySession::Update(float dt, bool inputActive) {
             if (m_tvTimer >= m_tvDuration) {
                 StopTvVideo();
             } else {
-                float prog = m_tvTimer / m_tvDuration;
-                m_tvFrame = std::clamp((int)(prog * 12.0f) + 1, 1, 12);
                 m_tvGlitch += dt;
-                std::string frameTex = "tape" + std::to_string(m_tvTape) + "_frame" + std::to_string(m_tvFrame);
+                RenderTv3DScene(dt);
                 for (auto& up : m_scene.GetGameObjects()) {
                     if (!up) continue;
-                    if (up->name == "Экран_телевизора") {
-                        up->meshRenderer.textureName = frameTex;
-                        up->meshRenderer.emissive = true;
-                    } else if (up->name == "Свет_телевизора") {
+                    if (up->name == "Свет_телевизора") {
                         m_rt[up->id].lightOn = true;
                         up->light.enabled = true;
                         float pulse = 0.55f + 0.20f * std::sin(m_tvTimer * 26.0f) + 0.15f * std::cos(m_tvTimer * 43.0f);
@@ -1981,6 +2218,14 @@ void PlaySession::DrawShape(const scene::GameObject& o, Vector3 wp) {
     }
 
     if (shape == "Cube") {
+        if (o.name == "Экран_телевизора" && m_tvActive && m_tvTarget.id != 0) {
+            rlPushMatrix();
+            rlTranslatef(wp.x, wp.y, wp.z);
+            rlRotatef(o.transform.rotation.y, 0, 1, 0);
+            render::DrawTexturedBox(m_tvTarget.texture, Vector3{0, 0, 0}, size.x, size.y, size.z, WHITE);
+            rlPopMatrix();
+            return;
+        }
         DrawBox(wp, size, o.transform.rotation.y, tex, tint, mr.emissive || o.itemPickup.enabled);
     } else if (shape == "Sphere") {
         Color lit = mr.emissive ? WHITE : ShadePoint(wp, Vector3{0, 1, 0});
@@ -2198,12 +2443,19 @@ void PlaySession::RenderHUD(int w, int h) {
         DrawHudText("ГОРИЗОНТ-Ц257 // ВИДЕОМАГНИТОФОН ЭЛЕКТРОНИКА ВМ-12", tx + 8, ty + th + 12, fs * 0.70f, Color{195, 165, 110, 220}, false);
         DrawCircle(tx + tw - 16, ty + th + 20, 5.0f, Color{255, 40, 20, 255});
 
-        std::string frameTexName = "tape" + std::to_string(m_tvTape) + "_frame" + std::to_string(m_tvFrame);
-        Texture2D ft = render::TextureManager::Instance().GetTexture(frameTexName);
-        if (ft.id != 0) {
-            DrawTexturePro(ft, Rectangle{0, 0, (float)ft.width, (float)ft.height},
+        if (m_tvTarget.id != 0) {
+            DrawTexturePro(m_tvTarget.texture,
+                           Rectangle{0, 0, (float)m_tvTarget.texture.width, -(float)m_tvTarget.texture.height},
                            Rectangle{(float)tx, (float)ty, (float)tw, (float)th},
                            Vector2{0, 0}, 0.0f, WHITE);
+        } else {
+            std::string frameTexName = "tape" + std::to_string(m_tvTape) + "_frame" + std::to_string(m_tvFrame);
+            Texture2D ft = render::TextureManager::Instance().GetTexture(frameTexName);
+            if (ft.id != 0) {
+                DrawTexturePro(ft, Rectangle{0, 0, (float)ft.width, (float)ft.height},
+                               Rectangle{(float)tx, (float)ty, (float)tw, (float)th},
+                               Vector2{0, 0}, 0.0f, WHITE);
+            }
         }
 
         for (int sy = ty; sy < ty + th; sy += 3) {

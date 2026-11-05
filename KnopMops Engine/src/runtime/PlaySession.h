@@ -369,6 +369,8 @@ private:
     float m_tvDuration = 12.0f;
     int m_tvFrame = 1;
     float m_tvGlitch = 0.0f;
+    RenderTexture2D m_tvTarget{};
+    void RenderTv3DScene(float dt);
 };
 
 }
