@@ -121,7 +121,7 @@ void ItemRandomizer::Generate(unsigned int seed) {
 
     for (size_t i = 0; i < m_slots.size(); ++i) {
         if (m_slots[i].id == "slot_bed_drawer") continue;
-        if (!m_slots[i].locked && m_slots[i].zone != "Basement" && m_slots[i].zone != "Garage") {
+        if (!m_slots[i].locked && m_slots[i].requiredTool.empty() && m_slots[i].zone != "Basement" && m_slots[i].zone != "Garage" && m_slots[i].zone != "Attic") {
             earlySlotIndices.push_back(i);
         } else {
             otherSlotIndices.push_back(i);
@@ -150,6 +150,29 @@ void ItemRandomizer::Generate(unsigned int seed) {
             size_t slotIdx = remainingSlots.back();
             remainingSlots.pop_back();
             m_slots[slotIdx].containedItem = item;
+        }
+    }
+
+    auto isSafeCrowbarSlot = [](const SearchSlot& s) {
+        return !s.locked && s.requiredTool.empty() && s.zone != "Basement" && s.zone != "Garage" && s.zone != "Attic" && s.id != "slot_bed_drawer";
+    };
+
+    for (size_t i = 0; i < m_slots.size(); ++i) {
+        if (m_slots[i].containedItem == "item_crowbar" && !isSafeCrowbarSlot(m_slots[i])) {
+            for (size_t j = 0; j < m_slots.size(); ++j) {
+                if (isSafeCrowbarSlot(m_slots[j]) && m_slots[j].containedItem != "item_crowbar") {
+                    std::swap(m_slots[i].containedItem, m_slots[j].containedItem);
+                    break;
+                }
+            }
+        }
+        if (m_slots[i].locked && !m_slots[i].requiredTool.empty() && m_slots[i].containedItem == m_slots[i].requiredTool) {
+            for (size_t j = 0; j < m_slots.size(); ++j) {
+                if (!m_slots[j].locked && m_slots[j].requiredTool.empty() && m_slots[j].containedItem != m_slots[i].requiredTool) {
+                    std::swap(m_slots[i].containedItem, m_slots[j].containedItem);
+                    break;
+                }
+            }
         }
     }
 }
