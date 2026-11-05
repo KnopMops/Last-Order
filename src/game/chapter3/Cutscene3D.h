@@ -40,6 +40,7 @@ public:
     float GetDuration() const { return m_duration; }
     const std::string& GetName() const { return m_name; }
     void SetCustomCallback(EventCallback cb) { m_customCallback = std::move(cb); }
+    void SetOrigin(Vector3 origin) { m_origin = origin; }
 
 private:
     std::string m_name;
@@ -55,6 +56,8 @@ private:
     float m_fadeSpeed = 2.0f;
     Color m_fadeColor{0, 0, 0, 255};
     EventCallback m_customCallback;
+    Vector3 m_origin{};
+    bool m_relative = false;
 
     CameraKeyframe InterpolateCamera(float t) const;
 };

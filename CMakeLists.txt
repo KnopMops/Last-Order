@@ -82,9 +82,14 @@ add_library(lo_engine STATIC
     src/engine/3d/Lighting3D.cpp
     src/engine/3d/LightBaker.cpp
     src/engine/3d/CameraFPS.cpp
+    src/engine/hd/HdRendererD3D11.cpp
+    src/engine/hd/HdRendererD3D12.cpp
 )
 target_include_directories(lo_engine PUBLIC src)
 target_link_libraries(lo_engine PUBLIC raylib nlohmann_json::nlohmann_json Jolt)
+if(WIN32)
+    target_link_libraries(lo_engine PUBLIC d3d11 d3d12 dxgi d3dcompiler dxguid)
+endif()
 set(APP_ICON_OBJ "${CMAKE_CURRENT_BINARY_DIR}/app_icon.obj")
 add_custom_command(
     OUTPUT "${APP_ICON_OBJ}"
@@ -117,6 +122,9 @@ set(GAME_SOURCES
     src/game/chapter3/WeaponAssembly.cpp
     src/game/chapter3/GrannyAI.cpp
     src/game/chapter3/EscapeManager.cpp
+    src/game/chapter3/HouseLevel.cpp
+    src/game/chapter3/HouseHd.cpp
+    src/game/chapter3/Ch3Graphics.cpp
     src/game/chapter3/HouseWorld3D.cpp
 )
 add_executable(last_order ${GAME_SOURCES})

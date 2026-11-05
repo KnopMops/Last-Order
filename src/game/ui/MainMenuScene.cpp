@@ -137,6 +137,10 @@ MenuCommand MainMenuScene::Update(engine::core::Engine& eng, float dt) {
             eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.5f);
             return MenuCommand::None;
         }
+        if (m_state == MenuState::Main) {
+            eng.Audio().PlaySfx("audio/sfx/sfx_notebook_flip.wav", 0.5f);
+            return MenuCommand::QuitGame;
+        }
     }
 
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
@@ -413,19 +417,21 @@ void MainMenuScene::RenderUI(engine::core::Engine& eng) const {
             float bw = 460.0f;
             float bh = 52.0f;
 
-            Color bgCol = sel ? Color{107, 51, 34, 245} : Color{42, 23, 21, 215};
-            Color borderCol = sel ? Color{244, 184, 96, 255} : Color{196, 122, 59, 160};
+            bool isQuitBtn = (i == 4);
+            Color bgCol = sel ? (isQuitBtn ? Color{130, 36, 36, 245} : Color{107, 51, 34, 245}) : (isQuitBtn ? Color{52, 20, 20, 215} : Color{42, 23, 21, 215});
+            Color borderCol = sel ? (isQuitBtn ? Color{255, 96, 96, 255} : Color{244, 184, 96, 255}) : (isQuitBtn ? Color{196, 70, 70, 160} : Color{196, 122, 59, 160});
 
             DrawRectangle(static_cast<int>(bx), static_cast<int>(by), static_cast<int>(bw), static_cast<int>(bh), bgCol);
             DrawRectangleLinesEx(Rectangle{bx, by, bw, bh}, sel ? 2.5f : 1.0f, borderCol);
 
             if (sel) {
-                DrawRectangle(static_cast<int>(bx), static_cast<int>(by), 8, static_cast<int>(bh), Color{244, 184, 96, 255});
+                DrawRectangle(static_cast<int>(bx), static_cast<int>(by), 8, static_cast<int>(bh), isQuitBtn ? Color{255, 96, 96, 255} : Color{244, 184, 96, 255});
             }
 
-            DrawTextEx(font, mainButtons[i], Vector2{bx + 24.0f, by + 14.0f}, 22.0f, 1.0f,
-                       sel ? Color{244, 184, 96, 255} : Color{232, 227, 217, 230});
+            Color txtCol = sel ? (isQuitBtn ? Color{255, 230, 230, 255} : Color{244, 184, 96, 255}) : (isQuitBtn ? Color{232, 190, 190, 230} : Color{232, 227, 217, 230});
+            DrawTextEx(font, mainButtons[i], Vector2{bx + 24.0f, by + 14.0f}, 22.0f, 1.0f, txtCol);
         }
+        DrawTextEx(font, "[ESC] Выход из игры    [ENTER / ЛКМ] Выбрать", Vector2{58.0f, 544.0f}, 17.0f, 1.0f, Color{196, 170, 150, 180});
     } else if (m_state == MenuState::ChapterSelect) {
         DrawTextEx(font, "ВЫБОР ГЛАВЫ", Vector2{58, 196}, 21.0f, 1.0f, Color{244, 184, 96, 255});
 

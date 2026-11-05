@@ -42,6 +42,12 @@ int main(int argc, char** argv) {
         if (arg == "--chapter2") game.RequestChapter2Tour("");
         if (arg == "--ch2-tour" && i + 1 < argc) game.RequestChapter2Tour(argv[i + 1]);
         if (arg == "--ch2-drive") game.RequestChapter2Tour("@drive");
+        if (arg == "--chapter3") game.RequestChapter3(false, 0);
+        if (arg == "--ch3-tour") game.RequestChapter3(true, 0);
+        if (arg == "--ch3-hd") game.RequestChapter3(false, 1);
+        if (arg == "--ch3-hd-tour") game.RequestChapter3(true, 1);
+        if (arg == "--ch3-dx12-tour") game.RequestChapter3(true, 2);
+        if (arg == "--ch3-dx12") game.RequestChapter3(false, 2);
     }
 #endif
     engine.Run(game, smokeTest);

@@ -30,6 +30,7 @@ bool CutsceneEngine::Load(const std::string& jsonPath) {
 
     m_name = root.value("name", "cutscene");
     m_duration = root.value("duration", 5.0f);
+    m_relative = root.value("relative", false);
 
     if (root.contains("camera_tracks") && root["camera_tracks"].is_array()) {
         for (const auto& item : root["camera_tracks"]) {
@@ -174,8 +175,9 @@ void CutsceneEngine::Update(engine::core::Engine& eng, float dt, Camera3D& outCa
     }
 
     CameraKeyframe kf = InterpolateCamera(m_currentTime);
-    outCam.position = kf.position;
-    outCam.target = kf.target;
+    Vector3 offset = m_relative ? m_origin : Vector3{0.0f, 0.0f, 0.0f};
+    outCam.position = Vector3Add(kf.position, offset);
+    outCam.target = Vector3Add(kf.target, offset);
     outCam.fovy = kf.fov;
     outCam.up = {0.0f, 1.0f, 0.0f};
 
@@ -188,8 +190,8 @@ void CutsceneEngine::Update(engine::core::Engine& eng, float dt, Camera3D& outCa
 void CutsceneEngine::RenderUI(engine::core::Engine& eng) {
     if (!m_playing && m_fadeAlpha <= 0.001f) return;
 
-    int screenW = GetScreenWidth();
-    int screenH = GetScreenHeight();
+    int screenW = eng.Renderer().GetUIWidth();
+    int screenH = eng.Renderer().GetUIHeight();
 
     if (m_playing) {
         int barH = screenH / 10;

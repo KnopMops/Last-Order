@@ -48,6 +48,9 @@ public:
     void SetCrtEnabled(bool enabled) { m_crtEnabled = enabled; }
     bool IsCrtEnabled() const { return m_crtEnabled; }
 
+    void SetNativeOverlay(const Texture2D* tex) { m_nativeOverlay = tex; }
+    Rectangle GetPresentRect() const { return ComputeTargetViewport(); }
+
     int GetUIWidth() const { return UI_W; }
     int GetUIHeight() const { return UI_H; }
 
@@ -69,6 +72,7 @@ private:
     int m_uBrightnessLoc = -1;
     int m_uSanityStressLoc = -1;
 
+    const Texture2D* m_nativeOverlay = nullptr;
     bool m_crtEnabled = true;
     bool m_shakeAllowed = true;
     bool m_stretchToUltrawide = false;

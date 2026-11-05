@@ -32,6 +32,7 @@ struct SearchSlot {
     bool searched = false;
     bool locked = false;
     std::string requiredTool;
+    bool open = false;
 };
 
 class ItemRandomizer {

@@ -24,6 +24,8 @@ void ItemRandomizer::Init() {
     RegisterItem("item_sewer_key", "Ключ от коллектора", "Граненый ключ от дренажной решетки.", ItemCategory::Key, "sprites/3d/ch3/item_padlock_open.png");
     RegisterItem("item_radio_fuse", "Предохранитель 25A", "Керамический предохранитель для радиостанции.", ItemCategory::Tool, "sprites/3d/ch3/item_car_sparkplug.png");
     RegisterItem("item_vacuum_tube", "Радиолампа ГУ-50", "Мощная генераторная лампа для передатчика.", ItemCategory::Tool, "sprites/3d/ch3/item_car_sparkplug.png");
+    RegisterItem("item_flashlight", "Фонарик", "Карманный фонарь. [F] — включить. Батарейки садятся.", ItemCategory::Tool, "");
+    RegisterItem("item_batteries", "Батарейки", "Две пальчиковые батарейки. [Q] — заменить в фонарике.", ItemCategory::Consumable, "");
     RegisterItem("item_code_note", "Записка с кодом", "Клочок бумаги с цифрами от домофона.", ItemCategory::Clue, "sprites/3d/ch3/item_padlock_open.png");
     SetupSlots();
 }
@@ -34,42 +36,46 @@ void ItemRandomizer::RegisterItem(const std::string& id, const std::string& name
 
 void ItemRandomizer::SetupSlots() {
     m_slots.clear();
-    m_slots.push_back({"slot_bed_drawer", "Ящик тумбочки", "Bedroom", {-2.8f, 0.6f, 4.0f}, "", false, false, ""});
-    m_slots.push_back({"slot_bed_wardrobe", "Платяной шкаф", "Bedroom", {-3.5f, 1.2f, 1.5f}, "", false, false, ""});
-    m_slots.push_back({"slot_bed_under", "Под кроватью", "Bedroom", {-2.0f, 0.2f, 2.5f}, "", false, false, ""});
-    m_slots.push_back({"slot_bed_dresser", "Комод спальни", "Bedroom", {-1.0f, 0.8f, 4.5f}, "", false, false, ""});
+    m_slots.push_back({"slot_bed_drawer", "Тумбочка у кровати", "Bedroom", {-1.9f, 3.93f, 2.15f}, "", false, false, ""});
+    m_slots.push_back({"slot_bed_wardrobe", "Платяной шкаф", "Bedroom", {-5.3f, 4.3f, 2.35f}, "", false, false, ""});
+    m_slots.push_back({"slot_bed_under", "Под кроватью", "Bedroom", {-4.2f, 3.4f, 3.25f}, "", false, false, ""});
+    m_slots.push_back({"slot_bed_dresser", "Комод спальни", "Bedroom", {-2.2f, 4.05f, 5.4f}, "", false, false, ""});
 
-    m_slots.push_back({"slot_hall2_closet", "Бельевой шкаф", "Hallway2F", {0.0f, 1.0f, 2.0f}, "", false, false, ""});
-    m_slots.push_back({"slot_hall2_drawer", "Консольный столик", "Hallway2F", {1.5f, 0.7f, 3.5f}, "", false, false, ""});
+    m_slots.push_back({"slot_hall2_closet", "Бельевой шкаф", "Hallway2F", {-0.85f, 4.3f, -5.4f}, "", false, false, ""});
+    m_slots.push_back({"slot_hall2_drawer", "Консольный столик", "Hallway2F", {-1.0f, 3.95f, 0.6f}, "", false, false, ""});
 
-    m_slots.push_back({"slot_bath_mirror", "Аптечка за зеркалом", "Bathroom", {3.2f, 1.4f, 1.0f}, "", false, false, ""});
-    m_slots.push_back({"slot_bath_sink", "Тумба под раковиной", "Bathroom", {3.2f, 0.4f, 1.0f}, "", false, false, ""});
+    m_slots.push_back({"slot_bath_mirror", "Аптечка за зеркалом", "Bathroom", {5.8f, 4.8f, -0.55f}, "", false, false, ""});
+    m_slots.push_back({"slot_bath_sink", "Тумба под раковиной", "Bathroom", {5.45f, 3.75f, -0.55f}, "", false, false, ""});
 
-    m_slots.push_back({"slot_guest_desk", "Письменный стол", "GuestRoom", {2.5f, 0.7f, 4.5f}, "", false, false, ""});
-    m_slots.push_back({"slot_guest_shelf", "Книжная полка", "GuestRoom", {3.6f, 1.2f, 3.8f}, "", false, false, ""});
-    m_slots.push_back({"slot_guest_box", "Коробка с архивом", "GuestRoom", {1.5f, 0.3f, 4.8f}, "", false, false, ""});
+    m_slots.push_back({"slot_guest_desk", "Письменный стол", "GuestRoom", {3.7f, 3.98f, 5.35f}, "", false, false, ""});
+    m_slots.push_back({"slot_guest_shelf", "Книжная полка", "GuestRoom", {5.6f, 4.3f, 1.95f}, "", false, false, ""});
+    m_slots.push_back({"slot_guest_box", "Коробка с архивом", "GuestRoom", {2.1f, 3.6f, 5.5f}, "", false, false, ""});
 
-    m_slots.push_back({"slot_attic_crate1", "Пыльный ящик у слухового окна", "Attic", {-2.5f, 4.8f, 2.0f}, "", false, true, "item_crowbar"});
-    m_slots.push_back({"slot_attic_crate2", "Сундук под стропилами", "Attic", {2.0f, 4.8f, 3.0f}, "", false, false, ""});
-    m_slots.push_back({"slot_attic_table", "Радиостол чердака", "Attic", {0.0f, 4.8f, -1.5f}, "", false, false, ""});
+    m_slots.push_back({"slot_attic_crate1", "Пыльный ящик у слухового окна", "Attic", {-3.2f, 7.0f, 3.9f}, "", false, true, "item_crowbar"});
+    m_slots.push_back({"slot_attic_crate2", "Сундук под стропилами", "Attic", {2.6f, 6.95f, 4.7f}, "", false, false, ""});
+    m_slots.push_back({"slot_attic_table", "Радиостол чердака", "Attic", {4.8f, 7.2f, -5.3f}, "", false, false, ""});
 
-    m_slots.push_back({"slot_living_tv", "Тумба под старым ТВ", "LivingRoom", {-1.5f, 0.6f, -3.0f}, "", false, false, ""});
-    m_slots.push_back({"slot_living_sofa", "Между подушек дивана", "LivingRoom", {-3.0f, 0.4f, -4.0f}, "", false, false, ""});
-    m_slots.push_back({"slot_living_fire", "Каминная полка", "LivingRoom", {0.0f, 1.1f, -5.2f}, "", false, false, ""});
+    m_slots.push_back({"slot_living_tv", "Тумба под старым ТВ", "LivingRoom", {-3.1f, 0.45f, 5.45f}, "", false, false, ""});
+    m_slots.push_back({"slot_living_sofa", "Между подушек дивана", "LivingRoom", {-5.2f, 0.5f, 4.7f}, "", false, false, ""});
+    m_slots.push_back({"slot_living_fire", "Каминная полка", "LivingRoom", {-3.5f, 1.32f, 2.3f}, "", false, false, ""});
 
-    m_slots.push_back({"slot_kitchen_cup1", "Верхний кухонный шкаф", "Kitchen", {2.5f, 1.5f, -3.5f}, "", false, false, ""});
-    m_slots.push_back({"slot_kitchen_cup2", "Нижний ящик гарнитура", "Kitchen", {2.5f, 0.5f, -3.5f}, "", false, false, ""});
-    m_slots.push_back({"slot_kitchen_fridge", "Старый холодильник ЗИЛ", "Kitchen", {3.6f, 0.9f, -5.0f}, "", false, false, ""});
-    m_slots.push_back({"slot_kitchen_oven", "Духовой шкаф плиты", "Kitchen", {1.8f, 0.4f, -5.0f}, "", false, false, ""});
+    m_slots.push_back({"slot_kitchen_cup1", "Верхний кухонный шкаф", "Kitchen", {3.6f, 1.85f, -5.6f}, "", false, false, ""});
+    m_slots.push_back({"slot_kitchen_cup2", "Нижний ящик гарнитура", "Kitchen", {4.8f, 0.5f, -5.35f}, "", false, false, ""});
+    m_slots.push_back({"slot_kitchen_fridge", "Старый холодильник ЗИЛ", "Kitchen", {5.3f, 1.1f, -3.8f}, "", false, false, ""});
+    m_slots.push_back({"slot_kitchen_oven", "Духовой шкаф плиты", "Kitchen", {2.0f, 0.4f, -5.3f}, "", false, false, ""});
 
-    m_slots.push_back({"slot_garage_tool1", "Верхний ящик верстака", "Garage", {-6.5f, 0.9f, -6.0f}, "", false, false, ""});
-    m_slots.push_back({"slot_garage_tool2", "Нижняя тумба автослесаря", "Garage", {-6.5f, 0.4f, -6.0f}, "", false, false, ""});
-    m_slots.push_back({"slot_garage_trunk", "Багажник Копейки", "Garage", {-8.0f, 0.6f, -8.5f}, "", false, true, "item_crowbar"});
-    m_slots.push_back({"slot_garage_glove", "Бардачок автомобиля", "Garage", {-8.0f, 0.8f, -6.5f}, "", false, false, ""});
+    m_slots.push_back({"slot_garage_tool1", "Верхний ящик верстака", "Garage", {-12.3f, 0.9f, -1.3f}, "", false, false, ""});
+    m_slots.push_back({"slot_garage_tool2", "Нижняя тумба автослесаря", "Garage", {-12.3f, 1.0f, 2.2f}, "", false, false, ""});
+    m_slots.push_back({"slot_garage_trunk", "Багажник Копейки", "Garage", {-9.5f, 0.85f, -0.55f}, "", false, true, "item_crowbar"});
+    m_slots.push_back({"slot_garage_glove", "Бардачок автомобиля", "Garage", {-8.6f, 1.05f, -2.9f}, "", false, false, ""});
 
-    m_slots.push_back({"slot_base_shelf", "Стеллаж с банками", "Basement", {1.5f, -2.2f, 1.0f}, "", false, false, ""});
-    m_slots.push_back({"slot_base_barrel", "Деревянная бочка", "Basement", {-1.5f, -2.4f, 2.5f}, "", false, false, ""});
-    m_slots.push_back({"slot_base_drawer", "Ящик оружейного стола", "Basement", {-2.5f, -2.2f, -1.0f}, "", false, false, ""});
+    m_slots.push_back({"slot_base_shelf", "Стеллаж с банками", "Basement", {5.5f, -1.9f, -2.0f}, "", false, false, ""});
+    m_slots.push_back({"slot_base_barrel", "Деревянная бочка", "Basement", {3.0f, -2.1f, -5.15f}, "", false, false, ""});
+    m_slots.push_back({"slot_base_drawer", "Ящик оружейного стола", "Basement", {0.05f, -2.25f, -5.4f}, "", false, false, ""});
+    for (auto& s : m_slots) {
+        s.open = s.id == "slot_bed_drawer" || s.id == "slot_hall2_drawer" || s.id == "slot_guest_desk" || s.id == "slot_living_fire" ||
+                 s.id == "slot_living_tv" || s.id == "slot_garage_tool1" || s.id == "slot_attic_table" || s.id == "slot_base_drawer";
+    }
 }
 
 void ItemRandomizer::Generate(unsigned int seed) {
@@ -102,13 +108,19 @@ void ItemRandomizer::Generate(unsigned int seed) {
         "item_sewer_key",
         "item_radio_fuse",
         "item_vacuum_tube",
+        "item_batteries",
+        "item_batteries",
+        "item_batteries",
         "item_code_note"
     };
+
+    if (SearchSlot* start = GetSlotMut("slot_bed_drawer")) start->containedItem = "item_flashlight";
 
     std::vector<size_t> earlySlotIndices;
     std::vector<size_t> otherSlotIndices;
 
     for (size_t i = 0; i < m_slots.size(); ++i) {
+        if (m_slots[i].id == "slot_bed_drawer") continue;
         if (!m_slots[i].locked && m_slots[i].zone != "Basement" && m_slots[i].zone != "Garage") {
             earlySlotIndices.push_back(i);
         } else {

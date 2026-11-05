@@ -214,10 +214,15 @@ void Renderer::EndUIPassAndPresent() {
     BeginDrawing();
     ClearBackground(Color{6, 8, 16, 255});
 
-    if (m_crtEnabled) BeginShaderMode(m_crtShader);
-    Rectangle srcWorld = {0.0f, 0.0f, static_cast<float>(targetW), -static_cast<float>(targetH)};
-    DrawTexturePro((m_highRes3DMode ? m_composite3DRT : m_compositeRT).texture, srcWorld, dstScreen, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
-    if (m_crtEnabled) EndShaderMode();
+    if (m_nativeOverlay != nullptr && m_nativeOverlay->id != 0) {
+        Rectangle srcOverlay = {0.0f, 0.0f, static_cast<float>(m_nativeOverlay->width), static_cast<float>(m_nativeOverlay->height)};
+        DrawTexturePro(*m_nativeOverlay, srcOverlay, dstScreen, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+    } else {
+        if (m_crtEnabled) BeginShaderMode(m_crtShader);
+        Rectangle srcWorld = {0.0f, 0.0f, static_cast<float>(targetW), -static_cast<float>(targetH)};
+        DrawTexturePro((m_highRes3DMode ? m_composite3DRT : m_compositeRT).texture, srcWorld, dstScreen, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+        if (m_crtEnabled) EndShaderMode();
+    }
 
     Rectangle srcUI = {0.0f, 0.0f, static_cast<float>(UI_W), -static_cast<float>(UI_H)};
     DrawTexturePro(m_uiRT.texture, srcUI, dstScreen, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
