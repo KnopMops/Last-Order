@@ -884,7 +884,7 @@ void PlaySession::Update(float dt, bool inputActive) {
                 StopTvVideo();
             } else {
                 float prog = m_tvTimer / m_tvDuration;
-                m_tvFrame = std::clamp((int)(prog * 5.0f) + 1, 1, 5);
+                m_tvFrame = std::clamp((int)(prog * 12.0f) + 1, 1, 12);
                 m_tvGlitch += dt;
                 std::string frameTex = "tape" + std::to_string(m_tvTape) + "_frame" + std::to_string(m_tvFrame);
                 for (auto& up : m_scene.GetGameObjects()) {
@@ -903,7 +903,6 @@ void PlaySession::Update(float dt, bool inputActive) {
         }
     }
 
-    // затухание
     if (m_fade != m_fadeTarget) {
         float step = m_fadeSpeed * dt;
         if (std::fabs(m_fadeTarget - m_fade) <= step) m_fade = m_fadeTarget;
@@ -2184,7 +2183,7 @@ void PlaySession::RenderHUD(int w, int h) {
     }
 
     if (m_tvActive) {
-        int tw = (int)(w * 0.62f);
+        int tw = (int)(w * 0.64f);
         int th = (int)(tw * 3.0f / 4.0f);
         if (th > h * 0.72f) {
             th = (int)(h * 0.72f);
@@ -2193,11 +2192,11 @@ void PlaySession::RenderHUD(int w, int h) {
         int tx = (w - tw) / 2;
         int ty = (h - th) / 2 - 25;
 
-        DrawRectangle(0, 0, w, h, Color{0, 0, 0, 160});
-        DrawRectangleRounded(Rectangle{(float)tx - 16, (float)ty - 16, (float)tw + 32, (float)th + 48}, 0.04f, 8, Color{36, 26, 20, 255});
-        DrawRectangleRoundedLinesEx(Rectangle{(float)tx - 16, (float)ty - 16, (float)tw + 32, (float)th + 48}, 0.04f, 8, 3.0f, Color{85, 62, 48, 255});
-        DrawHudText("ГОРИЗОНТ-Ц257 // ВИДЕОМАГНИТОФОН", tx + 8, ty + th + 10, fs * 0.75f, Color{195, 165, 110, 220}, false);
-        DrawCircle(tx + tw - 20, ty + th + 16, 5.0f, Color{255, 40, 20, 255});
+        DrawRectangle(0, 0, w, h, Color{0, 0, 0, 180});
+        DrawRectangleRounded(Rectangle{(float)tx - 20, (float)ty - 20, (float)tw + 40, (float)th + 56}, 0.04f, 8, Color{32, 24, 18, 255});
+        DrawRectangleRoundedLinesEx(Rectangle{(float)tx - 20, (float)ty - 20, (float)tw + 40, (float)th + 56}, 0.04f, 8, 3.5f, Color{85, 62, 48, 255});
+        DrawHudText("ГОРИЗОНТ-Ц257 // ВИДЕОМАГНИТОФОН ЭЛЕКТРОНИКА ВМ-12", tx + 8, ty + th + 12, fs * 0.70f, Color{195, 165, 110, 220}, false);
+        DrawCircle(tx + tw - 16, ty + th + 20, 5.0f, Color{255, 40, 20, 255});
 
         std::string frameTexName = "tape" + std::to_string(m_tvTape) + "_frame" + std::to_string(m_tvFrame);
         Texture2D ft = render::TextureManager::Instance().GetTexture(frameTexName);
@@ -2208,19 +2207,61 @@ void PlaySession::RenderHUD(int w, int h) {
         }
 
         for (int sy = ty; sy < ty + th; sy += 3) {
-            DrawRectangle(tx, sy, tw, 1, Color{0, 0, 0, 65});
+            DrawRectangle(tx, sy, tw, 1, Color{0, 0, 0, 60});
         }
 
         float barPhase = std::fmod(m_tvTimer * 0.35f, 1.0f);
         int by = ty + (int)(barPhase * th);
-        DrawRectangle(tx, by, tw, 12, Color{220, 230, 255, 40});
+        DrawRectangle(tx, by, tw, 14, Color{220, 230, 255, 35});
 
-        DrawRectangleLinesEx(Rectangle{(float)tx, (float)ty, (float)tw, (float)th}, 4, Color{10, 14, 18, 200});
+        DrawRectangleLinesEx(Rectangle{(float)tx, (float)ty, (float)tw, (float)th}, 4, Color{10, 14, 18, 220});
+
+        bool blink = ((int)(m_tvTimer * 2.2f) % 2) == 0;
+        if (blink) {
+            DrawCircle(tx + 24, ty + 24, 6.0f, Color{255, 30, 30, 255});
+        }
+        DrawHudText(blink ? "REC" : "   ", tx + 36, ty + 16, fs * 0.85f, Color{255, 60, 60, 255}, false);
+        DrawHudText("PLAY", tx + 100, ty + 16, fs * 0.85f, Color{80, 240, 120, 255}, false);
+        DrawHudText("CH-03 // АВТО-ТРЕКИНГ", tx + tw - 240, ty + 16, fs * 0.70f, Color{120, 210, 255, 230}, false);
+
+        int totalFrames = (int)(m_tvTimer * 24.0f);
+        int subSec = (int)m_tvTimer;
+        int subFrame = totalFrames % 24;
+        char tcBuf[64];
+        std::snprintf(tcBuf, sizeof(tcBuf), "SP  -00:%02d:%02d", subSec, subFrame);
+        DrawHudText(tcBuf, tx + 24, ty + th - 36, fs * 0.85f, Color{240, 240, 220, 240}, false);
+
+        const char* tapeTitle = (m_tvTape == 1) ? "КАССЕТА #1: У ДУШЕВОЙ (1986)" :
+                                (m_tvTape == 2) ? "КАССЕТА #2: БАНКЕТНЫЙ ЗАЛ (1986)" :
+                                                  "КАССЕТА #3: ТУННЕЛЬ 86 (1986)";
+        DrawHudText(tapeTitle, tx + tw * 0.5f, ty + 18, fs * 0.75f, Color{255, 220, 130, 220}, true);
+
+        const char* subtitle = "";
+        if (m_tvTape == 1) {
+            if (m_tvFrame <= 3) subtitle = "Внешняя камера мотеля... Дождь над шоссе...";
+            else if (m_tvFrame <= 6) subtitle = "Отражение в зеркале... Почему его нет?!";
+            else if (m_tvFrame <= 9) subtitle = "Оно поднимается из зеркальной глади!";
+            else subtitle = "ОНО В ОКНЕ! ОНО ПРИШЛО ЗА МНОЙ!";
+        } else if (m_tvTape == 2) {
+            if (m_tvFrame <= 3) subtitle = "Спуск в банкетный подвал отеля... Запах гари...";
+            else if (m_tvFrame <= 6) subtitle = "Стол накрыт на 11 персон... Черные свечи...";
+            else if (m_tvFrame <= 9) subtitle = "Фигура во главе стола... Она поворачивает голову!";
+            else subtitle = "ОНО БЕЖИТ СЮДА! КАМЕРА РАЗБИТА!";
+        } else {
+            if (m_tvFrame <= 3) subtitle = "Стрелочный пост 86. Входной семафор переключен.";
+            else if (m_tvFrame <= 6) subtitle = "Ввод аварийного кода доступа: 1 - 1 - 8 - 6";
+            else if (m_tvFrame <= 9) subtitle = "Створки гермоворот Туннеля 86 открываются...";
+            else subtitle = "ОБЪЕКТ НА ПУТЯХ! ТРЕВОГА! ЗАКРЫТЬ ГЕРМОВОРОТА!";
+        }
+        if (subtitle[0] != '\0') {
+            DrawRectangle(tx + 20, ty + th - 62, tw - 40, 24, Color{0, 0, 0, 170});
+            DrawHudText(subtitle, tx + tw * 0.5f, ty + th - 60, fs * 0.75f, Color{255, 235, 170, 255}, true);
+        }
+
         DrawHudText("[ПРОБЕЛ / ESC] — Пропустить видео", w * 0.5f, ty + th + 54, fs * 0.8f, Color{220, 210, 180, 220}, true);
     }
 
     if (m_end == EndState::Playing && !m_cutCam && !m_tvActive) {
-        // прицел
         DrawCircle((int)cx, (int)cy, m_focusObj ? 3.5f : 2.0f, Color{255, 255, 255, (unsigned char)(m_focusObj ? 230 : 120)});
         if (!m_prompt.empty()) {
             DrawHudText(m_prompt, cx, cy + fs * 1.4f, fs, Color{245, 230, 190, 255}, true);
@@ -2232,7 +2273,6 @@ void PlaySession::RenderHUD(int w, int h) {
         }
     }
 
-    // уведомления
     float ny = h * 0.05f;
     for (const auto& t : m_toasts) {
         float a = Clamp01(std::min(t.t / 0.2f, (t.dur - t.t) / 0.5f));

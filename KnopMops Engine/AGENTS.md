@@ -1,28 +1,24 @@
-# Руководство для ИИ-агентов: KnopMops Engine 1.0
+# Руководство для ИИ-агентов (AI Developer Guide): KnopMops Engine
 
-Ты помогаешь делать главы для игры **Last Order** в редакторе KnopMops Engine. Главу составляют:
-уровни (геометрия `.map` + объекты `.kmscene`), Lua-скрипты и `chapter.json`. Движок — C++/raylib;
-**игровую логику главы пиши на Lua**, а не на C++. C++ правь только при расширении самого движка.
+> Этот документ предназначен для любых языковых моделей (LLM / ИИ-агентов) и разработчиков, работающих над кодовой базой **KnopMops Engine** внутри репозитория **Last Order**.  
+> Движок предназначен для визуальной разработки и программирования 4-й главы («Глава 4: Подземный комплекс "Заслон"») и последующих глав.
 
-## Что где лежит
-* Проект главы: `KnopMops Engine/projects/<id>/` (см. README). Пример: `projects/bunker_demo`.
-* Рантайм (общий для редактора и игры): `KnopMops Engine/src/{scene,map,runtime}`; редактор: `src/ui`, `src/render`, `src/scripting`.
-* Предметы — `chapter.json -> items`, id вида `item_crowbar`. Звуки игры: `assets/audio/sfx/*.wav` (путь `audio/sfx/имя.wav`).
-* Текстуры: `KnopMops Engine/assets/textures/*.png` (имя без расширения, напр. `motel_concrete`).
+---
 
-## Модель сцены
-Объект (`GameObject`): имя, тег, `active`, Transform (position / rotation.y / scale), `props` и компоненты:
-Mesh Renderer (shape Auto/None/Cube/Sphere/Cylinder), Player, Camera, Light, Box Collider (size в метрах, `isTrigger`),
-Search Slot, Hiding Spot, Door, AI Monster, Item Pickup, Script. Position = центр объекта; у Player/Monster — точка на полу.
-Yaw 0 смотрит в +Z, 90 — в +X. Дверь: ширина = scale.x, шарнир на -X краю; дверь в стене вдоль Z: rotation.y = 90.
-Коллайдеры осевые (AABB). На уровне обязателен объект с компонентом Player и хотя бы одна лампа (или Ambient > 0).
+## 1. Ментальная модель архитектуры
 
-## Lua API
-Скрипт — файл `scripts/*.lua`, назначается объекту (Script -> файл). Параметры в Инспекторе:
-`exports = { code = "1234", speed = 2.5 }` -> `self.params.code`.
+KnopMops Engine построен по модульному принципу в стиле Unity:
 
-Хуки: `on_start(self)`, `on_update(self,dt)`, `on_interact(self)` (нужен Script -> Interactable), `on_locked`, `on_unlocked`,
-`on_search(self,item)`, `on_item_picked`, `on_door_opened/closed`, `on_hide/on_unhide`, `on_trigger_enter/exit(self,player)` (Collider -> Is Trigger).
+```
+[Scene (Игровые объекты & Компоненты)] <──> [.kmscene JSON / Assets]
+[MapDocument (3D-браши мира)]          <──> [.map Quake/Valve 220]
+         │
+         ├──► [ViewportRenderer (3D Raylib)] ──► Scene View & Game View
+         ├──► [CodeEditor (C++ / Scripting)]  ──► Редактор скриптов логики
+         ├──► [Chapter4Director (Сюжет/ИИ)]   ──► 1-Click экспорт главы в Last Order
+         │
+         └───────────────────────────────────► [EditorUI (Dear ImGui Docking)] ──► Плиточный UI Unity
+```
 
 Объект (`self`, `game.find(имя)`, `game.find_all(тег)`): поля `name tag active x y z yaw`; методы
 `get_position() set_position(x,y,z) set_rotation(deg) set_active(b) destroy() distance_to_player() distance_to(o)
@@ -37,32 +33,85 @@ load_level(имя[,spawn]) level() win(заголовок,текст) lose(те�
 cutscene_camera(px,py,pz,lx,ly,lz) cutscene_camera_end() play_tv(кассета[,сек]) stop_tv() is_tv_playing() ask_code(подсказка,код,function(ok,введено) end)
 after(сек,fn) every(сек,fn) cancel(id) start(fn) wait(сек) time() distance(...) key_pressed('E') key_down('SHIFT') on(событие,fn)`.
 
-События для `game.on`: `level_loaded item_added item_removed item_used player_caught monster_mode noise trigger_enter
-slot_searched player_hidden player_unhidden var_changed chapter_won`.
-`game.wait` работает только внутри `game.start(function() ... end)` (корутина — катсцены и последовательности).
-Ошибка скрипта пишется в Console (файл:строка) и отключает этот скрипт до перезапуска Play.
+## 2. Системы координат и преобразования
 
-## Как создать главу
-1. File -> New Chapter Project (или копия `bunker_demo`). Заполни Chapter -> Settings / Items.
-2. Геометрия: Map Tools -> Generate Room, либо `GameObject -> 3D Object -> Wall/Floor Brush` + Size в Inspector (проёмы — отдельными стенами). Сетка 0.5 м.
-3. Объекты: Player, лампы, ящики (Search Slot), двери (Door + ключ), шкафы (Hiding Spot), предметы, триггеры, маньяк (waypoints в Inspector).
-4. Логика: Script Editor -> New Script (шаблоны: интерактив, триггер, маньяк, катсцена, кодовый замок); общие события — `scripts/main.lua`.
-5. Проверка: Play (Ctrl+P); Chapter -> «Проверить главу» ищет ошибки Lua, неописанные предметы и **софтлоки**.
-6. Экспорт: Chapter -> Export to Game; запуск `Last Order.exe --chapter <id>`.
-Автотест примера: `"KnopMops Engine.exe" --selftest` -> «ВСЕ ТЕСТЫ ПРОЙДЕНЫ». Добавляя фичи рантайма — расширяй `EditorUI::RunSelfTest`.
+1. **Quake / Valve 220 Coordinates (`.map`)**:
+   - 32 юнита = 1 метр (`QUAKE_UNITS_PER_METER = 32.0f`).
+   - $X$ — вправо, $Y$ — вперёд, $Z$ — вверх.
+2. **World / Viewport Coordinates (OpenGL / Raylib)**:
+   - 1 юнит = 1 метр.
+   - $X$ — вправо, $Y$ — вверх, $Z$ — на зрителя.
 
-## Правила правок движка
-* Новая функция скрипта: структура `LuaApi` в `runtime/ScriptHost.cpp` + `RegisterApi` + `kApiHelp` (`scripting/CodeEditor.cpp`) + этот файл.
-* Новое поле компонента: `scene/Scene.h` + `ObjectToJson/ObjectFromJson` + Инспектор (`EditorUI::RenderObjectInspector`) + `PlaySession`.
-* Рантайм не должен зависеть от ImGui — он линкуется в игру. В игре правки только через `src/game/custom/CustomChapter.*`.
-* Браши: нормаль (p2-p1)x(p3-p1) каждой грани обязана смотреть НАРУЖУ, иначе у браша нет полигонов.
-* Не запускай `KnopMops Engine.exe` во время сборки (файл занят).
+### Функции конвертации (`src/core/Math3D.h`):
 
-## Версия 1.0: добавлено
-* **Узел** — любой GameObject (точка со свойствами `props`). **Коллайдер**: shape 0 Box / 1 Sphere / 2 Capsule (`size`, `radius`, `height`, `offset`, `trigger`).
-* **Rigidbody** (`rigidbody`: mass, gravity, kinematic, drag, bounce, friction) — симуляция в `PlaySession::UpdatePhysics`. Lua: `add_force set_velocity get_velocity is_grounded`, `game.raycast`.
-* **PlayerController** (компонент `player`): speeds, radius, height, jump, gravity, sens.
-* Редактор: окна «Файлы» и «Менеджер сцен», режим «Освещение (как в игре)», перетаскивание объектов мышью, «Вся карта» (Home). Интерфейс на русском.
-* Шаблонов нет: новый проект/скрипт/сцена создаются пустыми. Проект для игры: `projects/last_order`. Подробности для пользователя: `РУКОВОДСТВО.md`.
-* Формат .kmscene (объект): id, parent, name, tag, active, props, transform{pos,rot,scale}, mesh{shape,texture,tint,emissive}, и по необходимости
-  camera, player, light, collider, rigidbody, searchSlot, hidingSpot, door, aiSpawn, itemPickup, script. Пример: любой файл в `projects/bunker_demo/levels/`.
+```cpp
+// Quake -> World (метры)
+Vector3 world = knopmops::core::QuakeToWorld(qx, qy, qz);
+
+// World (метры) -> Quake
+Vector3 quake = knopmops::core::WorldToQuake(worldPos);
+```
+
+---
+
+## 3. Плиточная компоновка окон (Unity Docking Tiles)
+
+Интерфейс спроектирован по плиточному принципу Unity. Каждое окно можно:
+
+- Перетаскивать за заголовок вкладки в любую область (влево, вправо, вверх, вниз, по центру).
+- Группировать во вкладки (табы), например `[Scene View]` рядом с `[Game View]` и `[Code Editor]`.
+- Разделять экран на плитки (Split) по горизонтали или вертикали.
+
+### Состав плиток:
+
+1. **Hierarchy**: дерево объектов сцены (`Scene`) и брашей карты (`World Brushes`).
+2. **Scene View**: 3D-редактор уровня со свободной камерой (Flycam `[WASD] + RMB`, Orbit `[Alt] + LMB`, Focus `[F]`) и 3D-манипулятором перемещения (`Gizmo`).
+3. **Game View**: вид из камеры игрока (Player POV) с предпросмотром HUD и режимом тестирования `[ ▶ Play In Editor ]`.
+4. **Code & Script Editor**: встроенный редактор C++ скриптов с шаблонами `PlayerController`, `ProwlerMonsterAI`, `KeypadLock`, `CarEscapeEnding`.
+5. **Inspector**: свойства выделенного объекта, редактирование компонентов, кнопка `Add Component...`.
+6. **Project & Console (вкладки внизу)**:
+   - `Textures & Assets`: браузер текстур (клик накладывает текстуру на выбранный браш).
+   - `Map Builder Tools`: генератор комнат за 1 клик.
+   - `Chapter 4 Director`: настройка сюжета, ИИ и кнопка экспорта Главы 4.
+   - `Console`: цветной лог ошибок, предупреждений и событий.
+
+---
+
+## 4. Как написать новую главу (Инструкция для ИИ и разработчиков)
+
+### Шаг 1: Построение геометрии комнат
+
+Используйте процедурные генераторы или визуальное создание:
+
+- Вкладка `Map Builder Tools` -> Задайте ширину, длину, высоту и нажмите **«Generate Room Brushes»**.
+- Или используйте меню `GameObject -> 3D Object -> Cube Brush` и перемещайте стены с привязкой к сетке (`Snap: 0.5m` или `1.0m`).
+
+### Шаг 2: Расстановка интерактивных хоррор-пропов
+
+Через меню `GameObject -> Horror Props`:
+
+- **Search Slot**: ящик для лута (монтировка, ключи, предохранители).
+- **Hiding Spot**: платяной шкаф для укрытия от маньяка.
+- **Interactive Door**: запертая дверь, требующая ключ.
+
+### Шаг 3: Настройка ИИ и спавна врагов
+
+Через меню `GameObject -> AI -> Prowler Monster AI Spawn`:
+
+- Задайте радиус слуха (`hearingRadius = 9.0m`), конус зрения (`visionAngle = 110°`) и точки патрулирования.
+
+### Шаг 4: Программирование скриптов логики
+
+В окне **Code & Script Editor**:
+
+- Выберите нужный шаблон (например, `KeypadLock.cpp` или `CarEscapeEnding.cpp`) или напишите свой скрипт.
+- Нажмите `Save Script [Ctrl+S]`.
+- В окне **Inspector** выделите нужный объект и в выпадающем списке `Add Component...` выберите `Script`.
+
+### Шаг 5: Экспорт и запуск
+
+Во вкладке **Chapter 4 Director**:
+
+- Настройте дни выживания (по умолчанию 5 дней), концовки (побег на машине, подземный тоннель, вызов по рации).
+- Нажмите кнопку **«Экспортировать Главу 4 в игру Last Order»**.
+- Движок автоматически создаст карту `assets/data/maps/ch4_level.map`, катсцены и файлы предметов в `assets/data/chapter4/`.

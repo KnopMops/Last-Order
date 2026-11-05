@@ -53,3 +53,4 @@ function on_interact(self)
     self:set_prop("busy", false)
   end)
 end
+
