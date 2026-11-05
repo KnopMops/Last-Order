@@ -12,4 +12,8 @@ CHAPTER_2_*.md
 scratch/
 drive_*.png
 tour_*.png
+imgui.ini
+premake*
+KnopMops Engine/build/
+KnopMops Engine/bin/
 
