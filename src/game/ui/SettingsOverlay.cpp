@@ -220,7 +220,7 @@ void SettingsOverlay::Render(engine::core::Engine& eng) const {
     bool selGfx = (m_selectedRow == 7);
     DrawRectangle(static_cast<int>(rx), 472, 600, 40, selGfx ? Color{70, 60, 110, 255} : Color{40, 34, 66, 230});
     DrawRectangleLinesEx(Rectangle{rx, 472, 600, 40}, 1.5f, selGfx ? Color{160, 150, 240, 255} : Color{110, 100, 180, 200});
-    engine::graphics::TextLayout::DrawCentered(font, "Графика Главы 3  >", 640.0f, 482.0f, 19.0f, selGfx ? Color{230, 225, 255, 255} : Color{190, 185, 230, 230});
+    engine::graphics::TextLayout::DrawCentered(font, "Графика: DirectX 11/12, трассировка, тени, FOV (Главы 3 и 3.5)  >", 640.0f, 482.0f, 19.0f, selGfx ? Color{230, 225, 255, 255} : Color{190, 185, 230, 230});
 
     bool selMenu = (m_selectedRow == 8);
     DrawRectangle(static_cast<int>(rx), 518, 600, 40, selMenu ? Color{120, 46, 46, 255} : Color{60, 24, 24, 220});

@@ -1,0 +1,64 @@
+{
+  "format": 2,
+  "objects": [
+    {
+      "active": true,
+      "collider": {
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ],
+        "trigger": false
+      },
+      "id": 1,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_cardboard",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Crate",
+      "parent": 0,
+      "searchSlot": {
+        "consumeTool": false,
+        "duration": 1.2000000476837158,
+        "item": "",
+        "locked": false,
+        "name": "Ящик",
+        "noise": 0.0,
+        "slotId": "Crate",
+        "tool": ""
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          0.0,
+          0.3499999940395355,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ]
+      }
+    }
+  ]
+}

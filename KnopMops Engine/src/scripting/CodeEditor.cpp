@@ -1,217 +1,265 @@
 #include "scripting/CodeEditor.h"
-#include "imgui.h"
 #include "core/Log.h"
+#include "imgui.h"
+#include "runtime/ScriptHost.h"
+#include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
-#include <algorithm>
 
 namespace knopmops::scripting {
 
-CodeEditor::CodeEditor() {
-    SetupDefaultTemplates();
+namespace fs = std::filesystem;
+
+namespace {
+
+struct EditCtx {
+    std::string* text;
+    int* line;
+    int* col;
+    int* jumpLine;
+};
+
+int EditCallback(ImGuiInputTextCallbackData* data) {
+    EditCtx* ctx = static_cast<EditCtx*>(data->UserData);
+    if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
+        ctx->text->resize(static_cast<size_t>(data->BufTextLen));
+        data->Buf = ctx->text->data();
+    } else if (data->EventFlag == ImGuiInputTextFlags_CallbackAlways) {
+        if (*ctx->jumpLine > 0) {
+            int ln = 1, pos = 0;
+            while (pos < data->BufTextLen && ln < *ctx->jumpLine) {
+                if (data->Buf[pos] == '\n') ++ln;
+                ++pos;
+            }
+            data->CursorPos = pos;
+            data->SelectionStart = pos;
+            int end = pos;
+            while (end < data->BufTextLen && data->Buf[end] != '\n') ++end;
+            data->SelectionEnd = end;
+            *ctx->jumpLine = -1;
+        }
+        int ln = 1, col = 1;
+        for (int i = 0; i < data->CursorPos && i < data->BufTextLen; ++i) {
+            if (data->Buf[i] == '\n') { ++ln; col = 1; } else ++col;
+        }
+        *ctx->line = ln;
+        *ctx->col = col;
+    }
+    return 0;
 }
 
-CodeEditor::~CodeEditor() = default;
+const char* kApiHelp =
+    "ОБЪЕКТ / УЗЕЛ (self и game.find(...)):\n"
+    "  self.name / self.tag / self.active / self.x .y .z / self.yaw      поля\n"
+    "  self:get_position() -> x,y,z      self:set_position(x,y,z)\n"
+    "  self:set_active(b)  self:destroy()  self:distance_to_player()  self:distance_to(obj)\n"
+    "  self:get_prop(k[,def]) / self:set_prop(k,v)     свойства узла (любые, задаются в Инспекторе)\n"
+    "  self:lock() unlock() is_locked() open() close() toggle() is_open()   двери и ящики\n"
+    "  self:set_item(id) / get_item()   содержимое ящика\n"
+    "  self:set_light(b) set_color(r,g,b) set_visible(b) set_interactable(b[,текст])\n"
+    "  self:set_texture(name) set_emissive(b)\n"
+    "  ФИЗИКА (Rigidbody): self:add_force(x,y,z) set_velocity(x,y,z) get_velocity() is_grounded()\n"
+    "  МАНЬЯК: self:set_mode('patrol'|'chase'|'search'|'investigate'|'idle') get_mode()\n"
+    "          self:freeze(b) set_speed(walk,chase) investigate(x,y,z)\n"
+    "  self.params.<имя>   значения из exports (настраиваются в Инспекторе)\n\n"
+    "ХУКИ (объявляйте функции в скрипте):\n"
+    "  on_start(self)  on_update(self,dt)  on_interact(self)  on_locked(self)  on_unlocked(self)\n"
+    "  on_search(self,item)  on_item_picked(self,item)  on_door_opened(self)  on_door_closed(self)\n"
+    "  on_hide(self)  on_unhide(self)  on_trigger_enter(self,player)  on_trigger_exit(self,player)\n\n"
+    "game.*:\n"
+    "  notify(текст[,сек])  subtitle(текст[,сек])  log(...)\n"
+    "  has_item(id) give_item(id[,silent]) take_item(id) items()\n"
+    "  set(k,v) get(k[,def]) set_flag(k,b) get_flag(k)       переменные главы\n"
+    "  find(имя) find_all(тег) spawn(префаб,x,y,z) player() player_pos()\n"
+    "  raycast(ox,oy,oz, dx,dy,dz[,дальность]) -> попал,дист,x,y,z,имя_объекта\n"
+    "  teleport_player(x,y,z[,yaw]) lock_player(b) enable_flashlight(b) player_hidden()\n"
+    "  make_noise(x,y,z,радиус) alert_monsters(x,y,z)\n"
+    "  load_level(имя[,spawn]) level() win(заголовок,текст) lose(текст)\n"
+    "  fade(alpha,сек) shake(сила,сек) cutscene_camera(px,py,pz, lx,ly,lz) cutscene_camera_end()\n"
+    "  play_tv(кассета[,сек]) stop_tv() is_tv_playing()\n"
+    "  ask_code(подсказка, правильный_код, function(ok,введено) ... end)\n"
+    "  play_sound(путь[,громк]) play_ambient(путь[,громк]) stop_ambient()\n"
+    "  after(сек,fn) every(сек,fn) cancel(id) start(fn) wait(сек) time()\n"
+    "  key_pressed('E') key_down('SHIFT') distance(x1,y1,z1,x2,y2,z2)\n"
+    "  on('событие', fn)  события: level_loaded item_added item_removed item_used player_caught\n"
+    "                     monster_mode noise trigger_enter slot_searched player_hidden var_changed chapter_won\n";
 
-void CodeEditor::Init() {
-    if (!m_templates.empty()) {
-        LoadTemplate(0);
+}
+
+void CodeEditor::SetProject(runtime::ChapterProject* project) {
+    if (m_project != project) {
+        m_project = project;
+        m_file.clear();
+        m_path.clear();
+        m_text.clear();
+        m_modified = false;
+        m_errors.clear();
+        m_status.clear();
     }
 }
 
-void CodeEditor::SetSourceText(const std::string& text) {
-    m_sourceText = text;
-    m_textBuffer.assign(text.begin(), text.end());
-    m_textBuffer.resize(std::max(m_textBuffer.size() + 1024, size_t(65536)), '\0');
-    m_isModified = false;
+void CodeEditor::OpenFile(const std::string& scriptFile) {
+    if (!m_project || scriptFile.empty()) return;
+    OpenPath(m_project->ScriptPath(scriptFile));
 }
 
-void CodeEditor::LoadTemplate(size_t index) {
-    if (index < m_templates.size()) {
-        m_currentFile = m_templates[index].filename;
-        SetSourceText(m_templates[index].code);
-        core::Log::Info("Loaded script template: " + m_templates[index].name);
-    }
-}
-
-void CodeEditor::OpenFile(const std::string& path) {
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        core::Log::Error("Could not open script file: " + path);
+void CodeEditor::OpenPath(const std::string& fullPath) {
+    if (fullPath.empty()) return;
+    if (m_modified && !m_path.empty()) SaveFile();
+    std::ifstream f(fullPath, std::ios::binary);
+    if (!f.is_open()) {
+        core::Log::Error("Файл не найден: " + fullPath);
         return;
     }
     std::stringstream ss;
-    ss << file.rdbuf();
-    m_currentFile = path;
-    SetSourceText(ss.str());
-    core::Log::Success("Opened script: " + path);
+    ss << f.rdbuf();
+    m_text = ss.str();
+    m_path = fullPath;
+    m_file = fs::path(fullPath).filename().string();
+    m_modified = false;
+    m_requestFocus = true;
+    RunCheck();
 }
 
-bool CodeEditor::SaveFile(const std::string& path) {
-    std::string target = path.empty() ? m_currentFile : path;
-    if (target.empty()) target = "assets/scripts/CustomScript.cpp";
-
-    m_sourceText = m_textBuffer.data();
-    std::ofstream file(target);
-    if (!file.is_open()) {
-        core::Log::Error("Failed to save script to: " + target);
+bool CodeEditor::SaveFile() {
+    if (m_path.empty()) return false;
+    std::ofstream f(m_path, std::ios::binary);
+    if (!f.is_open()) {
+        core::Log::Error("Не удалось сохранить: " + m_path);
         return false;
     }
-    file << m_sourceText;
-    m_currentFile = target;
-    m_isModified = false;
-    core::Log::Success("Saved script file: " + target);
+    f << m_text;
+    m_modified = false;
+    RunCheck();
     return true;
 }
 
-void CodeEditor::SetupDefaultTemplates() {
-    m_templates.push_back({
-        "Player Controller (FPS + Stamina + Flashlight)",
-        "PlayerController.cpp",
-        "#include \"game/PlayerController.h\"\n\n"
-        "namespace game::chapter4 {\n\n"
-        "void PlayerController::OnStart() {\n"
-        "    m_stamina = 100.0f;\n"
-        "    m_hasFlashlight = true;\n"
-        "    m_flashlightBattery = 1.0f;\n"
-        "}\n\n"
-        "void PlayerController::OnUpdate(float dt) {\n"
-        "    bool sprint = IsKeyDown(KEY_LEFT_SHIFT) && m_stamina > 0.0f;\n"
-        "    float speed = sprint ? 5.2f : 2.8f;\n\n"
-        "    if (sprint) m_stamina = std::max(0.0f, m_stamina - dt * 15.0f);\n"
-        "    else m_stamina = std::min(100.0f, m_stamina + dt * 8.0f);\n\n"
-        "    if (IsKeyPressed(KEY_F)) {\n"
-        "        m_flashlightOn = !m_flashlightOn;\n"
-        "        PlaySfx(\"audio/sfx/sfx_flashlight_click.wav\");\n"
-        "    }\n"
-        "}\n\n"
-        "}\n"
-    });
+bool CodeEditor::CreateScript(const std::string& fileName) {
+    if (!m_project) return false;
+    std::string name = fileName;
+    if (name.size() < 4 || name.substr(name.size() - 4) != ".lua") name += ".lua";
+    if (fs::exists(m_project->ScriptPath(name))) {
+        core::Log::Warn("Скрипт уже существует: " + name);
+        OpenFile(name);
+        return false;
+    }
+    fs::create_directories(m_project->ScriptsDir());
+    std::ofstream f(m_project->ScriptPath(name), std::ios::binary);
+    f << "-- " << name << "\n";
+    f.close();
+    core::Log::Success("Создан скрипт: " + name);
+    OpenFile(name);
+    return true;
+}
 
-    m_templates.push_back({
-        "Prowler Monster AI (Patrol + Investigate + Hunt)",
-        "ProwlerMonsterAI.cpp",
-        "#include \"game/ProwlerMonsterAI.h\"\n\n"
-        "namespace game::chapter4 {\n\n"
-        "void ProwlerMonsterAI::OnStart() {\n"
-        "    m_state = AIState::Patrol;\n"
-        "    m_moveSpeed = 2.4f;\n"
-        "    m_hearingRadius = 9.0f;\n"
-        "}\n\n"
-        "void ProwlerMonsterAI::OnUpdate(float dt) {\n"
-        "    switch (m_state) {\n"
-        "    case AIState::Patrol:\n"
-        "        MoveAlongWaypoints(dt);\n"
-        "        if (CanSeePlayer()) EnterHuntMode();\n"
-        "        break;\n"
-        "    case AIState::InvestigateSound:\n"
-        "        WalkToNoiseSource(dt);\n"
-        "        if (ReachedNoiseSource()) {\n"
-        "            SearchRoomForHidingPlayer(8.0f);\n"
-        "            SetNotification(\"Видимо, показалось...\");\n"
-        "            m_state = AIState::Patrol;\n"
-        "        }\n"
-        "        break;\n"
-        "    case AIState::Hunt:\n"
-        "        ChasePlayer(dt * 1.5f);\n"
-        "        if (PlayerInDistance(1.2f)) KillPlayer();\n"
-        "        break;\n"
-        "    }\n"
-        "}\n\n"
-        "void ProwlerMonsterAI::OnHearNoise(Vector3 soundPos, float volume) {\n"
-        "    if (m_state != AIState::Hunt) {\n"
-        "        m_noiseTarget = soundPos;\n"
-        "        m_state = AIState::InvestigateSound;\n"
-        "        SetNotification(\"МАНЬЯК УСЛЫШАЛ ШУМ И ИДЕТ ПРОВЕРЯТЬ!\");\n"
-        "    }\n"
-        "}\n\n"
-        "}\n"
-    });
-
-    m_templates.push_back({
-        "Keypad Lock Puzzle (4-Digit PIN Code)",
-        "KeypadLock.cpp",
-        "#include \"game/KeypadLock.h\"\n\n"
-        "namespace game::chapter4 {\n\n"
-        "void KeypadLock::OnStart() {\n"
-        "    m_correctPin = \"4815\";\n"
-        "    m_currentInput.clear();\n"
-        "    m_isUnlocked = false;\n"
-        "}\n\n"
-        "void KeypadLock::PressDigit(char digit) {\n"
-        "    if (m_isUnlocked || m_currentInput.size() >= 4) return;\n"
-        "    m_currentInput.push_back(digit);\n"
-        "    PlaySfx(\"audio/sfx/sfx_ch3_keypad_beep.wav\");\n\n"
-        "    if (m_currentInput.size() == 4) {\n"
-        "        if (m_currentInput == m_correctPin) {\n"
-        "            m_isUnlocked = true;\n"
-        "            PlaySfx(\"audio/sfx/sfx_door_unlocked.wav\");\n"
-        "            ShowNotification(\"Электронный замок открыт!\");\n"
-        "        } else {\n"
-        "            PlaySfx(\"audio/sfx/sfx_keypad_error.wav\");\n"
-        "            m_currentInput.clear();\n"
-        "        }\n"
-        "    }\n"
-        "}\n\n"
-        "}\n"
-    });
-
-    m_templates.push_back({
-        "Car Escape Ending (Repair & Drive)",
-        "CarEscapeEnding.cpp",
-        "#include \"game/CarEscapeEnding.h\"\n\n"
-        "namespace game::chapter4 {\n\n"
-        "bool CarEscapeEnding::TryStartCar(const std::vector<std::string>& inventory) {\n"
-        "    bool hasBattery = HasItem(inventory, \"item_car_battery\");\n"
-        "    bool hasSparkplug = HasItem(inventory, \"item_car_sparkplug\");\n"
-        "    bool hasGas = HasItem(inventory, \"item_gas_canister\");\n"
-        "    bool hasKeys = HasItem(inventory, \"item_car_key\");\n\n"
-        "    if (hasBattery && hasSparkplug && hasGas && hasKeys) {\n"
-        "        PlayCutscene(\"ending_car_escape\");\n"
-        "        return true;\n"
-        "    }\n"
-        "    ShowNotification(\"Автомобиль не заводится: проверьте детали мотора.\");\n"
-        "    return false;\n"
-        "}\n\n"
-        "}\n"
-    });
+void CodeEditor::RunCheck() {
+    m_errors.clear();
+    m_status.clear();
+    if (m_path.empty()) return;
+    if (fs::path(m_path).extension() != ".lua") return;
+    std::string err;
+    if (runtime::ScriptHost::CheckSyntaxText(m_text, "scripts/" + m_file, err)) {
+        m_status = "Синтаксис в порядке";
+    } else {
+        std::stringstream ss(err);
+        std::string line;
+        while (std::getline(ss, line)) m_errors.push_back(line);
+        m_status = "Ошибок: " + std::to_string(m_errors.size());
+    }
 }
 
 void CodeEditor::Render() {
-    ImGui::Begin("Code & Script Editor");
+    ImGui::Begin("Редактор скриптов");
 
-    if (ImGui::Button("Save Script [Ctrl+S]")) {
-        SaveFile();
+    if (!m_project || !m_project->IsLoaded()) {
+        ImGui::TextDisabled("Откройте проект (Файл -> Открыть проект).");
+        ImGui::End();
+        return;
     }
+
+    if (m_requestFocus) {
+        ImGui::SetWindowFocus();
+        m_requestFocus = false;
+    }
+
+    bool focused = ImGui::IsWindowFocused(ImGuiFocusedFlags_RootAndChildWindows);
+    if (focused && ImGui::GetIO().KeyCtrl && ImGui::IsKeyPressed(ImGuiKey_S, false)) SaveFile();
+
+    if (ImGui::Button("Сохранить (Ctrl+S)")) SaveFile();
+    ImGui::SameLine();
+    if (ImGui::Button("Проверить")) RunCheck();
     ImGui::SameLine();
 
-    ImGui::SetNextItemWidth(260.0f);
-    if (ImGui::BeginCombo("##TemplatesCombo", ("Template: " + m_currentFile).c_str())) {
-        for (size_t i = 0; i < m_templates.size(); ++i) {
-            bool selected = (m_currentFile == m_templates[i].filename);
-            if (ImGui::Selectable(m_templates[i].name.c_str(), selected)) {
-                LoadTemplate(i);
-            }
+    auto scripts = m_project->ListScripts();
+    ImGui::SetNextItemWidth(220.0f);
+    std::string preview = m_file.empty() ? "(выберите скрипт)" : m_file + (m_modified ? " *" : "");
+    if (ImGui::BeginCombo("##ScriptCombo", preview.c_str())) {
+        for (const auto& s : scripts) {
+            if (ImGui::Selectable(s.c_str(), s == m_file)) OpenFile(s);
         }
         ImGui::EndCombo();
     }
     ImGui::SameLine();
+    if (ImGui::Button("Новый скрипт...")) ImGui::OpenPopup("NewScriptPopup");
+    ImGui::SameLine();
+    ImGui::Checkbox("Справка API", &m_showApi);
 
-    ImGui::TextDisabled("File: %s", m_currentFile.c_str());
+    if (ImGui::BeginPopup("NewScriptPopup")) {
+        ImGui::InputText("Имя файла", m_newName, sizeof(m_newName));
+        if (ImGui::Button("Создать пустой скрипт")) {
+            CreateScript(m_newName);
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
 
     ImGui::Separator();
 
-    ImVec2 avail = ImGui::GetContentRegionAvail();
-    if (m_textBuffer.empty()) SetSourceText("// Write Chapter 4 C++ script code here\n");
+    float errH = m_errors.empty() ? 0.0f : std::min(110.0f, 22.0f + m_errors.size() * 18.0f);
+    float footerH = ImGui::GetTextLineHeightWithSpacing() + errH + 6.0f;
+    float apiW = m_showApi ? ImGui::GetContentRegionAvail().x * 0.42f : 0.0f;
 
-    ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
-    if (ImGui::InputTextMultiline("##ScriptSource", m_textBuffer.data(), m_textBuffer.size(),
-                                  ImVec2(-FLT_MIN, -FLT_MIN), flags)) {
-        m_isModified = true;
+    ImVec2 editSize(ImGui::GetContentRegionAvail().x - apiW - (m_showApi ? 8.0f : 0.0f), ImGui::GetContentRegionAvail().y - footerH);
+    if (m_path.empty()) {
+        ImGui::BeginChild("NoFile", editSize, true);
+        ImGui::TextDisabled("Выберите скрипт в списке, откройте .lua в окне «Файлы» или создайте новый.\nСкрипты назначаются объектам в Инспекторе -> Скрипт.");
+        ImGui::EndChild();
+    } else {
+        EditCtx ctx{&m_text, &m_cursorLine, &m_cursorCol, &m_jumpLine};
+        m_text.reserve(m_text.size() + 1);
+        ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput | ImGuiInputTextFlags_CallbackResize | ImGuiInputTextFlags_CallbackAlways;
+        if (ImGui::InputTextMultiline("##code", m_text.data(), m_text.capacity() + 1, editSize, flags, EditCallback, &ctx)) {
+            m_modified = true;
+        }
     }
+
+    if (m_showApi) {
+        ImGui::SameLine();
+        ImGui::BeginChild("ApiHelp", ImVec2(apiW, ImGui::GetContentRegionAvail().y - footerH), true);
+        ImGui::TextUnformatted(kApiHelp);
+        ImGui::EndChild();
+    }
+
+    if (!m_errors.empty()) {
+        ImGui::BeginChild("Errors", ImVec2(0, errH), true);
+        for (const auto& e : m_errors) {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.45f, 0.4f, 1.0f));
+            if (ImGui::Selectable(e.c_str())) {
+                size_t p1 = e.find(':');
+                if (p1 != std::string::npos) {
+                    int ln = std::atoi(e.c_str() + p1 + 1);
+                    if (ln > 0) m_jumpLine = ln;
+                }
+            }
+            ImGui::PopStyleColor();
+        }
+        ImGui::EndChild();
+    }
+
+    ImGui::TextDisabled("Стр %d, кол %d   |   %s%s", m_cursorLine, m_cursorCol, m_status.c_str(), m_modified ? "   |   не сохранено" : "");
 
     ImGui::End();
 }
 
 }
-

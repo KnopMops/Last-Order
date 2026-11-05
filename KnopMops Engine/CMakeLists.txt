@@ -67,10 +67,17 @@ target_link_libraries(rlimgui PUBLIC
     raylib
 )
 
-# Engine sources
-file(GLOB_RECURSE ENGINE_SOURCES
-    "src/*.cpp"
-    "src/*.h"
+# Общая библиотека (сцена, карта, Lua, PlaySession) — её же использует игра Last Order
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/kmruntime.cmake")
+
+# Editor sources
+set(ENGINE_SOURCES
+    "src/main.cpp"
+    "src/crash_handler.cpp"
+    "src/tools/Chapter35Builder.cpp"
+    "src/render/ViewportRenderer.cpp"
+    "src/scripting/CodeEditor.cpp"
+    "src/ui/EditorUI.cpp"
 )
 
 add_executable(knopmops_engine ${ENGINE_SOURCES})
@@ -83,6 +90,7 @@ target_include_directories(knopmops_engine PRIVATE
 )
 
 target_link_libraries(knopmops_engine PRIVATE
+    kmruntime
     rlimgui
     imgui
     raylib

@@ -31,12 +31,13 @@ MapBrush BrushBuilder::CreateBox(Vector3 minWorld, Vector3 maxWorld, const std::
         return f;
     };
 
-    b.faces.push_back(makeFace({x1, y1, z2}, {x2, y1, z2}, {x2, y2, z2}, 1, 0, 0, 0, -1, 0));
-    b.faces.push_back(makeFace({x1, y2, z1}, {x2, y2, z1}, {x2, y1, z1}, 1, 0, 0, 0, -1, 0));
-    b.faces.push_back(makeFace({x1, y2, z2}, {x1, y1, z2}, {x1, y1, z1}, 0, 1, 0, 0, 0, -1));
-    b.faces.push_back(makeFace({x2, y1, z2}, {x2, y2, z2}, {x2, y2, z1}, 0, 1, 0, 0, 0, -1));
-    b.faces.push_back(makeFace({x2, y2, z2}, {x1, y2, z2}, {x1, y2, z1}, 1, 0, 0, 0, 0, -1));
-    b.faces.push_back(makeFace({x1, y1, z2}, {x2, y1, z2}, {x2, y1, z1}, 1, 0, 0, 0, 0, -1));
+    // Порядок точек подобран так, чтобы нормаль (p2-p1)x(p3-p1) смотрела НАРУЖУ браша.
+    b.faces.push_back(makeFace({x1, y1, z2}, {x2, y1, z2}, {x2, y2, z2}, 1, 0, 0, 0, -1, 0)); // +Z (верх)
+    b.faces.push_back(makeFace({x1, y2, z1}, {x2, y2, z1}, {x2, y1, z1}, 1, 0, 0, 0, -1, 0)); // -Z (низ)
+    b.faces.push_back(makeFace({x1, y1, z2}, {x1, y2, z2}, {x1, y2, z1}, 0, 1, 0, 0, 0, -1)); // -X
+    b.faces.push_back(makeFace({x2, y2, z2}, {x2, y1, z2}, {x2, y1, z1}, 0, 1, 0, 0, 0, -1)); // +X
+    b.faces.push_back(makeFace({x1, y2, z2}, {x2, y2, z2}, {x2, y2, z1}, 1, 0, 0, 0, 0, -1)); // +Y
+    b.faces.push_back(makeFace({x2, y1, z2}, {x1, y1, z2}, {x1, y1, z1}, 1, 0, 0, 0, 0, -1)); // -Y
 
     b.BuildPolygons();
     return b;

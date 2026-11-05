@@ -1,0 +1,4555 @@
+{
+  "environment": {
+    "ambient": 0.12999999523162842,
+    "background": [
+      14,
+      17,
+      24,
+      255
+    ],
+    "fogEnd": 34.0
+  },
+  "format": 2,
+  "name": "razyezd",
+  "nextId": 100,
+  "objects": [
+    {
+      "active": true,
+      "camera": {
+        "far": 120.0,
+        "fov": 70.0,
+        "main": true,
+        "near": 0.05000000074505806
+      },
+      "id": 1,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Лера",
+      "parent": 0,
+      "player": {
+        "crouch": 1.2999999523162842,
+        "eye": 1.649999976158142,
+        "flashlight": true,
+        "gravity": 18.0,
+        "height": 1.7999999523162842,
+        "jump": 4.0,
+        "radius": 0.30000001192092896,
+        "sens": 0.10999999940395355,
+        "sprint": 3.4000000953674316,
+        "walk": 2.299999952316284
+      },
+      "tag": "player",
+      "transform": {
+        "pos": [
+          -30.0,
+          0.0,
+          -8.0
+        ],
+        "rot": [
+          0.0,
+          70.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 2,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Spawn_front_door",
+      "parent": 0,
+      "tag": "spawn",
+      "transform": {
+        "pos": [
+          -30.0,
+          0.0,
+          -8.0
+        ],
+        "rot": [
+          0.0,
+          70.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 3,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Spawn_car",
+      "parent": 0,
+      "tag": "spawn",
+      "transform": {
+        "pos": [
+          -26.0,
+          0.0,
+          -6.0
+        ],
+        "rot": [
+          0.0,
+          80.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 4,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Spawn_sewer",
+      "parent": 0,
+      "tag": "spawn",
+      "transform": {
+        "pos": [
+          -33.0,
+          0.0,
+          -10.0
+        ],
+        "rot": [
+          0.0,
+          60.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 5,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Spawn_radio",
+      "parent": 0,
+      "tag": "spawn",
+      "transform": {
+        "pos": [
+          -29.0,
+          0.0,
+          -7.0
+        ],
+        "rot": [
+          0.0,
+          75.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 6,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Spawn_police",
+      "parent": 0,
+      "tag": "spawn",
+      "transform": {
+        "pos": [
+          -23.0,
+          0.0,
+          -4.0
+        ],
+        "rot": [
+          0.0,
+          85.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          1.7000000476837158,
+          1.399999976158142,
+          4.199999809265137
+        ],
+        "trigger": false
+      },
+      "id": 7,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_car",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Копейка",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          -27.5,
+          0.699999988079071,
+          -5.5
+        ],
+        "rot": [
+          0.0,
+          20.0,
+          0.0
+        ],
+        "scale": [
+          1.7000000476837158,
+          1.399999976158142,
+          4.199999809265137
+        ]
+      }
+    },
+    {
+      "active": true,
+      "aiSpawn": {
+        "chase": 3.299999952316284,
+        "hearing": 8.5,
+        "type": "Prowler",
+        "visionAngle": 110.0,
+        "visionDist": 14.0,
+        "wait": 2.0,
+        "walk": 1.399999976158142,
+        "waypoints": []
+      },
+      "id": 8,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Эхо",
+      "parent": 0,
+      "script": {
+        "file": "echo.lua",
+        "interactable": false,
+        "params": {},
+        "prompt": ""
+      },
+      "tag": "echo",
+      "transform": {
+        "pos": [
+          -26.0,
+          0.0,
+          -24.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 9,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_0",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -38.0,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 10,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_0",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -37.20000076293945,
+          3.5,
+          -27.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 11,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_1",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -35.07692337036133,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 12,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_1",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -34.27692413330078,
+          3.5,
+          -26.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 13,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_2",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -32.153846740722656,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 14,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_2",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -31.35384750366211,
+          3.5,
+          -25.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 15,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_3",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -29.230770111083984,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 16,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_3",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -28.430770874023438,
+          3.5,
+          -27.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 17,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_4",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -26.30769157409668,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 18,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_4",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -25.507692337036133,
+          3.5,
+          -26.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 19,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_5",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -23.384614944458008,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 20,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_5",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -22.58461570739746,
+          3.5,
+          -25.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 21,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_6",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -20.461538314819336,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 22,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_6",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -19.66153907775879,
+          3.5,
+          -27.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 23,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_7",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -17.53845977783203,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 24,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_7",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -16.738460540771484,
+          3.5,
+          -26.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 25,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_8",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -14.61538314819336,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 26,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_8",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -13.815382957458496,
+          3.5,
+          -25.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 27,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_9",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -11.692306518554688,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 28,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_9",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -10.892306327819824,
+          3.5,
+          -27.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 29,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_10",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -8.769229888916016,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 30,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_10",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -7.969229698181152,
+          3.5,
+          -26.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 31,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_11",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -5.846153259277344,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 32,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_11",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -5.0461530685424805,
+          3.5,
+          -25.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 33,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_12",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -2.923076629638672,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 34,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_12",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          -2.1230766773223877,
+          3.5,
+          -27.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 35,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_13",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          0.0,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 36,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_13",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          0.800000011920929,
+          3.5,
+          -26.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 37,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_14",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          2.9230804443359375,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 38,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_14",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          3.7230803966522217,
+          3.5,
+          -25.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 39,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_15",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          5.846153259277344,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 40,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_15",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          6.646153450012207,
+          3.5,
+          -27.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 41,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_16",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          8.769233703613281,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 42,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_16",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          9.569233894348145,
+          3.5,
+          -26.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 43,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_17",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          11.692306518554688,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 44,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_17",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          12.49230670928955,
+          3.5,
+          -25.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 45,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_18",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          14.615386962890625,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 46,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_18",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          15.415387153625488,
+          3.5,
+          -27.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 47,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_19",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          17.53845977783203,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 48,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_19",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          18.338459014892578,
+          3.5,
+          -26.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 49,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_20",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          20.46154022216797,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 50,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_20",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          21.261539459228516,
+          3.5,
+          -25.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 51,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_21",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          23.384613037109375,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 52,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_21",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          24.184612274169922,
+          3.5,
+          -27.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 53,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_22",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          26.307693481445312,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 54,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_22",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          27.10769271850586,
+          3.5,
+          -26.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 55,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_23",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          29.23076629638672,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 56,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_23",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          30.030765533447266,
+          3.5,
+          -25.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 57,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_24",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          32.153846740722656,
+          3.5,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 58,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_24",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          32.9538459777832,
+          3.5,
+          -27.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.3499999940395355,
+        "shape": 1,
+        "size": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "trigger": false
+      },
+      "id": 59,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_25",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          35.07691955566406,
+          3.5,
+          29.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 60,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cylinder",
+        "texture": "",
+        "tint": [
+          70,
+          52,
+          40,
+          255
+        ]
+      },
+      "name": "Сосна_ю_25",
+      "parent": 0,
+      "tag": "tree",
+      "transform": {
+        "pos": [
+          35.87691879272461,
+          3.5,
+          -26.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.699999988079071,
+          7.0,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          0.1599999964237213,
+          3.200000047683716,
+          0.1599999964237213
+        ],
+        "trigger": false
+      },
+      "id": 61,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Столб_1",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          -6.0,
+          1.649999976158142,
+          11.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.1599999964237213,
+          3.200000047683716,
+          0.1599999964237213
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 62,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Кронштейн_1",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          -6.0,
+          3.2200000286102295,
+          11.149999618530273
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.14000000059604645,
+          0.05999999865889549,
+          0.6000000238418579
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 63,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.75,
+        "radius": 10.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Фонарь_платформы_1",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          -6.0,
+          3.119999885559082,
+          11.399999618530273
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          0.1599999964237213,
+          3.200000047683716,
+          0.1599999964237213
+        ],
+        "trigger": false
+      },
+      "id": 64,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Столб_2",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          2.0,
+          1.649999976158142,
+          11.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.1599999964237213,
+          3.200000047683716,
+          0.1599999964237213
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 65,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Кронштейн_2",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          2.0,
+          3.2200000286102295,
+          11.149999618530273
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.14000000059604645,
+          0.05999999865889549,
+          0.6000000238418579
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 66,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": true,
+        "intensity": 0.75,
+        "radius": 10.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Фонарь_платформы_2",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          2.0,
+          3.119999885559082,
+          11.399999618530273
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          0.1599999964237213,
+          3.200000047683716,
+          0.1599999964237213
+        ],
+        "trigger": false
+      },
+      "id": 67,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Столб_3",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          10.0,
+          1.649999976158142,
+          11.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.1599999964237213,
+          3.200000047683716,
+          0.1599999964237213
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 68,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Кронштейн_3",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          10.0,
+          3.2200000286102295,
+          11.149999618530273
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.14000000059604645,
+          0.05999999865889549,
+          0.6000000238418579
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 69,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.75,
+        "radius": 10.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Фонарь_платформы_3",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          10.0,
+          3.119999885559082,
+          11.399999618530273
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          0.1599999964237213,
+          3.200000047683716,
+          0.1599999964237213
+        ],
+        "trigger": false
+      },
+      "id": 70,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Столб_4",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          18.0,
+          1.649999976158142,
+          11.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.1599999964237213,
+          3.200000047683716,
+          0.1599999964237213
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 71,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Кронштейн_4",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          18.0,
+          3.2200000286102295,
+          11.149999618530273
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.14000000059604645,
+          0.05999999865889549,
+          0.6000000238418579
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 72,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": true,
+        "intensity": 0.75,
+        "radius": 10.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Фонарь_платформы_4",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          18.0,
+          3.119999885559082,
+          11.399999618530273
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          0.1599999964237213,
+          3.200000047683716,
+          0.1599999964237213
+        ],
+        "trigger": false
+      },
+      "id": 73,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Столб_5",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          26.0,
+          1.649999976158142,
+          11.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.1599999964237213,
+          3.200000047683716,
+          0.1599999964237213
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 74,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Кронштейн_5",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          26.0,
+          3.2200000286102295,
+          11.149999618530273
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.14000000059604645,
+          0.05999999865889549,
+          0.6000000238418579
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 75,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.75,
+        "radius": 10.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Фонарь_платформы_5",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          26.0,
+          3.119999885559082,
+          11.399999618530273
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 76,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": true,
+        "intensity": 0.800000011920929,
+        "radius": 6.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_будки",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          2.0,
+          2.940000057220459,
+          22.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 77,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": true,
+        "intensity": 0.550000011920929,
+        "radius": 9.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_депо_1",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          22.0,
+          2.940000057220459,
+          21.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 78,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.5,
+        "radius": 8.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_депо_2",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          29.0,
+          2.940000057220459,
+          21.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 79,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.3499999940395355,
+        "radius": 30.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лунный_свет",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          -25.0,
+          9.0,
+          -2.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          1.600000023841858,
+          0.800000011920929,
+          0.800000011920929
+        ],
+        "trigger": false
+      },
+      "id": 80,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_wall_wood",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Стол_стрелочника",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          2.0,
+          0.4000000059604645,
+          23.600000381469727
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.600000023841858,
+          0.800000011920929,
+          0.800000011920929
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 81,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_radio",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Магнитофон",
+      "parent": 0,
+      "script": {
+        "file": "magnetofon.lua",
+        "interactable": true,
+        "params": {},
+        "prompt": "Включить магнитофон"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          2.38,
+          0.9,
+          23.6
+        ],
+        "rot": [
+          0.0,
+          -8.0,
+          0.0
+        ],
+        "scale": [
+          0.45,
+          0.2,
+          0.28
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ],
+        "trigger": false
+      },
+      "id": 82,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_cardboard",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Ящик_будки",
+      "parent": 0,
+      "searchSlot": {
+        "consumeTool": false,
+        "duration": 1.2000000476837158,
+        "item": "item_tape_1",
+        "locked": false,
+        "name": "Ящик с кассетами",
+        "noise": 0.0,
+        "slotId": "Ящик_будки",
+        "tool": "item_crowbar"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          -0.30000001192092896,
+          0.3499999940395355,
+          20.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          0.800000011920929,
+          2.0,
+          0.5
+        ],
+        "trigger": false
+      },
+      "id": 83,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Шкафчик_платформы",
+      "parent": 0,
+      "searchSlot": {
+        "consumeTool": false,
+        "duration": 1.2000000476837158,
+        "item": "item_switch_key",
+        "locked": false,
+        "name": "Железный шкафчик",
+        "noise": 0.0,
+        "slotId": "Шкафчик_платформы",
+        "tool": "item_crowbar"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          -6.0,
+          1.0,
+          12.600000381469727
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.800000011920929,
+          2.0,
+          0.5
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          1.600000023841858,
+          0.5,
+          0.5
+        ],
+        "trigger": false
+      },
+      "id": 84,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_wall_wood",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Скамейка",
+      "parent": 0,
+      "searchSlot": {
+        "consumeTool": false,
+        "duration": 1.2000000476837158,
+        "item": "item_tape_2",
+        "locked": false,
+        "name": "Под скамейкой",
+        "noise": 0.0,
+        "slotId": "Скамейка",
+        "tool": "item_crowbar"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          9.0,
+          0.30000001192092896,
+          12.800000190734863
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.600000023841858,
+          0.5,
+          0.5
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ],
+        "trigger": false
+      },
+      "id": 85,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_cardboard",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Ящик_депо",
+      "parent": 0,
+      "searchSlot": {
+        "consumeTool": false,
+        "duration": 1.2000000476837158,
+        "item": "item_fuse",
+        "locked": false,
+        "name": "Ящик у входа",
+        "noise": 0.0,
+        "slotId": "Ящик_депо",
+        "tool": "item_crowbar"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          17.200000762939453,
+          0.3499999940395355,
+          25.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          1.2000000476837158,
+          0.8999999761581421,
+          0.699999988079071
+        ],
+        "trigger": false
+      },
+      "id": 86,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_wall_wood",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Верстак_депо",
+      "parent": 0,
+      "searchSlot": {
+        "consumeTool": false,
+        "duration": 1.2000000476837158,
+        "item": "item_tape_3",
+        "locked": false,
+        "name": "Верстак",
+        "noise": 0.0,
+        "slotId": "Верстак_депо",
+        "tool": "item_crowbar"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          30.799999237060547,
+          0.44999998807907104,
+          26.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.2000000476837158,
+          0.8999999761581421,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "aiSpawn": {
+        "chase": 3.299999952316284,
+        "hearing": 8.5,
+        "type": "Prowler",
+        "visionAngle": 110.0,
+        "visionDist": 14.0,
+        "wait": 2.0,
+        "walk": 1.399999976158142,
+        "waypoints": []
+      },
+      "id": 87,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Стоячий_1",
+      "parent": 0,
+      "script": {
+        "file": "mimic.lua",
+        "interactable": false,
+        "params": {},
+        "prompt": ""
+      },
+      "tag": "mimic",
+      "transform": {
+        "pos": [
+          21.0,
+          0.0,
+          18.0
+        ],
+        "rot": [
+          0.0,
+          270.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "aiSpawn": {
+        "chase": 3.299999952316284,
+        "hearing": 8.5,
+        "type": "Prowler",
+        "visionAngle": 110.0,
+        "visionDist": 14.0,
+        "wait": 2.0,
+        "walk": 1.399999976158142,
+        "waypoints": []
+      },
+      "id": 88,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Стоячий_2",
+      "parent": 0,
+      "script": {
+        "file": "mimic.lua",
+        "interactable": false,
+        "params": {},
+        "prompt": ""
+      },
+      "tag": "mimic",
+      "transform": {
+        "pos": [
+          23.5,
+          0.0,
+          24.5
+        ],
+        "rot": [
+          0.0,
+          270.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "aiSpawn": {
+        "chase": 3.299999952316284,
+        "hearing": 8.5,
+        "type": "Prowler",
+        "visionAngle": 110.0,
+        "visionDist": 14.0,
+        "wait": 2.0,
+        "walk": 1.399999976158142,
+        "waypoints": []
+      },
+      "id": 89,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Стоячий_3",
+      "parent": 0,
+      "script": {
+        "file": "mimic.lua",
+        "interactable": false,
+        "params": {},
+        "prompt": ""
+      },
+      "tag": "mimic",
+      "transform": {
+        "pos": [
+          26.0,
+          0.0,
+          18.5
+        ],
+        "rot": [
+          0.0,
+          270.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "aiSpawn": {
+        "chase": 3.299999952316284,
+        "hearing": 8.5,
+        "type": "Prowler",
+        "visionAngle": 110.0,
+        "visionDist": 14.0,
+        "wait": 2.0,
+        "walk": 1.399999976158142,
+        "waypoints": []
+      },
+      "id": 90,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Стоячий_4",
+      "parent": 0,
+      "script": {
+        "file": "mimic.lua",
+        "interactable": false,
+        "params": {},
+        "prompt": ""
+      },
+      "tag": "mimic",
+      "transform": {
+        "pos": [
+          27.5,
+          0.0,
+          24.0
+        ],
+        "rot": [
+          0.0,
+          270.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "aiSpawn": {
+        "chase": 3.299999952316284,
+        "hearing": 8.5,
+        "type": "Prowler",
+        "visionAngle": 110.0,
+        "visionDist": 14.0,
+        "wait": 2.0,
+        "walk": 1.399999976158142,
+        "waypoints": []
+      },
+      "id": 91,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Стоячий_5",
+      "parent": 0,
+      "script": {
+        "file": "mimic.lua",
+        "interactable": false,
+        "params": {},
+        "prompt": ""
+      },
+      "tag": "mimic",
+      "transform": {
+        "pos": [
+          29.5,
+          0.0,
+          20.0
+        ],
+        "rot": [
+          0.0,
+          270.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          1.5,
+          2.0,
+          2.5
+        ],
+        "trigger": true
+      },
+      "id": 92,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Подсказка_депо",
+      "parent": 0,
+      "script": {
+        "file": "hint_trigger.lua",
+        "interactable": false,
+        "params": {
+          "text": "Они стоят ровными рядами. Пока на них смотришь — они не двигаются."
+        },
+        "prompt": "Использовать"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          16.5,
+          1.0,
+          21.200000762939453
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          4.0,
+          2.0,
+          6.0
+        ],
+        "trigger": true
+      },
+      "id": 93,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Подсказка_рельсы",
+      "parent": 0,
+      "script": {
+        "file": "hint_trigger.lua",
+        "interactable": false,
+        "params": {
+          "text": "Рельсы идут на восток. Там, в тумане, горят фонари платформы."
+        },
+        "prompt": "Использовать"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          -14.0,
+          1.0,
+          2.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 94,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Дрезина",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          33.0,
+          0.30000001192092896,
+          6.849999904632568
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          2.5999999046325684,
+          0.5,
+          1.5
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          0.6000000238418579,
+          0.8999999761581421,
+          0.4000000059604645
+        ],
+        "trigger": false
+      },
+      "id": 95,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_fuse_box",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Пульт_дрезины",
+      "parent": 0,
+      "script": {
+        "file": "dresina.lua",
+        "interactable": true,
+        "params": {},
+        "prompt": "Запустить дрезину"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          33.0,
+          0.8999999761581421,
+          8.800000190734863
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.6000000238418579,
+          0.8999999761581421,
+          0.4000000059604645
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 96,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_wall_wood",
+        "tint": [
+          220,
+          205,
+          195,
+          255
+        ]
+      },
+      "name": "Телевизор",
+      "parent": 0,
+      "script": {
+        "file": "tv.lua",
+        "interactable": true,
+        "params": {},
+        "prompt": "Включить телевизор"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          1.6,
+          1.08,
+          23.6
+        ],
+        "rot": [
+          0.0,
+          10.0,
+          0.0
+        ],
+        "scale": [
+          0.65,
+          0.55,
+          0.48
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 97,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "ch35_tv_off",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Экран_телевизора",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          1.58,
+          1.08,
+          23.36
+        ],
+        "rot": [
+          0.0,
+          10.0,
+          0.0
+        ],
+        "scale": [
+          0.48,
+          0.4,
+          0.04
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 98,
+      "light": {
+        "color": [
+          140,
+          210,
+          255,
+          255
+        ],
+        "flicker": true,
+        "intensity": 0.0,
+        "radius": 5.5,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": false,
+        "enabled": false,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Свет_телевизора",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          1.58,
+          1.1,
+          23.1
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.2,
+          0.2,
+          0.2
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 99,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          200,
+          200,
+          200,
+          255
+        ]
+      },
+      "name": "Антенна_телевизора",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          1.6,
+          1.44,
+          23.6
+        ],
+        "rot": [
+          0.0,
+          10.0,
+          0.0
+        ],
+        "scale": [
+          0.35,
+          0.18,
+          0.04
+        ]
+      }
+    }
+  ]
+}

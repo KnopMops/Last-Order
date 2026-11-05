@@ -72,6 +72,7 @@ public:
 
     bool WantsReturnToMenu() const { return m_returnToMenu; }
     bool WantsChapterComplete() const { return m_chapterComplete; }
+    const std::string& EndingId() const { return m_endingId; }
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
     void StartTour();
     void StartCutsceneTour();
@@ -212,6 +213,8 @@ private:
 
     bool m_returnToMenu = false;
     bool m_chapterComplete = false;
+    std::string m_endingId;
+    bool m_usedRadio = false;
     bool m_inCutscene = false;
 
     std::string m_enteredKeypadCode;

@@ -1,0 +1,803 @@
+{
+  "environment": {
+    "ambient": 0.05999999865889549,
+    "background": [
+      6,
+      6,
+      9,
+      255
+    ],
+    "fogEnd": 22.0
+  },
+  "format": 2,
+  "name": "level1",
+  "nextId": 16,
+  "objects": [
+    {
+      "active": true,
+      "camera": {
+        "far": 120.0,
+        "fov": 70.0,
+        "main": true,
+        "near": 0.05000000074505806
+      },
+      "id": 1,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Player",
+      "parent": 0,
+      "player": {
+        "crouch": 1.2999999523162842,
+        "eye": 1.649999976158142,
+        "flashlight": true,
+        "sprint": 4.599999904632568,
+        "walk": 2.5999999046325684
+      },
+      "tag": "player",
+      "transform": {
+        "pos": [
+          -3.0,
+          0.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 2,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": true,
+        "intensity": 0.8999999761581421,
+        "radius": 9.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          245,
+          210,
+          255
+        ]
+      },
+      "name": "Lamp_A",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          0.0,
+          2.8499999046325684,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 3,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.800000011920929,
+        "radius": 7.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          245,
+          210,
+          255
+        ]
+      },
+      "name": "Lamp_Corridor",
+      "parent": 0,
+      "tag": "powered_lamp",
+      "transform": {
+        "pos": [
+          8.0,
+          2.8499999046325684,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 4,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.8999999761581421,
+        "radius": 11.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          245,
+          210,
+          255
+        ]
+      },
+      "name": "Lamp_B",
+      "parent": 0,
+      "tag": "powered_lamp",
+      "transform": {
+        "pos": [
+          16.0,
+          2.8499999046325684,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ],
+        "trigger": false
+      },
+      "id": 5,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_cardboard",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Crate_Tools",
+      "parent": 0,
+      "searchSlot": {
+        "consumeTool": false,
+        "duration": 1.2000000476837158,
+        "item": "item_crowbar",
+        "locked": false,
+        "name": "Ящик с инструментами",
+        "noise": 0.0,
+        "slotId": "Crate_Tools",
+        "tool": ""
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          -3.200000047683716,
+          0.3499999940395355,
+          -3.299999952316284
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ],
+        "trigger": false
+      },
+      "id": 6,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_cardboard",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Crate_Locked",
+      "parent": 0,
+      "searchSlot": {
+        "consumeTool": false,
+        "duration": 1.2000000476837158,
+        "item": "item_bunker_key",
+        "locked": true,
+        "name": "Запертый ящик",
+        "noise": 0.0,
+        "slotId": "Crate_Locked",
+        "tool": "item_crowbar"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          3.200000047683716,
+          0.3499999940395355,
+          3.299999952316284
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          1.0,
+          2.0999999046325684,
+          0.699999988079071
+        ],
+        "trigger": false
+      },
+      "hidingSpot": {
+        "exitYaw": 180.0,
+        "eye": [
+          0.0,
+          0.44999998807907104,
+          0.0
+        ],
+        "type": "Wardrobe"
+      },
+      "id": 7,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_wall_wood",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Wardrobe",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          -3.299999952316284,
+          1.0499999523162842,
+          3.299999952316284
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          2.0999999046325684,
+          0.699999988079071
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 8,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          235,
+          225,
+          190,
+          255
+        ]
+      },
+      "name": "Note_Code",
+      "parent": 0,
+      "script": {
+        "file": "note.lua",
+        "interactable": true,
+        "params": {},
+        "prompt": "Прочитать записку"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          3.200000047683716,
+          1.399999976158142,
+          -3.950000047683716
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.44999998807907104,
+          0.3199999928474426,
+          0.03999999910593033
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          1.399999976158142,
+          2.200000047683716,
+          0.11999999731779099
+        ],
+        "trigger": false
+      },
+      "door": {
+        "angle": 90.0,
+        "consumeKey": false,
+        "key": "item_bunker_key",
+        "locked": true,
+        "sound": "audio/sfx/sfx_door_open.wav",
+        "speed": 3.0,
+        "startOpen": false
+      },
+      "id": 9,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Auto",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Door_East",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          4.125,
+          1.100000023841858,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          1.399999976158142,
+          2.200000047683716,
+          0.11999999731779099
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 10,
+      "itemPickup": {
+        "item": "item_batteries"
+      },
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Auto",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Batteries",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          8.0,
+          0.15000000596046448,
+          -1.100000023841858
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.20000000298023224,
+          0.20000000298023224,
+          0.20000000298023224
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          1.0,
+          2.0,
+          3.0
+        ],
+        "trigger": true
+      },
+      "id": 11,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Trigger_Alarm",
+      "parent": 0,
+      "script": {
+        "file": "prowler_alarm.lua",
+        "interactable": false,
+        "params": {},
+        "prompt": "Использовать"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          8.0,
+          1.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ],
+        "trigger": false
+      },
+      "id": 12,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_cardboard",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Crate_Fuse",
+      "parent": 0,
+      "searchSlot": {
+        "consumeTool": false,
+        "duration": 1.2000000476837158,
+        "item": "item_fuse",
+        "locked": false,
+        "name": "Ящик у стены",
+        "noise": 0.0,
+        "slotId": "Crate_Fuse",
+        "tool": ""
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          13.5,
+          0.3499999940395355,
+          4.199999809265137
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.800000011920929,
+          0.699999988079071,
+          0.800000011920929
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          1.2000000476837158,
+          1.2000000476837158,
+          0.800000011920929
+        ],
+        "trigger": false
+      },
+      "id": 13,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_generator",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Generator",
+      "parent": 0,
+      "script": {
+        "file": "generator.lua",
+        "interactable": true,
+        "params": {},
+        "prompt": "Запустить генератор"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          18.0,
+          0.6000000238418579,
+          -4.199999809265137
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.2000000476837158,
+          1.2000000476837158,
+          0.800000011920929
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 14,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Exit_Hatch",
+      "parent": 0,
+      "script": {
+        "file": "hatch.lua",
+        "interactable": true,
+        "params": {},
+        "prompt": "Открыть люк"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          19.8799991607666,
+          1.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.10000000149011612,
+          1.7999999523162842,
+          1.2000000476837158
+        ]
+      }
+    },
+    {
+      "active": true,
+      "aiSpawn": {
+        "chase": 3.299999952316284,
+        "hearing": 8.5,
+        "type": "Prowler",
+        "visionAngle": 110.0,
+        "visionDist": 14.0,
+        "wait": 2.0,
+        "walk": 1.399999976158142,
+        "waypoints": [
+          [
+            14.0,
+            0.0,
+            0.0
+          ],
+          [
+            17.0,
+            0.0,
+            -3.5
+          ],
+          [
+            17.0,
+            0.0,
+            3.5
+          ],
+          [
+            8.0,
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      "id": 15,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Prowler",
+      "parent": 0,
+      "tag": "monster",
+      "transform": {
+        "pos": [
+          8.0,
+          0.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  ]
+}

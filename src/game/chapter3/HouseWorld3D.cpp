@@ -999,8 +999,13 @@ void HouseWorld3D::Update(engine::core::Engine& eng, float dt) {
                 m_returnToMenu = true;
             } else if (cname == "car_escape" || cname == "front_door_escape" || cname == "sewer_escape" || cname == "police_arrival") {
                 TraceLog(LOG_WARNING, "CH3: ending %s finished -> chapter complete", cname.c_str());
+                if (cname == "car_escape") m_endingId = "car";
+                else if (cname == "front_door_escape") m_endingId = "front_door";
+                else if (cname == "sewer_escape") m_endingId = "sewer";
+                else m_endingId = m_usedRadio ? "radio" : "police";
                 m_chapterComplete = true;
             } else if (cname == "radio_ending") {
+                m_usedRadio = true;
                 StartHoldout(eng);
             } else {
                 m_viewCam = m_fps.GetCamera();

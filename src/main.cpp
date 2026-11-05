@@ -52,6 +52,9 @@ int main(int argc, char** argv) {
         if (arg == "--ch3-cutscene-tour") game.RequestChapter3CutsceneTour(2);
     }
 #endif
+    for (int i = 1; i < argc; ++i) {
+        if (std::string(argv[i]) == "--chapter35") game.RequestChapter35(i + 1 < argc && argv[i + 1][0] != '-' ? argv[i + 1] : "");
+    }
     engine.Run(game, smokeTest);
     engine.Shutdown();
     return 0;

@@ -13,6 +13,7 @@
 #include "game/world/CafeWorld.h"
 #include "game/chapter2/MotelWorld3D.h"
 #include "game/chapter3/HouseWorld3D.h"
+#include "game/custom/CustomChapter.h"
 #include <optional>
 #include <string>
 #include <vector>
@@ -26,6 +27,7 @@ enum class GameScreen {
     NightmareChase,
     Chapter2_Motel3D,
     Chapter3_House3D,
+    CustomChapter,
     Paused
 };
 
@@ -35,6 +37,7 @@ public:
     void RequestChapter3Holdout(int renderer) { m_pendingChapter3 = true; m_chapter3Holdout = true; m_chapter3Renderer = renderer; }
     void RequestChapter3CutsceneTour(int renderer) { m_pendingChapter3 = true; m_chapter3CutsceneTour = true; m_chapter3Renderer = renderer; }
     void RequestChapter3(bool tour, int renderer = -1) { m_pendingChapter3 = true; m_chapter3Tour = tour; m_chapter3Renderer = renderer; }
+    void RequestChapter35(const std::string& ending) { m_pendingCh35Ending = ending; m_pendingCh35 = true; }
     void OnInit(engine::core::Engine& eng) override;
     void OnFixedUpdate(engine::core::Engine& eng, float fixedDt) override;
     void OnFrameUpdate(engine::core::Engine& eng, float dt) override;
@@ -47,12 +50,16 @@ public:
 private:
     bool m_pendingChapter2 = false;
     std::string m_chapter2TourDir;
+    bool m_pendingCh35 = false;
+    std::string m_pendingCh35Ending;
     bool m_pendingChapter3 = false;
     bool m_chapter3Tour = false;
     bool m_chapter3CutsceneTour = false;
     bool m_chapter3Holdout = false;
     int m_chapter3Renderer = -1;
     void StartNewShift(engine::core::Engine& eng, int nightNumber, bool withTutorial);
+    void BeginChapter35(engine::core::Engine& eng, const std::string& ch3Ending);
+    void EndChapter35(engine::core::Engine& eng);
     void StartEndlessShift(engine::core::Engine& eng);
     void StartMinigame(engine::core::Engine& eng, systems::MinigameType type);
     void CompleteActiveMinigame(engine::core::Engine& eng);
@@ -128,6 +135,7 @@ private:
     float m_endlessSanityCooldownTimer = 0.0f;
     chapter2::MotelWorld3D m_motel3D{};
     chapter3::HouseWorld3D m_house3D{};
+    custom::CustomChapter m_custom{};
 };
 
 }

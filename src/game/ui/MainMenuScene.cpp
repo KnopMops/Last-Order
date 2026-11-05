@@ -152,7 +152,7 @@ MenuCommand MainMenuScene::Update(engine::core::Engine& eng, float dt) {
     int maxUnlocked = systems::SaveSystem::GetMaxUnlockedNight();
 
     int btnCount = 5;
-    if (m_state == MenuState::ChapterSelect) btnCount = 4;
+    if (m_state == MenuState::ChapterSelect) btnCount = 5;
     else if (m_state == MenuState::NightSelect) btnCount = 7;
     else if (m_state == MenuState::SaveSelect) btnCount = 4;
 
@@ -234,6 +234,8 @@ MenuCommand MainMenuScene::Update(engine::core::Engine& eng, float dt) {
                 case 2:
                     return MenuCommand::StartChapter3_House3D;
                 case 3:
+                    return MenuCommand::StartChapter35;
+                case 4:
                     m_state = MenuState::Main;
                     m_selectedBtn = 0;
                     return MenuCommand::None;
@@ -435,14 +437,15 @@ void MainMenuScene::RenderUI(engine::core::Engine& eng) const {
     } else if (m_state == MenuState::ChapterSelect) {
         DrawTextEx(font, "ВЫБОР ГЛАВЫ", Vector2{58, 196}, 21.0f, 1.0f, Color{244, 184, 96, 255});
 
-        const char* chTitles[4] = {
+        const char* chTitles[5] = {
             "Глава 1: Кафе «Тёплый угол» [5 Ночей]",
             "Глава 2: Мотель «Северное сияние» [3D]",
             "Глава 3: Дом смотрителя «Побег» [3D Horror]",
+            "Глава 3.5: Разъезд 86 [3D]",
             "Назад в главное меню"
         };
 
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < 5; ++i) {
             bool sel = (m_selectedBtn == i);
             float bx = 58.0f;
             float by = 240.0f + i * 72.0f;

@@ -1,43 +1,44 @@
 #pragma once
 
+#include "runtime/ChapterProject.h"
 #include <string>
 #include <vector>
 
 namespace knopmops::scripting {
 
-struct ScriptTemplate {
-    std::string name;
-    std::string filename;
-    std::string code;
-};
-
+// Встроенный редактор Lua-скриптов (scripts/*.lua и любые .lua через файловый проводник).
 class CodeEditor {
 public:
-    CodeEditor();
-    ~CodeEditor();
-
-    void Init();
+    void SetProject(runtime::ChapterProject* project);
     void Render();
 
-    void OpenFile(const std::string& path);
-    bool SaveFile(const std::string& path = "");
+    // Открывает скрипт по имени внутри scripts/ (например, "generator.lua").
+    void OpenFile(const std::string& scriptFile);
+    // Открывает любой текстовый файл по полному пути.
+    void OpenPath(const std::string& fullPath);
+    bool SaveFile();
+    // Создаёт пустой скрипт в scripts/ и открывает его.
+    bool CreateScript(const std::string& fileName);
 
-    const std::string& GetCurrentFile() const { return m_currentFile; }
-    const std::string& GetSourceText() const { return m_sourceText; }
-    void SetSourceText(const std::string& text);
-
-    const std::vector<ScriptTemplate>& GetTemplates() const { return m_templates; }
-    void LoadTemplate(size_t index);
+    const std::string& CurrentFile() const { return m_file; }
+    bool IsModified() const { return m_modified; }
 
 private:
-    std::string m_currentFile = "PlayerController.cpp";
-    std::string m_sourceText;
-    std::vector<char> m_textBuffer;
-    bool m_isModified = false;
-    std::vector<ScriptTemplate> m_templates;
+    runtime::ChapterProject* m_project = nullptr;
+    std::string m_file;   // имя для показа
+    std::string m_path;   // полный путь
+    std::string m_text;
+    bool m_modified = false;
+    bool m_requestFocus = false;
+    std::vector<std::string> m_errors;
+    std::string m_status;
+    int m_cursorLine = 1;
+    int m_cursorCol = 1;
+    int m_jumpLine = -1;
+    char m_newName[64] = "novyi_skript.lua";
+    bool m_showApi = false;
 
-    void SetupDefaultTemplates();
+    void RunCheck();
 };
 
 }
-

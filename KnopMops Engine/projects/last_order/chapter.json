@@ -1,0 +1,13 @@
+{
+  "description": "",
+  "flashlightDrain": 0.004000000189989805,
+  "format": 1,
+  "id": "last_order",
+  "intro": "",
+  "items": [],
+  "loseText": "Тебя поймали...",
+  "startItems": [],
+  "startLevel": "level1",
+  "title": "Last Order",
+  "winTitle": "ГЛАВА ПРОЙДЕНА"
+}

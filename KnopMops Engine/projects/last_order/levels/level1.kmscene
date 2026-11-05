@@ -1,0 +1,119 @@
+{
+  "environment": {
+    "ambient": 0.11999999731779099,
+    "background": [
+      6,
+      6,
+      9,
+      255
+    ],
+    "fogEnd": 24.0
+  },
+  "format": 2,
+  "name": "level1",
+  "nextId": 3,
+  "objects": [
+    {
+      "active": true,
+      "camera": {
+        "far": 120.0,
+        "fov": 70.0,
+        "main": true,
+        "near": 0.05000000074505806
+      },
+      "id": 1,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Игрок",
+      "parent": 0,
+      "player": {
+        "crouch": 1.2999999523162842,
+        "eye": 1.649999976158142,
+        "flashlight": true,
+        "gravity": 18.0,
+        "height": 1.7999999523162842,
+        "jump": 4.0,
+        "radius": 0.30000001192092896,
+        "sens": 0.10999999940395355,
+        "sprint": 4.599999904632568,
+        "walk": 2.5999999046325684
+      },
+      "tag": "player",
+      "transform": {
+        "pos": [
+          0.0,
+          0.0,
+          -3.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 2,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 1.0,
+        "radius": 12.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          245,
+          210,
+          255
+        ]
+      },
+      "name": "Лампа",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          0.0,
+          3.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    }
+  ]
+}

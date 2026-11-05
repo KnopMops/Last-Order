@@ -1,0 +1,380 @@
+{
+  "environment": {
+    "ambient": 0.05000000074505806,
+    "background": [
+      6,
+      6,
+      9,
+      255
+    ],
+    "fogEnd": 20.0
+  },
+  "format": 2,
+  "name": "level2",
+  "nextId": 8,
+  "objects": [
+    {
+      "active": true,
+      "camera": {
+        "far": 120.0,
+        "fov": 70.0,
+        "main": true,
+        "near": 0.05000000074505806
+      },
+      "id": 1,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Player",
+      "parent": 0,
+      "player": {
+        "crouch": 1.2999999523162842,
+        "eye": 1.649999976158142,
+        "flashlight": true,
+        "sprint": 4.599999904632568,
+        "walk": 2.5999999046325684
+      },
+      "tag": "player",
+      "transform": {
+        "pos": [
+          1.5,
+          0.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 2,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": true,
+        "intensity": 0.800000011920929,
+        "radius": 7.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          245,
+          210,
+          255
+        ]
+      },
+      "name": "Lamp_1",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          3.0,
+          2.8499999046325684,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 3,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": true,
+        "intensity": 0.550000011920929,
+        "radius": 6.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          245,
+          210,
+          255
+        ]
+      },
+      "name": "Lamp_2",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          13.0,
+          2.8499999046325684,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 4,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 1.0,
+        "radius": 8.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          245,
+          210,
+          255
+        ]
+      },
+      "name": "Lamp_3",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          24.0,
+          2.8499999046325684,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          0.8999999761581421,
+          2.0999999046325684,
+          0.6000000238418579
+        ],
+        "trigger": false
+      },
+      "hidingSpot": {
+        "exitYaw": 0.0,
+        "eye": [
+          0.0,
+          0.44999998807907104,
+          0.0
+        ],
+        "type": "Locker"
+      },
+      "id": 5,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Locker",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          10.0,
+          1.0499999523162842,
+          -1.149999976158142
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.8999999761581421,
+          2.0999999046325684,
+          0.6000000238418579
+        ]
+      }
+    },
+    {
+      "active": true,
+      "aiSpawn": {
+        "chase": 3.299999952316284,
+        "hearing": 8.5,
+        "type": "Prowler",
+        "visionAngle": 110.0,
+        "visionDist": 14.0,
+        "wait": 2.0,
+        "walk": 1.600000023841858,
+        "waypoints": [
+          [
+            12.0,
+            0.0,
+            0.0
+          ],
+          [
+            21.0,
+            0.0,
+            0.0
+          ]
+        ]
+      },
+      "id": 6,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Prowler",
+      "parent": 0,
+      "tag": "monster",
+      "transform": {
+        "pos": [
+          14.0,
+          0.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "size": [
+          1.5,
+          2.0,
+          3.0
+        ],
+        "trigger": true
+      },
+      "id": 7,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Trigger_End",
+      "parent": 0,
+      "script": {
+        "file": "ending.lua",
+        "interactable": false,
+        "params": {},
+        "prompt": "Использовать"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          25.0,
+          1.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  ]
+}

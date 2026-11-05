@@ -66,6 +66,9 @@ execute_process(
 if(NOT GIT_BUILD_COUNT)
     set(GIT_BUILD_COUNT "0")
 endif()
+# Рантайм KnopMops Engine: сцена, Lua-скрипты, PlaySession (Глава 3.5 и последующие, собранные в редакторе)
+include("${CMAKE_CURRENT_SOURCE_DIR}/KnopMops Engine/cmake/kmruntime.cmake")
+
 add_library(lo_engine STATIC
     src/engine/physics/PhysicsWorld.cpp
     src/engine/graphics/LightingSystem.cpp
@@ -86,7 +89,7 @@ add_library(lo_engine STATIC
     src/engine/hd/HdRendererD3D12.cpp
 )
 target_include_directories(lo_engine PUBLIC src)
-target_link_libraries(lo_engine PUBLIC raylib nlohmann_json::nlohmann_json Jolt)
+target_link_libraries(lo_engine PUBLIC raylib nlohmann_json::nlohmann_json Jolt kmruntime)
 if(WIN32)
     target_link_libraries(lo_engine PUBLIC d3d11 d3d12 dxgi d3dcompiler dxguid)
 endif()
@@ -126,6 +129,8 @@ set(GAME_SOURCES
     src/game/chapter3/HouseHd.cpp
     src/game/chapter3/Ch3Graphics.cpp
     src/game/chapter3/HouseWorld3D.cpp
+    src/game/custom/CustomChapter.cpp
+    src/game/custom/HdPlayView.cpp
 )
 add_executable(last_order ${GAME_SOURCES})
 set_target_properties(last_order PROPERTIES OUTPUT_NAME "Last Order")

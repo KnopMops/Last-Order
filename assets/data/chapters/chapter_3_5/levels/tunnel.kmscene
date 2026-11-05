@@ -1,0 +1,985 @@
+{
+  "environment": {
+    "ambient": 0.05999999865889549,
+    "background": [
+      4,
+      4,
+      6,
+      255
+    ],
+    "fogEnd": 22.0
+  },
+  "format": 2,
+  "name": "tunnel",
+  "nextId": 21,
+  "objects": [
+    {
+      "active": true,
+      "camera": {
+        "far": 120.0,
+        "fov": 70.0,
+        "main": true,
+        "near": 0.05000000074505806
+      },
+      "id": 1,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Лера",
+      "parent": 0,
+      "player": {
+        "crouch": 1.2999999523162842,
+        "eye": 1.649999976158142,
+        "flashlight": true,
+        "gravity": 18.0,
+        "height": 1.7999999523162842,
+        "jump": 4.0,
+        "radius": 0.30000001192092896,
+        "sens": 0.10999999940395355,
+        "sprint": 3.4000000953674316,
+        "walk": 2.299999952316284
+      },
+      "tag": "player",
+      "transform": {
+        "pos": [
+          2.0,
+          0.05000000074505806,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 2,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Дрезина",
+      "parent": 0,
+      "props": {
+        "hd_slide": "0,72"
+      },
+      "tag": "dynamic",
+      "transform": {
+        "pos": [
+          2.0,
+          0.20000000298023224,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          3.0,
+          0.4000000059604645,
+          1.7999999523162842
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 3,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Рычаг_дрезины",
+      "parent": 2,
+      "tag": "dynamic",
+      "transform": {
+        "pos": [
+          1.2000000476837158,
+          0.6500000357627869,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.14000000059604645,
+          0.8999999761581421,
+          0.14000000059604645
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 4,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.6499999761581421,
+        "radius": 7.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          210,
+          120,
+          255
+        ]
+      },
+      "name": "Фонарь_дрезины",
+      "parent": 2,
+      "tag": "dynamic",
+      "transform": {
+        "pos": [
+          1.2000000476837158,
+          1.1999999284744263,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 5,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Маршрут",
+      "parent": 0,
+      "script": {
+        "file": "ride.lua",
+        "interactable": false,
+        "params": {},
+        "prompt": ""
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "aiSpawn": {
+        "chase": 3.299999952316284,
+        "hearing": 8.5,
+        "type": "Prowler",
+        "visionAngle": 110.0,
+        "visionDist": 14.0,
+        "wait": 2.0,
+        "walk": 1.399999976158142,
+        "waypoints": []
+      },
+      "id": 6,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Эхо_позади",
+      "parent": 0,
+      "script": {
+        "file": "echo.lua",
+        "interactable": false,
+        "params": {},
+        "prompt": ""
+      },
+      "tag": "echo",
+      "transform": {
+        "pos": [
+          -9.0,
+          0.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 7,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.800000011920929,
+        "radius": 7.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_туннеля_0",
+      "parent": 0,
+      "tag": "tunnel_lamp",
+      "transform": {
+        "pos": [
+          8.0,
+          2.940000057220459,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 8,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": true,
+        "intensity": 0.800000011920929,
+        "radius": 7.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_туннеля_1",
+      "parent": 0,
+      "tag": "tunnel_lamp",
+      "transform": {
+        "pos": [
+          16.0,
+          2.940000057220459,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 9,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.800000011920929,
+        "radius": 7.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_туннеля_2",
+      "parent": 0,
+      "tag": "tunnel_lamp",
+      "transform": {
+        "pos": [
+          24.0,
+          2.940000057220459,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 10,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.800000011920929,
+        "radius": 7.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_туннеля_3",
+      "parent": 0,
+      "tag": "tunnel_lamp",
+      "transform": {
+        "pos": [
+          32.0,
+          2.940000057220459,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 11,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": true,
+        "intensity": 0.800000011920929,
+        "radius": 7.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_туннеля_4",
+      "parent": 0,
+      "tag": "tunnel_lamp",
+      "transform": {
+        "pos": [
+          40.0,
+          2.940000057220459,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 12,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.800000011920929,
+        "radius": 7.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_туннеля_5",
+      "parent": 0,
+      "tag": "tunnel_lamp",
+      "transform": {
+        "pos": [
+          48.0,
+          2.940000057220459,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 13,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.800000011920929,
+        "radius": 7.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_туннеля_6",
+      "parent": 0,
+      "tag": "tunnel_lamp",
+      "transform": {
+        "pos": [
+          56.0,
+          2.940000057220459,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 14,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": true,
+        "intensity": 0.800000011920929,
+        "radius": 7.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_туннеля_7",
+      "parent": 0,
+      "tag": "tunnel_lamp",
+      "transform": {
+        "pos": [
+          64.0,
+          2.940000057220459,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 15,
+      "light": {
+        "color": [
+          255,
+          235,
+          190,
+          255
+        ],
+        "flicker": false,
+        "intensity": 0.8999999761581421,
+        "radius": 12.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_шлюза",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          77.0,
+          2.940000057220459,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 16,
+      "light": {
+        "color": [
+          160,
+          255,
+          210,
+          255
+        ],
+        "flicker": false,
+        "intensity": 1.0,
+        "radius": 8.0,
+        "type": 0
+      },
+      "mesh": {
+        "emissive": true,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          200,
+          255
+        ]
+      },
+      "name": "Лампа_коридора",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          90.0,
+          2.940000057220459,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.30000001192092896,
+          0.11999999731779099,
+          0.30000001192092896
+        ]
+      }
+    },
+    {
+      "active": true,
+      "id": 17,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_sign",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Табличка_Заслон",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          77.0,
+          1.7999999523162842,
+          -5.849999904632568
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          2.4000000953674316,
+          0.8999999761581421,
+          0.05000000074505806
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          3.0,
+          2.200000047683716,
+          0.11999999731779099
+        ],
+        "trigger": false
+      },
+      "door": {
+        "angle": 90.0,
+        "consumeKey": false,
+        "key": "",
+        "locked": true,
+        "sound": "audio/sfx/sfx_door_smash.wav",
+        "speed": 3.0,
+        "startOpen": false
+      },
+      "id": 18,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Ворота",
+      "parent": 0,
+      "tag": "",
+      "transform": {
+        "pos": [
+          84.125,
+          1.100000023841858,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          3.0,
+          2.200000047683716,
+          0.11999999731779099
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          1.7999999523162842,
+          0.800000011920929,
+          0.8999999761581421
+        ],
+        "trigger": false
+      },
+      "id": 19,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_wall_wood",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Стол_у_ворот",
+      "parent": 0,
+      "script": {
+        "file": "gate_choice.lua",
+        "interactable": true,
+        "params": {
+          "take": "false"
+        },
+        "prompt": "Оставить кассеты на столе"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          77.0,
+          0.4000000059604645,
+          3.200000047683716
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.7999999523162842,
+          0.800000011920929,
+          0.8999999761581421
+        ]
+      }
+    },
+    {
+      "active": true,
+      "collider": {
+        "height": 1.7999999523162842,
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "radius": 0.5,
+        "shape": 0,
+        "size": [
+          0.6000000238418579,
+          0.5,
+          0.4000000059604645
+        ],
+        "trigger": false
+      },
+      "id": 20,
+      "mesh": {
+        "emissive": false,
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_fabric",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ]
+      },
+      "name": "Рюкзак_Леры",
+      "parent": 0,
+      "script": {
+        "file": "gate_choice.lua",
+        "interactable": true,
+        "params": {
+          "take": "true"
+        },
+        "prompt": "Забрать кассеты с собой"
+      },
+      "tag": "",
+      "transform": {
+        "pos": [
+          77.0,
+          0.25,
+          -3.200000047683716
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.6000000238418579,
+          0.5,
+          0.4000000059604645
+        ]
+      }
+    }
+  ]
+}

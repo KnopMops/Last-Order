@@ -1,6 +1,11 @@
 #include "game/systems/SaveSystem.h"
 #include "game/LastOrderGame.h"
 #include "engine/core/PathUtils.h"
+#include "game/chapter3/Ch3Graphics.h"
+#include <fstream>
+#include <map>
+#include <nlohmann/json.hpp>
+#include "engine/core/PathUtils.h"
 #include "engine/graphics/TextLayout.h"
 #include "raylib.h"
 #include <algorithm>
@@ -649,6 +654,7 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
         if (!m_settingsUI.IsOpen()) m_house3D.FixedUpdate(eng, fixedDt);
         return;
     }
+    if (m_screen == GameScreen::CustomChapter) return;
 
     if (m_settingsUI.IsOpen() || m_sanity.IsGameOver() ||
         m_screen == GameScreen::MainMenu || m_screen == GameScreen::Paused) {
@@ -827,7 +833,71 @@ void LastOrderGame::OnFixedUpdate(engine::core::Engine& eng, float fixedDt) {
     }
 }
 
+namespace {
+
+nlohmann::json LoadProgress() {
+    nlohmann::json j = nlohmann::json::object();
+    std::ifstream f(engine::core::GetUserStorageDir() / "chapter_progress.json");
+    if (f.is_open()) {
+        try { f >> j; } catch (...) { j = nlohmann::json::object(); }
+    }
+    if (!j.is_object()) j = nlohmann::json::object();
+    return j;
+}
+
+void SaveProgress(const nlohmann::json& j) {
+    std::ofstream f(engine::core::GetUserStorageDir() / "chapter_progress.json");
+    if (f.is_open()) f << j.dump(2);
+}
+
+}
+
+void LastOrderGame::BeginChapter35(engine::core::Engine& eng, const std::string& ch3Ending) {
+    std::string ending = ch3Ending;
+    if (ending.empty()) {
+        auto j = LoadProgress();
+        if (j.contains("chapter3") && j["chapter3"].contains("ending")) ending = j["chapter3"]["ending"].get<std::string>();
+    }
+    if (ending.empty()) ending = "front_door";
+
+    std::map<std::string, knopmops::runtime::Var> vars;
+    knopmops::runtime::Var v;
+    v.type = knopmops::runtime::Var::Type::String;
+    v.str = ending;
+    vars["ch3_ending"] = v;
+
+    m_screen = GameScreen::CustomChapter;
+    eng.Renderer().SetHighRes3DMode(true);
+    eng.Renderer().SetSkip2DLightmap(true);
+    if (!m_custom.Init(eng, "chapter_3_5", vars)) EndChapter35(eng);
+}
+
+void LastOrderGame::EndChapter35(engine::core::Engine& eng) {
+    bool completed = m_custom.Completed();
+    auto vars = m_custom.FinalVars();
+    m_custom.Shutdown(eng);
+    if (completed) {
+        eng.State().SetFlag("chapter35_completed");
+        auto j = LoadProgress();
+        j["chapter3_5"]["completed"] = true;
+        auto it = vars.find("ch35_took_tapes");
+        if (it != vars.end()) j["chapter3_5"]["took_tapes"] = it->second.boolean;
+        SaveProgress(j);
+        SaveKeyMoment(eng, "Глава 3.5: Разъезд 86 пройден");
+    }
+    eng.Renderer().SetHighRes3DMode(false);
+    eng.Renderer().SetSkip2DLightmap(false);
+    m_screen = GameScreen::MainMenu;
+    m_mainMenu.Init(eng);
+    EnableCursor();
+}
+
 void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
+    if (m_pendingCh35) {
+        m_pendingCh35 = false;
+        BeginChapter35(eng, m_pendingCh35Ending);
+        return;
+    }
     if (m_pendingChapter2) {
         m_pendingChapter2 = false;
         m_screen = GameScreen::Chapter2_Motel3D;
@@ -944,6 +1014,9 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
                 eng.Renderer().SetSkip2DLightmap(true);
                 m_house3D.Init(eng);
                 break;
+            case ui::MenuCommand::StartChapter35:
+                BeginChapter35(eng, ""); // вариант старта берётся из сохранённой концовки Главы 3 (AppData)
+                break;
             case ui::MenuCommand::OpenSettings:
                 m_settingsUI.Open();
                 break;
@@ -989,6 +1062,30 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         return;
     }
 
+    if (m_screen == GameScreen::CustomChapter) {
+        if (m_settingsUI.IsOpen()) {
+            m_settingsUI.Update(eng);
+            if (m_settingsUI.WantsQuitToMenu()) {
+                m_settingsUI.ClearQuitToMenu();
+                EndChapter35(eng);
+                return;
+            }
+            if (!m_settingsUI.IsOpen()) {
+                DisableCursor();
+                m_custom.ApplyGraphics(eng);
+            }
+            return;
+        }
+        if (IsKeyPressed(KEY_ESCAPE) && m_custom.CanOpenSettings()) {
+            m_settingsUI.Open();
+            EnableCursor();
+            return;
+        }
+        m_custom.Update(eng, dt);
+        if (m_custom.WantsReturnToMenu()) EndChapter35(eng);
+        return;
+    }
+
     if (m_screen == GameScreen::Chapter3_House3D) {
         if (m_settingsUI.IsOpen()) {
             m_settingsUI.Update(eng);
@@ -996,14 +1093,17 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         }
         m_house3D.Update(eng, dt);
         if (m_house3D.WantsChapterComplete()) {
+            std::string ending = m_house3D.EndingId();
             m_house3D.Shutdown(eng);
             eng.State().SetFlag("chapter3_completed");
             SaveKeyMoment(eng, "Глава 3: побег из дома смотрителя завершен");
-            eng.Renderer().SetHighRes3DMode(false);
-            eng.Renderer().SetSkip2DLightmap(false);
-            m_screen = GameScreen::MainMenu;
-            m_mainMenu.Init(eng);
-            EnableCursor();
+            {
+                auto j = LoadProgress();
+                j["chapter3"]["ending"] = ending;
+                j["chapter3"]["completed"] = true;
+                SaveProgress(j);
+            }
+            BeginChapter35(eng, ending); // Глава 3.5 начинается сразу, вариант зависит от концовки
             return;
         }
         if (m_house3D.WantsReturnToMenu()) {
@@ -1647,6 +1747,10 @@ void LastOrderGame::OnRenderWorld(engine::core::Engine& eng) {
         m_motel3D.Render3D(eng);
         return;
     }
+    if (m_screen == GameScreen::CustomChapter) {
+        m_custom.RenderWorld(eng);
+        return;
+    }
     if (m_screen == GameScreen::Chapter3_House3D) {
         m_house3D.Render3D(eng);
         return;
@@ -1711,6 +1815,15 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
     }
     if (m_screen == GameScreen::Chapter2_Motel3D) {
         m_motel3D.RenderUI(eng);
+        m_settingsUI.Render(eng);
+        return;
+    }
+    if (m_screen == GameScreen::CustomChapter) {
+        m_custom.RenderUI(eng);
+        if (game::chapter3::Ch3Graphics::Get().showFps) {
+            std::string fpsText = std::to_string(GetFPS()) + " FPS";
+            DrawTextEx(eng.Assets().GetMainFont(), fpsText.c_str(), {16.0f, 12.0f}, 18.0f, 1.0f, Color{150, 255, 150, 230});
+        }
         m_settingsUI.Render(eng);
         return;
     }
@@ -1829,6 +1942,7 @@ void LastOrderGame::OnRenderUI(engine::core::Engine& eng) {
 
 void LastOrderGame::OnShutdown(engine::core::Engine& eng) {
     m_motel3D.Shutdown(eng);
+    if (m_screen == GameScreen::CustomChapter) m_custom.Shutdown(eng);
     if (IsCursorHidden()) EnableCursor();
 }
 

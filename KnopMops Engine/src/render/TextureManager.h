@@ -22,9 +22,13 @@ public:
 
     void Init(const std::string& assetsPath = "assets/textures");
     void Shutdown();
+    // Дополнительная папка с текстурами (например, textures/ внутри проекта главы).
+    void AddDirectory(const std::string& dir);
 
     Texture2D GetTexture(const std::string& name);
     const std::vector<TextureItem>& GetAllTextures() const { return m_items; }
+    // Путь к исходному PNG (для экспорта главы) или пусто.
+    std::string FindFile(const std::string& name) const;
 
     Texture2D GetDefaultGridTexture() const { return m_defaultGrid; }
 
@@ -39,4 +43,3 @@ private:
 };
 
 }
-
