@@ -32,6 +32,8 @@ enum class GameScreen {
 class LastOrderGame : public engine::core::IGame {
 public:
     void RequestChapter2Tour(const std::string& outputDir) { m_pendingChapter2 = true; m_chapter2TourDir = outputDir; }
+    void RequestChapter3Holdout(int renderer) { m_pendingChapter3 = true; m_chapter3Holdout = true; m_chapter3Renderer = renderer; }
+    void RequestChapter3CutsceneTour(int renderer) { m_pendingChapter3 = true; m_chapter3CutsceneTour = true; m_chapter3Renderer = renderer; }
     void RequestChapter3(bool tour, int renderer = -1) { m_pendingChapter3 = true; m_chapter3Tour = tour; m_chapter3Renderer = renderer; }
     void OnInit(engine::core::Engine& eng) override;
     void OnFixedUpdate(engine::core::Engine& eng, float fixedDt) override;
@@ -47,6 +49,8 @@ private:
     std::string m_chapter2TourDir;
     bool m_pendingChapter3 = false;
     bool m_chapter3Tour = false;
+    bool m_chapter3CutsceneTour = false;
+    bool m_chapter3Holdout = false;
     int m_chapter3Renderer = -1;
     void StartNewShift(engine::core::Engine& eng, int nightNumber, bool withTutorial);
     void StartEndlessShift(engine::core::Engine& eng);

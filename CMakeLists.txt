@@ -120,7 +120,7 @@ set(GAME_SOURCES
     src/game/chapter3/Cutscene3D.cpp
     src/game/chapter3/ItemRandomizer.cpp
     src/game/chapter3/WeaponAssembly.cpp
-    src/game/chapter3/GrannyAI.cpp
+    src/game/chapter3/ProwlerAI.cpp
     src/game/chapter3/EscapeManager.cpp
     src/game/chapter3/HouseLevel.cpp
     src/game/chapter3/HouseHd.cpp

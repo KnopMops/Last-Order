@@ -308,9 +308,24 @@ float RtVisible(float3 origin, float3 dir, float tmax)
 float RtSoftShadow(float3 P, float3 N, float3 lightPos, float lightRadius, float2 seed)
 {
     float3 origin = P + N * 0.03;
-    float3 d = lightPos - origin;
-    float dl = length(d);
-    return RtVisible(origin, d / dl, dl - 0.05);
+    float3 d0 = lightPos - origin;
+    float dl = length(d0);
+    float3 L = d0 / dl;
+    float3 t = normalize(cross(L, abs(L.y) < 0.9 ? float3(0, 1, 0) : float3(1, 0, 0)));
+    float3 b = cross(L, t);
+    float ign = frac(52.9829189 * frac(dot(seed, float2(0.06711056, 0.00583715))));
+    float lit = 0.0;
+    [unroll]
+    for (int k = 0; k < 5; ++k)
+    {
+        float r = sqrt((k + 0.5) / 5.0) * lightRadius;
+        float ang = k * 2.399963 + ign * 6.2831853;
+        float3 p = lightPos + (t * cos(ang) + b * sin(ang)) * r;
+        float3 d = p - origin;
+        float len = length(d);
+        lit += RtVisible(origin, d / len, len - 0.06);
+    }
+    return lit * 0.2;
 }
 
 float3 RtReflection(float3 P, float3 R)
@@ -395,11 +410,13 @@ float4 PSScene(VSOut i) : SV_Target
         float3 L = toL / dist;
         float x = dist / radius;
         float win = saturate(1.0 - x * x * x * x);
-        float att = win * win / (dist * dist + 0.6);
+        float att = win * win / (dist * dist + 1.6);
+        att *= lerp(0.3, 1.0, smoothstep(-0.25, 0.55, L.y));
+        att *= 1.6;
         float shadow = 1.0;
 #if HD_RT
         if (gRt.x > 0.5)
-            shadow = RtSoftShadow(i.wpos, N, gLightPos[li].xyz, 0.12, i.pos.xy + li * 11.0);
+            shadow = RtSoftShadow(i.wpos, N, gLightPos[li].xyz, 0.3, i.pos.xy + li * 11.0);
         else
 #endif
         {
@@ -421,11 +438,11 @@ float4 PSScene(VSOut i) : SV_Target
         if (cone > 0.0 && dist < gSpotPos.w)
         {
             float range = 1.0 - smoothstep(gSpotPos.w * 0.55, gSpotPos.w, dist);
-            float att = 1.0 / (1.0 + 0.1 * dist + 0.045 * dist * dist);
+            float att = 1.0 / (1.0 + 0.3 * dist + 0.1 * dist * dist);
             float shadow = 1.0;
 #if HD_RT
             if (gRt.x > 0.5)
-                shadow = RtSoftShadow(i.wpos, N, gSpotPos.xyz, 0.03, i.pos.xy + 91.0);
+                shadow = RtSoftShadow(i.wpos, N, gSpotPos.xyz, 0.06, i.pos.xy + 91.0);
             else
 #endif
                 shadow = SpotShadowAt(i.wpos, N, 0.03);

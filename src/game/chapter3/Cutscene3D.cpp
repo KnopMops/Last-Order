@@ -27,6 +27,9 @@ bool CutsceneEngine::Load(const std::string& jsonPath) {
     m_activeSubtitle.clear();
     m_subtitleRemaining = 0.0f;
     m_fadeAlpha = 0.0f;
+    m_flashAlpha = 0.0f;
+    m_fadeTarget = 0.0f;
+    m_fadeColor = Color{0, 0, 0, 255};
 
     m_name = root.value("name", "cutscene");
     m_duration = root.value("duration", 5.0f);
@@ -78,6 +81,9 @@ bool CutsceneEngine::Load(const std::string& jsonPath) {
 
 void CutsceneEngine::Play() {
     m_currentTime = 0.0f;
+    m_fadeAlpha = 0.0f;
+    m_fadeTarget = 0.0f;
+    m_flashAlpha = 0.0f;
     m_playing = true;
     m_activeSubtitle.clear();
     m_subtitleRemaining = 0.0f;
@@ -141,6 +147,8 @@ void CutsceneEngine::Update(engine::core::Engine& eng, float dt, Camera3D& outCa
         }
     }
 
+    if (m_flashAlpha > 0.0f) m_flashAlpha = std::max(0.0f, m_flashAlpha - m_flashDecay * dt);
+
     if (m_subtitleRemaining > 0.0f) {
         m_subtitleRemaining -= dt;
         if (m_subtitleRemaining <= 0.0f) {
@@ -164,12 +172,16 @@ void CutsceneEngine::Update(engine::core::Engine& eng, float dt, Camera3D& outCa
                 m_fadeAlpha = 0.0f;
                 m_fadeTarget = 1.0f;
                 m_fadeSpeed = (ev.duration > 0.01f ? 1.0f / ev.duration : 10.0f);
+            } else if (ev.type == "flash") {
+                m_flashAlpha = ev.volume > 0.0f ? std::min(1.0f, ev.volume) : 0.6f;
+                m_flashDecay = m_flashAlpha / std::max(0.05f, ev.duration);
+                m_flashColor = ev.param == "red" ? Color{200, 10, 10, 255} : (ev.param == "blue" ? Color{40, 70, 255, 255} : Color{255, 255, 255, 255});
             } else if (ev.type == "shake") {
                 eng.Renderer().TriggerShake(ev.volume, ev.duration);
             }
 
             if (m_customCallback) {
-                m_customCallback(ev.type, ev.param, ev.coords);
+                m_customCallback(ev);
             }
         }
     }
@@ -213,6 +225,7 @@ void CutsceneEngine::RenderUI(engine::core::Engine& eng) {
         DrawTextEx(fontSmall, "[SPACE / ESC] Пропустить", {20.0f, static_cast<float>(screenH - 30)}, 16.0f, 1.0f, ColorAlpha(LIGHTGRAY, 0.4f));
     }
 
+    if (m_flashAlpha > 0.001f) DrawRectangle(0, 0, screenW, screenH, ColorAlpha(m_flashColor, m_flashAlpha));
     if (m_fadeAlpha > 0.001f) {
         DrawRectangle(0, 0, screenW, screenH, ColorAlpha(m_fadeColor, m_fadeAlpha));
     }

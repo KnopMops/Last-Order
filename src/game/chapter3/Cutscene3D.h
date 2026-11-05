@@ -28,7 +28,7 @@ struct CutsceneEvent {
 
 class CutsceneEngine {
 public:
-    using EventCallback = std::function<void(const std::string& type, const std::string& param, Vector3 coords)>;
+    using EventCallback = std::function<void(const CutsceneEvent& ev)>;
 
     bool Load(const std::string& jsonPath);
     void Play();
@@ -52,6 +52,9 @@ private:
     std::string m_activeSubtitle;
     float m_subtitleRemaining = 0.0f;
     float m_fadeAlpha = 0.0f;
+    float m_flashAlpha = 0.0f;
+    float m_flashDecay = 2.0f;
+    Color m_flashColor{255, 255, 255, 255};
     float m_fadeTarget = 0.0f;
     float m_fadeSpeed = 2.0f;
     Color m_fadeColor{0, 0, 0, 255};

@@ -101,6 +101,38 @@ float Noise(int a) {
     return static_cast<float>(x & 0xFFFFu) / 65535.0f;
 }
 
+Image MakePerson(Color vest, Color sleeve, Color pants, Color hair, Color helmet, bool hasHelmet, bool longHair, Color stripe) {
+    Image img = GenImageColor(48, 96, BLANK);
+    Color skin{214, 170, 140, 255};
+    Color boot{28, 26, 26, 255};
+    ImageDrawRectangle(&img, 15, 58, 8, 32, pants);
+    ImageDrawRectangle(&img, 25, 58, 8, 32, pants);
+    ImageDrawRectangle(&img, 14, 88, 10, 7, boot);
+    ImageDrawRectangle(&img, 25, 88, 10, 7, boot);
+    ImageDrawRectangle(&img, 12, 26, 24, 34, vest);
+    ImageDrawRectangle(&img, 12, 38, 24, 3, stripe);
+    ImageDrawRectangle(&img, 12, 46, 24, 3, stripe);
+    ImageDrawRectangle(&img, 5, 28, 7, 26, sleeve);
+    ImageDrawRectangle(&img, 36, 28, 7, 26, sleeve);
+    ImageDrawRectangle(&img, 5, 54, 7, 6, skin);
+    ImageDrawRectangle(&img, 36, 54, 7, 6, skin);
+    ImageDrawRectangle(&img, 21, 20, 6, 7, skin);
+    ImageDrawCircle(&img, 24, 14, 9, skin);
+    if (hasHelmet) {
+        ImageDrawRectangle(&img, 14, 3, 20, 9, helmet);
+        ImageDrawRectangle(&img, 12, 11, 24, 2, helmet);
+    } else {
+        ImageDrawRectangle(&img, 15, 3, 18, 8, hair);
+        if (longHair) {
+            ImageDrawRectangle(&img, 14, 8, 4, 24, hair);
+            ImageDrawRectangle(&img, 30, 8, 4, 24, hair);
+        }
+    }
+    ImageDrawRectangle(&img, 20, 14, 2, 2, Color{30, 24, 24, 255});
+    ImageDrawRectangle(&img, 26, 14, 2, 2, Color{30, 24, 24, 255});
+    return img;
+}
+
 Image MakeFlashlightIcon() {
     Image img = GenImageColor(64, 64, BLANK);
     ImageDrawRectangle(&img, 8, 27, 30, 11, Color{50, 52, 58, 255});
@@ -115,7 +147,7 @@ Image MakeFlashlightIcon() {
 
 int HouseHd::TextureHandle(engine::core::Engine& eng, const std::string& name) {
     if (name == "@white") return 0;
-    for (const auto& [n, h] : m_textureCache) {
+    for (const auto& [n, h] : m_cur->textureCache) {
         if (n == name) return h;
     }
     std::string path = eng.Assets().GetBaseDir() + "/sprites/3d/" + name + ".png";
@@ -124,32 +156,32 @@ int HouseHd::TextureHandle(engine::core::Engine& eng, const std::string& name) {
     int handle = 0;
     if (img.data != nullptr) {
         ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-        handle = m_renderer->CreateTexture(static_cast<const uint8_t*>(img.data), img.width, img.height);
+        handle = m_cur->renderer->CreateTexture(static_cast<const uint8_t*>(img.data), img.width, img.height);
         if (handle < 0) handle = 0;
     }
     UnloadImage(img);
-    m_textureCache.emplace_back(name, handle);
+    m_cur->textureCache.emplace_back(name, handle);
     return handle;
 }
 
 int HouseHd::ItemTexture(engine::core::Engine& eng, const std::string& icon) {
-    if (icon == "@flashlight") return m_flashlightTex;
-    if (icon == "@batteries" || icon.empty()) return m_glowTex;
-    for (const auto& [n, h] : m_textureCache) {
+    if (icon == "@flashlight") return m_cur->flashlightTex;
+    if (icon == "@batteries" || icon.empty()) return m_cur->glowTex;
+    for (const auto& [n, h] : m_cur->textureCache) {
         if (n == icon) return h;
     }
     std::string path = eng.Assets().GetBaseDir() + "/" + icon;
-    int handle = m_glowTex;
+    int handle = m_cur->glowTex;
     if (FileExists(path.c_str())) {
         Image img = LoadImage(path.c_str());
         if (img.data != nullptr) {
             ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
-            int t = m_renderer->CreateTexture(static_cast<const uint8_t*>(img.data), img.width, img.height);
+            int t = m_cur->renderer->CreateTexture(static_cast<const uint8_t*>(img.data), img.width, img.height);
             if (t >= 0) handle = t;
         }
         UnloadImage(img);
     }
-    m_textureCache.emplace_back(icon, handle);
+    m_cur->textureCache.emplace_back(icon, handle);
     return handle;
 }
 
@@ -179,36 +211,97 @@ void HouseHd::AddTrees(engine::core::Engine& eng, const HouseLevel& level) {
     int barkTex = TextureHandle(eng, "motel_bark");
     int pineTex = TextureHandle(eng, "motel_pine");
     for (auto& [key, cell] : cells) {
-        int bm = m_renderer->CreateMesh(cell.first, bark, barkTex);
-        if (bm >= 0) m_meshTags.emplace_back(bm, "");
-        int pm = m_renderer->CreateMesh(cell.second, pine, pineTex);
-        if (pm >= 0) m_meshTags.emplace_back(pm, "");
+        int bm = m_cur->renderer->CreateMesh(cell.first, bark, barkTex);
+        if (bm >= 0) m_cur->meshTags.emplace_back(bm, "");
+        int pm = m_cur->renderer->CreateMesh(cell.second, pine, pineTex);
+        if (pm >= 0) m_cur->meshTags.emplace_back(pm, "");
     }
 }
 
 bool HouseHd::Init(engine::core::Engine& eng, const HouseLevel& level, engine::hd::HdApi api) {
     Shutdown(eng);
     m_level = &level;
-    m_renderer = engine::hd::CreateHdRenderer(api);
-    if (!m_renderer) {
+    const Ch3Graphics& cfg = Ch3Graphics::Get();
+    bool ok = false;
+    if (api == engine::hd::HdApi::D3D11) {
+        engine::hd::HdCapabilities caps = engine::hd::ProbeCapabilities(eng.Assets().GetBaseDir());
+        if (caps.d3d12 && caps.dxr && caps.dxc) {
+            engine::hd::HdQuality q = cfg.ToQuality();
+            q.rayTracing = 3;
+            m_forceRt = true;
+            ok = InitBackend(m_main, eng, level, engine::hd::HdApi::D3D12, q);
+            if (ok && !m_main.renderer->SupportsRayTracing()) ok = false;
+            if (!ok) {
+                TraceLog(LOG_WARNING, "CH3 HD: DXR renderer unavailable (%s), using DX11", m_info.c_str());
+                ShutdownBackend(m_main);
+                m_forceRt = false;
+            }
+        }
+    }
+    if (!ok) ok = InitBackend(m_main, eng, level, api, cfg.ToQuality());
+    m_cur = &m_main;
+    return ok;
+}
+
+bool HouseHd::InitBackend(Backend& b, engine::core::Engine& eng, const HouseLevel& level, engine::hd::HdApi api, const engine::hd::HdQuality& quality) {
+    m_cur = &b;
+    m_cur->renderer = engine::hd::CreateHdRenderer(api);
+    if (!m_cur->renderer) {
         m_info = "HD renderer is not available for the requested API";
         return false;
     }
-    const Ch3Graphics& cfg = Ch3Graphics::Get();
     engine::hd::HdInitDesc desc;
     desc.width = 1280;
     desc.height = 720;
     desc.shaderDir = eng.Assets().GetBaseDir() + "/shaders/hd";
-    desc.quality = cfg.ToQuality();
-    if (!m_renderer->Init(desc)) {
-        m_info = m_renderer->LastError();
-        m_renderer.reset();
+    desc.quality = quality;
+    if (!m_cur->renderer->Init(desc)) {
+        m_info = m_cur->renderer->LastError();
+        m_cur->renderer.reset();
         return false;
     }
 
-    m_textureCache.clear();
-    m_meshTags.clear();
-    m_phantomTex = TextureHandle(eng, "motel_phantom");
+    m_cur->textureCache.clear();
+    m_cur->meshTags.clear();
+    m_cur->phantomTex = TextureHandle(eng, "motel_phantom");
+    {
+        Image resc = MakePerson(Color{34, 48, 92, 255}, Color{34, 48, 92, 255}, Color{22, 28, 48, 255}, BLACK, Color{26, 34, 66, 255}, true, false, Color{58, 76, 128, 255});
+        ImageDrawRectangle(&resc, 21, 30, 5, 5, Color{210, 190, 90, 255});
+        int h = m_cur->renderer->CreateTexture(static_cast<const uint8_t*>(resc.data), resc.width, resc.height);
+        m_cur->rescuerTex = h >= 0 ? h : m_cur->glowTex;
+        UnloadImage(resc);
+        Image lera = MakePerson(Color{170, 40, 50, 255}, Color{170, 40, 50, 255}, Color{50, 65, 95, 255}, Color{45, 28, 20, 255}, WHITE, false, true, Color{235, 235, 235, 255});
+        int h2 = m_cur->renderer->CreateTexture(static_cast<const uint8_t*>(lera.data), lera.width, lera.height);
+        m_cur->leraTex = h2 >= 0 ? h2 : m_cur->glowTex;
+        UnloadImage(lera);
+    }
+    {
+        std::string path = eng.Assets().GetBaseDir() + "/sprites/3d/motel_phantom.png";
+        Image img = LoadImage(path.c_str());
+        if (img.data != nullptr) {
+            ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+            unsigned char* px = static_cast<unsigned char*>(img.data);
+            for (int y = 0; y < img.height; ++y) {
+                for (int x = 0; x < img.width; ++x) {
+                    float fx = (static_cast<float>(x) / static_cast<float>(img.width) - 0.465f) / 0.13f;
+                    float fy = (static_cast<float>(y) / static_cast<float>(img.height) - 0.178f) / 0.095f;
+                    if (fx * fx + fy * fy > 1.0f) continue;
+                    unsigned char* p = px + (static_cast<size_t>(y) * img.width + x) * 4;
+                    if (p[3] < 8) continue;
+                    float streak = 0.55f + 0.45f * Noise(x * 7 + (y / 3) * 131);
+                    unsigned char v = static_cast<unsigned char>(22.0f + 30.0f * streak);
+                    p[0] = v;
+                    p[1] = static_cast<unsigned char>(v * 0.95f);
+                    p[2] = static_cast<unsigned char>(v * 0.9f);
+                }
+            }
+            int h = m_cur->renderer->CreateTexture(px, img.width, img.height);
+            m_cur->phantomBackTex = h >= 0 ? h : m_cur->phantomTex;
+        } else {
+            m_cur->phantomBackTex = m_cur->phantomTex;
+        }
+        UnloadImage(img);
+    }
 
     std::vector<uint8_t> glow(32 * 32 * 4);
     for (int y = 0; y < 32; ++y) {
@@ -223,9 +316,9 @@ bool HouseHd::Init(engine::core::Engine& eng, const HouseLevel& level, engine::h
             px[3] = static_cast<uint8_t>(a * 255.0f);
         }
     }
-    m_glowTex = m_renderer->CreateTexture(glow.data(), 32, 32);
+    m_cur->glowTex = m_cur->renderer->CreateTexture(glow.data(), 32, 32);
     Image fl = MakeFlashlightIcon();
-    m_flashlightTex = m_renderer->CreateTexture(static_cast<const uint8_t*>(fl.data), fl.width, fl.height);
+    m_cur->flashlightTex = m_cur->renderer->CreateTexture(static_cast<const uint8_t*>(fl.data), fl.width, fl.height);
     UnloadImage(fl);
 
     size_t totalVerts = 0;
@@ -260,16 +353,16 @@ bool HouseHd::Init(engine::core::Engine& eng, const HouseLevel& level, engine::h
             dst.push_back(all[t + 2]);
         }
         for (auto& [key, verts] : cells) {
-            int handle = m_renderer->CreateMesh(verts, m, texHandle);
-            if (handle >= 0) m_meshTags.emplace_back(handle, b.tag);
+            int handle = m_cur->renderer->CreateMesh(verts, m, texHandle);
+            if (handle >= 0) m_cur->meshTags.emplace_back(handle, b.tag);
         }
     }
     AddTrees(eng, level);
-    m_renderer->FinishLoading();
+    m_cur->renderer->FinishLoading();
 
-    m_info = std::string(m_renderer->ApiName()) + " / " + m_renderer->AdapterName() + (m_renderer->SupportsRayTracing() ? " / DXR" : "");
-    TraceLog(LOG_WARNING, "CH3 HD: %s, %d meshes, %d textures, %d vertices", m_info.c_str(), static_cast<int>(m_meshTags.size()),
-             static_cast<int>(m_textureCache.size()), static_cast<int>(totalVerts));
+    m_info = std::string(m_cur->renderer->ApiName()) + " / " + m_cur->renderer->AdapterName() + (m_cur->renderer->SupportsRayTracing() ? " / DXR" : "");
+    TraceLog(LOG_WARNING, "CH3 HD: %s, %d meshes, %d textures, %d vertices", m_info.c_str(), static_cast<int>(m_cur->meshTags.size()),
+             static_cast<int>(m_cur->textureCache.size()), static_cast<int>(totalVerts));
     return true;
 }
 
@@ -277,10 +370,16 @@ void HouseHd::Shutdown(engine::core::Engine& eng) {
     eng.Renderer().SetNativeOverlay(nullptr);
     if (m_overlay.id != 0) UnloadTexture(m_overlay);
     m_overlay = Texture2D{};
-    m_meshTags.clear();
-    m_textureCache.clear();
-    if (m_renderer) m_renderer->Shutdown();
-    m_renderer.reset();
+    ShutdownBackend(m_main);
+    ShutdownBackend(m_rt);
+    m_cur = &m_main;
+}
+
+void HouseHd::ShutdownBackend(Backend& b) {
+    b.meshTags.clear();
+    b.textureCache.clear();
+    if (b.renderer) b.renderer->Shutdown();
+    b.renderer.reset();
 }
 
 void HouseHd::EnsureOverlay(int w, int h) {
@@ -294,7 +393,13 @@ void HouseHd::EnsureOverlay(int w, int h) {
 }
 
 void HouseHd::Render(engine::core::Engine& eng, const HouseHdInput& in) {
-    if (!m_renderer) return;
+    m_cur = &m_main;
+    static Backend* lastLogged = nullptr;
+    if (lastLogged != m_cur) {
+        lastLogged = m_cur;
+        TraceLog(LOG_WARNING, "CH3 HD: active backend -> %s", m_cur == &m_rt ? "DX12 ray tracing (bathroom)" : "DX11");
+    }
+    if (!m_cur->renderer) return;
     const Ch3Graphics& cfg = Ch3Graphics::Get();
 
     Rectangle present = eng.Renderer().GetPresentRect();
@@ -308,14 +413,15 @@ void HouseHd::Render(engine::core::Engine& eng, const HouseHdInput& in) {
     }
     w = std::max(640, w & ~1);
     h = std::max(360, h & ~1);
-    if (w != m_renderer->Width() || h != m_renderer->Height()) m_renderer->Resize(w, h);
+    if (w != m_cur->renderer->Width() || h != m_cur->renderer->Height()) m_cur->renderer->Resize(w, h);
 
-    for (const auto& [mesh, tag] : m_meshTags) {
-        m_renderer->SetMeshVisible(mesh, in.batchVisible ? in.batchVisible(tag) : true);
+    for (const auto& [mesh, tag] : m_cur->meshTags) {
+        m_cur->renderer->SetMeshVisible(mesh, in.batchVisible ? in.batchVisible(tag) : true);
     }
 
     HdFrameParams f;
     f.quality = cfg.ToQuality();
+    if (m_forceRt) f.quality.rayTracing = 3;
     f.camPos[0] = in.camera.position.x; f.camPos[1] = in.camera.position.y; f.camPos[2] = in.camera.position.z;
     f.camTarget[0] = in.camera.target.x; f.camTarget[1] = in.camera.target.y; f.camTarget[2] = in.camera.target.z;
     f.camUp[0] = in.camera.up.x; f.camUp[1] = in.camera.up.y; f.camUp[2] = in.camera.up.z;
@@ -339,7 +445,7 @@ void HouseHd::Render(engine::core::Engine& eng, const HouseHdInput& in) {
     f.fogColor[0] = 0.008f + 0.008f * o; f.fogColor[1] = 0.010f + 0.015f * o; f.fogColor[2] = 0.015f + 0.03f * o;
     f.fogDensity = 0.032f + 0.05f * o;
     f.scatterDensity = 0.08f * (1.0f - o) + 0.035f * o;
-    f.bakedScale = 0.1f;
+    f.bakedScale = 0.0f;
     if (in.day >= 3) {
         f.ambientSky[0] *= 0.8f; f.ambientSky[1] *= 0.8f; f.ambientSky[2] *= 0.8f;
     }
@@ -355,10 +461,10 @@ void HouseHd::Render(engine::core::Engine& eng, const HouseHdInput& in) {
             d.color[0] = l.color.x; d.color[1] = l.color.y; d.color[2] = l.color.z;
             d.radius = l.radius * 1.2f;
             float flick = 1.0f;
-            float dg = Vector3Distance(in.grannyPos, l.position);
+            float dg = Vector3Distance(in.prowlerPos, l.position);
             bool unstable = false;
             if (unstable) {
-                float rate = in.grannyChasing ? 24.0f : 11.0f;
+                float rate = in.prowlerChasing ? 24.0f : 11.0f;
                 int tick = static_cast<int>(in.time * rate) + static_cast<int>(i) * 13;
                 float n = Noise(tick);
                 float thr = 0.18f;
@@ -370,13 +476,13 @@ void HouseHd::Render(engine::core::Engine& eng, const HouseHdInput& in) {
         }
     }
 
-    if (!in.grannyStunned) {
+    if (!in.prowlerStunned && !in.hideProwler) {
         HdLightDesc g;
-        g.pos[0] = in.grannyPos.x; g.pos[1] = in.grannyPos.y + 1.7f; g.pos[2] = in.grannyPos.z;
+        g.pos[0] = in.prowlerPos.x; g.pos[1] = in.prowlerPos.y + 1.7f; g.pos[2] = in.prowlerPos.z;
         float pulse = 0.7f + 0.3f * std::sin(in.time * 6.0f);
         g.color[0] = 1.0f; g.color[1] = 0.05f; g.color[2] = 0.03f;
-        g.radius = in.grannyChasing ? 5.0f : 3.2f;
-        g.intensity = (in.grannyChasing ? 20.0f : 7.0f) * pulse;
+        g.radius = in.prowlerChasing ? 5.0f : 3.2f;
+        g.intensity = (in.prowlerChasing ? 20.0f : 7.0f) * pulse;
         g.id = -1;
         f.lights.push_back(g);
     }
@@ -384,35 +490,56 @@ void HouseHd::Render(engine::core::Engine& eng, const HouseHdInput& in) {
     f.spot.enabled = in.flashOn;
     f.spot.pos[0] = in.flashPos.x; f.spot.pos[1] = in.flashPos.y; f.spot.pos[2] = in.flashPos.z;
     f.spot.dir[0] = in.flashDir.x; f.spot.dir[1] = in.flashDir.y; f.spot.dir[2] = in.flashDir.z;
-    f.spot.innerCos = std::cos(14.0f * DEG2RAD);
-    f.spot.outerCos = std::cos(27.0f * DEG2RAD);
+    f.spot.innerCos = std::cos(9.0f * DEG2RAD);
+    f.spot.outerCos = std::cos(30.0f * DEG2RAD);
     f.spot.range = 15.0f;
-    f.spot.intensity = 32.0f * in.flashPower;
+    f.spot.intensity = 11.0f * in.flashPower;
     f.spot.color[0] = 1.0f; f.spot.color[1] = 0.9f; f.spot.color[2] = 0.74f;
 
-    if (!(in.grannyStunned && in.grannyStunLeft <= 0.05f)) {
-        float dist = Vector3Distance(in.camera.position, in.grannyPos);
+    for (const HouseHdActor& a : in.actors) {
+        if (f.billboards.size() >= 48) break;
+        float h = a.dead ? 0.55f : 1.9f;
+        float sink = a.dead ? std::min(1.0f, a.deadT * 3.0f) : 0.0f;
+        float hh = 1.9f * (1.0f - 0.7f * sink);
+        HdBillboard b;
+        b.center[0] = a.pos.x; b.center[1] = a.pos.y + hh * 0.5f - 0.04f * sink; b.center[2] = a.pos.z;
+        b.size[0] = 0.95f * (a.dead ? 1.0f + 0.5f * sink : 1.0f);
+        b.size[1] = hh;
+        float shade = a.dead ? 0.55f - 0.3f * sink : 0.95f;
+        b.tint[0] = shade * (a.dead ? 1.3f : 1.0f); b.tint[1] = shade * (a.dead ? 0.5f : 1.0f); b.tint[2] = shade * (a.dead ? 0.5f : 1.0f); b.tint[3] = a.alpha;
+        b.emissive = 0.35f;
+        b.texture = a.kind == 2 ? m_cur->leraTex : m_cur->rescuerTex;
+        (void)h;
+        f.billboards.push_back(b);
+    }
+
+    if (!in.hideProwler && !(in.prowlerStunned && in.prowlerStunLeft <= 0.05f)) {
+        float dist = Vector3Distance(in.camera.position, in.prowlerPos);
         float fog = std::clamp(1.0f - (dist - 7.0f) / 25.0f, 0.1f, 1.0f);
         float jitter = std::sin(in.time * 55.0f) > 0.3f ? 0.03f : -0.03f;
-        float rise = in.grannyStunned ? 0.25f : 1.0f;
-        float alpha = in.grannyStunned ? std::clamp(in.grannyStunLeft / 4.0f, 0.0f, 0.55f) : 1.0f;
+        float rise = in.prowlerStunned ? 0.25f : 1.0f;
+        float alpha = in.prowlerStunned ? std::clamp(in.prowlerStunLeft / 4.0f, 0.0f, 0.55f) : 1.0f;
         float sizeY = 2.5f * (0.3f + 0.7f * rise);
         HdBillboard b;
-        b.center[0] = in.grannyPos.x + jitter;
-        b.center[1] = in.grannyPos.y + sizeY * 0.5f - (1.0f - rise) * 0.2f;
-        b.center[2] = in.grannyPos.z;
+        b.center[0] = in.prowlerPos.x + jitter;
+        b.center[1] = in.prowlerPos.y + sizeY * 0.5f - (1.0f - rise) * 0.2f;
+        b.center[2] = in.prowlerPos.z;
         b.size[0] = 1.25f;
         b.size[1] = sizeY;
-        float shade = (0.25f + 0.75f * fog) * (in.grannyChasing ? 1.0f : 0.8f);
-        b.tint[0] = shade * (in.grannyChasing ? 1.0f : 0.9f);
-        b.tint[1] = shade * (in.grannyChasing ? 0.45f : 0.85f);
-        b.tint[2] = shade * (in.grannyChasing ? 0.45f : 0.9f);
+        float shade = (0.25f + 0.75f * fog) * (in.prowlerChasing ? 1.0f : 0.8f);
+        b.tint[0] = shade * (in.prowlerChasing ? 1.0f : 0.9f);
+        b.tint[1] = shade * (in.prowlerChasing ? 0.45f : 0.85f);
+        b.tint[2] = shade * (in.prowlerChasing ? 0.45f : 0.9f);
         b.tint[3] = alpha;
         b.emissive = 0.45f;
-        b.texture = m_phantomTex;
+        Vector3 fwdG{std::cos(in.prowlerYaw), 0.0f, std::sin(in.prowlerYaw)};
+        Vector3 toCamG{in.camera.position.x - in.prowlerPos.x, 0.0f, in.camera.position.z - in.prowlerPos.z};
+        float tcl = Vector3Length(toCamG);
+        bool seenFromFront = tcl < 0.01f || Vector3DotProduct(fwdG, Vector3Scale(toCamG, 1.0f / tcl)) > -0.1f;
+        b.texture = seenFromFront ? m_cur->phantomTex : m_cur->phantomBackTex;
         f.billboards.push_back(b);
 
-        if (!in.grannyStunned) {
+        if (!in.prowlerStunned && seenFromFront) {
             float pulse = 0.5f + 0.5f * std::sin(in.time * 24.0f);
             for (float side : {-1.0f, 1.0f}) {
                 Vector3 fwd = Vector3Normalize(Vector3Subtract(in.camera.target, in.camera.position));
@@ -425,7 +552,7 @@ void HouseHd::Render(engine::core::Engine& eng, const HouseHdInput& in) {
                 eye.size[0] = eye.size[1] = 0.075f;
                 eye.tint[0] = 1.0f; eye.tint[1] = 0.12f + 0.1f * pulse; eye.tint[2] = 0.06f; eye.tint[3] = 1.0f;
                 eye.emissive = 30.0f;
-                eye.texture = m_glowTex;
+                eye.texture = m_cur->glowTex;
                 f.billboards.push_back(eye);
                 HdBillboard halo = eye;
                 halo.size[0] = halo.size[1] = 0.4f;
@@ -444,7 +571,7 @@ void HouseHd::Render(engine::core::Engine& eng, const HouseHdInput& in) {
         halo.size[0] = halo.size[1] = 0.42f;
         halo.tint[0] = 0.9f; halo.tint[1] = 0.8f; halo.tint[2] = 0.55f; halo.tint[3] = 0.5f;
         halo.emissive = 0.9f * pulse;
-        halo.texture = m_glowTex;
+        halo.texture = m_cur->glowTex;
         f.billboards.push_back(halo);
         HdBillboard icon;
         icon.center[0] = it.pos.x; icon.center[1] = it.pos.y + 0.07f; icon.center[2] = it.pos.z;
@@ -456,9 +583,9 @@ void HouseHd::Render(engine::core::Engine& eng, const HouseHdInput& in) {
         f.billboards.push_back(icon);
     }
 
-    if (!m_renderer->RenderFrame(f)) return;
-    EnsureOverlay(m_renderer->Width(), m_renderer->Height());
-    UpdateTexture(m_overlay, m_renderer->Pixels());
+    if (!m_cur->renderer->RenderFrame(f)) return;
+    EnsureOverlay(m_cur->renderer->Width(), m_cur->renderer->Height());
+    UpdateTexture(m_overlay, m_cur->renderer->Pixels());
     eng.Renderer().SetNativeOverlay(&m_overlay);
 }
 

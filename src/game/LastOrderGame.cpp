@@ -847,6 +847,8 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
         m_house3D.Init(eng, m_chapter3Renderer);
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
         if (m_chapter3Tour) m_house3D.StartTour();
+        if (m_chapter3CutsceneTour) m_house3D.StartCutsceneTour();
+        if (m_chapter3Holdout) m_house3D.StartHoldoutTest();
 #endif
         return;
     }

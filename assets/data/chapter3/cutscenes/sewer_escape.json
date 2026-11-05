@@ -1,16 +1,21 @@
 {
   "name": "sewer_escape",
-  "duration": 6.0,
+  "duration": 7.0,
   "camera_tracks": [
-    { "time": 0.0, "pos": [4.6, -1.5, 3.7], "target": [6.0, -2.3, 3.7], "fov": 75 },
-    { "time": 3.0, "pos": [5.6, -2.3, 3.7], "target": [9.0, -2.5, 3.7], "fov": 70 },
-    { "time": 6.0, "pos": [7.5, -2.4, 3.7], "target": [14.0, -2.4, 3.7], "fov": 60 }
+    { "time": 0.0, "pos": [3.0, -1.4, 1.8], "target": [5.9, -2.3, 3.6], "fov": 70 },
+    { "time": 3.0, "pos": [3.4, -1.7, 2.6], "target": [5.9, -2.4, 3.7], "fov": 58 },
+    { "time": 3.05, "pos": [11.0, 0.3, 3.7], "target": [19.0, 0.0, 3.7], "fov": 62 },
+    { "time": 7.0, "pos": [14.5, 0.5, 3.7], "target": [22.0, 0.2, 3.7], "fov": 58 }
   ],
   "events": [
-    { "time": 0.0, "type": "sfx", "param": "audio/sfx/sfx_pipe_valve.wav", "volume": 0.8 },
-    { "time": 0.8, "type": "subtitle", "text": "Пар перекрыт. Решётка коллектора поддалась.", "duration": 2.5 },
-    { "time": 3.2, "type": "subtitle", "text": "Сквозь дренажный лаз — прямо к горной реке!", "duration": 2.5 },
-    { "time": 5.0, "type": "fade_out", "duration": 1.0 }
+    { "time": 0.0, "type": "fade_in", "duration": 0.8 },
+    { "time": 0.0, "type": "sfx", "param": "audio/sfx/sfx_pipe_valve.wav", "volume": 0.9 },
+    { "time": 0.8, "type": "subtitle", "text": "Пар перекрыт. Решётка коллектора поддалась.", "duration": 2.4 },
+    { "time": 2.6, "type": "sfx", "param": "audio/sfx/sfx_ch3_crowbar_pry.wav", "volume": 0.9 },
+    { "time": 2.8, "type": "fade_out", "duration": 0.25 },
+    { "time": 3.15, "type": "fade_in", "duration": 0.8 },
+    { "time": 3.4, "type": "subtitle", "text": "Сквозь дренажный лаз — прямо к горной реке!", "duration": 2.6 },
+    { "time": 3.4, "type": "sfx", "param": "audio/sfx/sfx_footstep_concrete_02.wav", "volume": 0.8 },
+    { "time": 6.0, "type": "fade_out", "duration": 1.0 }
   ]
 }
-

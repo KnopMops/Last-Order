@@ -98,8 +98,18 @@ void HouseWorld3D::Init(engine::core::Engine& eng, int rendererOverride) {
     }
 
     m_weapon.Reset();
-    m_granny.Init();
-    m_granny.SetOcclusionQuery([this](Vector3 a, Vector3 b) { return m_physics.IsStaticOccluded(a, b); });
+    m_prowler.Init();
+    {
+        std::vector<Vector3> spots;
+        for (const InteractiveProp& p : m_props) {
+            if (p.kind != PropKind::Hide) continue;
+            float floorY = p.center.y >= 6.0f ? 6.4f : (p.center.y >= 2.6f ? 3.2f : (p.center.y >= -0.5f ? 0.0f : -3.0f));
+            spots.push_back(Vector3{p.center.x, floorY, p.center.z});
+        }
+        m_prowler.SetHideSpots(spots);
+    }
+    m_cutscene.SetCustomCallback([this](const CutsceneEvent& ev) { HandleCutsceneEvent(ev); });
+    m_prowler.SetOcclusionQuery([this](Vector3 a, Vector3 b) { return m_physics.IsStaticOccluded(a, b); });
     m_escape.Reset();
 
     m_ready = true;
@@ -107,7 +117,7 @@ void HouseWorld3D::Init(engine::core::Engine& eng, int rendererOverride) {
     PlayCutscene("intro_waking_up");
 
     DisableCursor();
-    eng.Audio().PlayAmbient("audio/bgm/amb_rain_roof_lp.ogg", 0.65f);
+    eng.Audio().PlayAmbient("audio/bgm/amb_motel_storm_lp.wav", 0.65f);
 }
 
 void HouseWorld3D::SetupProps() {
@@ -123,14 +133,10 @@ void HouseWorld3D::SetupProps() {
         p.hideYaw = yaw;
         m_props.push_back(p);
     };
-    hide("hide_bed", "под кровать", {-3.4f, 3.55f, 4.4f}, {-4.2f, 3.42f, 4.3f}, PI * 0.5f);
     hide("hide_living_wardrobe", "в шкаф", {-2.0f, 1.0f, 5.2f}, {-2.0f, 1.55f, 5.22f}, 0.0f);
     hide("hide_guest_wardrobe", "в шкаф", {5.2f, 4.2f, 4.65f}, {5.22f, 4.8f, 4.65f}, -PI * 0.5f);
     hide("hide_basement_cupboard", "в кладовой шкаф", {-5.2f, -2.0f, 2.6f}, {-5.22f, -1.4f, 2.6f}, PI * 0.5f);
     hide("hide_bedroom_wardrobe", "в шкаф", {-5.2f, 4.2f, 2.35f}, {-5.22f, 4.8f, 2.35f}, PI * 0.5f);
-    hide("hide_dining_table", "под стол", {3.8f, 0.45f, 3.6f}, {3.8f, 0.6f, 3.6f}, 0.0f);
-    hide("hide_guest_bed", "под кровать", {2.15f, 3.4f, 3.1f}, {2.15f, 3.4f, 3.05f}, PI);
-    hide("hide_garage_car", "под машину", {-9.5f, 0.3f, -2.6f}, {-9.5f, 0.3f, -2.6f}, 0.0f);
 
     auto special = [this](const char* id, const char* name, PropKind kind, Vector3 center, float radius) {
         InteractiveProp p;
@@ -168,7 +174,10 @@ void HouseWorld3D::StartNewDay(engine::core::Engine& eng, int dayNumber) {
     m_fps.Update(0.0f, m_physics.GetCharacterPosition(), engine::camera3d::CameraMotion{});
     m_viewCam = m_fps.GetCamera();
 
-    m_granny.ResetToDay(dayNumber);
+    m_prowler.ResetToDay(dayNumber);
+    m_prowler.SetHunt(false);
+    m_holdout = false;
+    m_radioDone = false;
 
     m_dayTitleTimer = 4.5f;
     m_dayTitleAlpha = 1.0f;
@@ -180,6 +189,7 @@ void HouseWorld3D::StartNewDay(engine::core::Engine& eng, int dayNumber) {
 }
 
 void HouseWorld3D::PlayCutscene(const std::string& name) {
+    m_actors.clear();
     m_cutscene.SetOrigin(m_physics.GetCharacterPosition());
     if (!m_cutscene.Load(m_eng->Assets().GetBaseDir() + "/data/chapter3/cutscenes/" + name + ".json")) {
         m_cutscene.Load("assets/data/chapter3/cutscenes/" + name + ".json");
@@ -189,7 +199,7 @@ void HouseWorld3D::PlayCutscene(const std::string& name) {
 }
 
 void HouseWorld3D::TriggerNoise(engine::core::Engine&, Vector3 pos, float radius, float volume) {
-    m_granny.NotifySound(pos, radius, volume);
+    m_prowler.NotifySound(pos, radius, volume);
 }
 
 void HouseWorld3D::ShowNotification(const std::string& text, float duration) {
@@ -337,9 +347,9 @@ void HouseWorld3D::UpdateFear(engine::core::Engine& eng, float dt) {
     if (m_invOpen) UpdateInventory(eng);
 
     Vector3 feet = m_physics.GetCharacterPosition();
-    Vector3 gp = m_granny.GetPosition();
+    Vector3 gp = m_prowler.GetPosition();
     float d = Vector3Distance(gp, feet);
-    EntityState st = m_granny.GetState();
+    EntityState st = m_prowler.GetState();
     float target = 0.0f;
     if (st == EntityState::Chase) {
         target = 1.0f;
@@ -385,8 +395,8 @@ void HouseWorld3D::UpdateFlashlight(float dt) {
         power = 0.35f + 0.65f * (m_battery / 0.2f);
         stutter = false;
     }
-    if (!m_inCutscene && m_granny.GetState() != EntityState::Stunned) {
-        float d = m_granny.GetDistanceToPlayer();
+    if (!m_inCutscene && m_prowler.GetState() != EntityState::Stunned) {
+        float d = m_prowler.GetDistanceToPlayer();
         (void)d;
     }
     m_flashPower = power;
@@ -479,7 +489,8 @@ void HouseWorld3D::CheckInteractions(engine::core::Engine& eng) {
         for (size_t i = 0; i < m_props.size(); ++i) {
             const InteractiveProp& p = m_props[i];
             if (p.kind != PropKind::Hide) continue;
-            if (std::abs(p.center.y - feet.y) > 2.4f) continue;
+            float hideFloor = p.center.y >= 6.0f ? 6.4f : (p.center.y >= 2.6f ? 3.2f : (p.center.y >= -0.5f ? 0.0f : -3.0f));
+            if (std::abs(hideFloor - feet.y) > 1.2f) continue;
             Vector3 to{p.center.x - feet.x, 0.0f, p.center.z - feet.z};
             float d = Vector3Length(to);
             if (d > bestD) continue;
@@ -547,6 +558,10 @@ void HouseWorld3D::CheckInteractions(engine::core::Engine& eng) {
             if (t < 0.15f || t > USE_RANGE) continue;
             float perp = Vector3Distance(Vector3Add(origin, Vector3Scale(dir, t)), p.center);
             if (perp > p.radius) continue;
+            if (p.kind == PropKind::Hide) {
+                float hf = p.center.y >= 6.0f ? 6.4f : (p.center.y >= 2.6f ? 3.2f : (p.center.y >= -0.5f ? 0.0f : -3.0f));
+                if (std::abs(hf - m_physics.GetCharacterPosition().y) > 1.2f) continue;
+            }
             if (t > limit + p.radius + 0.15f) continue;
             float score = perp + t * 0.1f;
             if (score < best) {
@@ -668,7 +683,10 @@ void HouseWorld3D::CheckInteractions(engine::core::Engine& eng) {
             bool ok = m_escape.TryInteractRadio(eng, activeItem, 94.5f, msg);
             ShowNotification(msg);
             if (ok && (activeItem == "item_radio_fuse" || activeItem == "item_vacuum_tube")) ConsumeActiveItem();
-            if (m_escape.GetRadioState().IsReady()) PlayCutscene("radio_ending");
+            if (m_escape.GetRadioState().IsReady() && !m_radioDone) {
+                m_radioDone = true;
+                PlayCutscene("radio_ending");
+            }
         }
         return;
     case PropKind::Slot:
@@ -734,6 +752,7 @@ void HouseWorld3D::CheckInteractions(engine::core::Engine& eng) {
 void HouseWorld3D::StartTour() {
     m_hasFlashlight = true;
     m_flashlightOn = true;
+    std::fill(m_lampOn.begin(), m_lampOn.end(), static_cast<unsigned char>(1));
     m_tour = {
         {"ch3_01_bedroom_bed", {-3.0f, 3.25f, 3.2f}, 46.4f, -18.0f},
         {"ch3_02_bedroom_door", {-3.0f, 3.25f, 3.2f}, 90.0f, -5.0f},
@@ -764,19 +783,112 @@ void HouseWorld3D::StartTour() {
     m_inCutscene = false;
 }
 
+void HouseWorld3D::StartHoldoutTest() {
+    m_hasFlashlight = true;
+    m_cutscene.Stop();
+    StartHoldout(*m_eng);
+    m_holdoutTimer = 15.0f;
+    TraceLog(LOG_WARNING, "CH3 HOLDOUT TEST: started, timer=%.0f", m_holdoutTimer);
+}
+
+void HouseWorld3D::StartCutsceneTour() {
+    m_hasFlashlight = true;
+    m_flashlightOn = false;
+    std::fill(m_lampOn.begin(), m_lampOn.end(), static_cast<unsigned char>(1));
+    m_csTourList = {"intro_waking_up", "entity_knockout", "front_door_escape", "car_escape", "sewer_escape", "radio_ending", "police_arrival", "game_over_day5"};
+    m_csTourIdx = 0;
+    m_csStarted = false;
+    m_cutscene.Stop();
+    m_inCutscene = false;
+    m_physics.TeleportCharacter(Vector3{0.0f, 0.05f, 1.0f});
+}
+
+void HouseWorld3D::UpdateCutsceneTour(engine::core::Engine& eng, float dt) {
+    if (m_csTourIdx >= static_cast<int>(m_csTourList.size())) {
+        eng.RequestQuit();
+        return;
+    }
+    const int cols = 4;
+    const int rows = 3;
+    const int cw = 860;
+    const int ch = 355;
+    const std::string& name = m_csTourList[m_csTourIdx];
+    if (!m_csStarted) {
+        PlayCutscene(name);
+        m_csStarted = true;
+        m_csShots = 0;
+        m_csSheet = GenImageColor(cw * cols, ch * rows, BLACK);
+    }
+    m_cutscene.Update(eng, dt, m_viewCam);
+    UpdateActors(dt);
+    UpdateFlashlight(dt);
+    float dur = m_cutscene.GetDuration();
+    while (m_csShots < cols * rows && m_cutscene.GetCurrentTime() >= dur * (static_cast<float>(m_csShots) + 0.5f) / static_cast<float>(cols * rows)) {
+        Image shot = LoadImageFromScreen();
+        ImageResize(&shot, cw, ch);
+        Rectangle dst{static_cast<float>(cw * (m_csShots % cols)), static_cast<float>(ch * (m_csShots / cols)), static_cast<float>(cw), static_cast<float>(ch)};
+        ImageDraw(&m_csSheet, shot, Rectangle{0.0f, 0.0f, static_cast<float>(cw), static_cast<float>(ch)}, dst, WHITE);
+        ImageDrawText(&m_csSheet, TextFormat("%.1fs", m_cutscene.GetCurrentTime()), static_cast<int>(dst.x) + 10, static_cast<int>(dst.y) + 8, 28, YELLOW);
+        UnloadImage(shot);
+        ++m_csShots;
+    }
+    if (!m_cutscene.IsPlaying()) {
+        std::string file = "cs_" + name + ".png";
+        ExportImage(m_csSheet, file.c_str());
+        TraceLog(LOG_WARNING, "CH3 CUTSCENE TOUR: %s (%.1fs, %d shots) -> %s", name.c_str(), dur, m_csShots, file.c_str());
+        UnloadImage(m_csSheet);
+        m_csSheet = Image{};
+        m_inCutscene = false;
+        ++m_csTourIdx;
+        m_csStarted = false;
+    }
+}
+
 void HouseWorld3D::UpdateTour(engine::core::Engine& eng, float dt) {
     if (m_tourIndex >= static_cast<int>(m_tour.size())) {
         TraceLog(LOG_WARNING, "CH3 TOUR: avg frame %.2f ms (%.0f fps) over %d frames", m_tourTime / std::max(1, m_tourTotalFrames) * 1000.0f, static_cast<float>(m_tourTotalFrames) / std::max(0.001f, m_tourTime), m_tourTotalFrames);
-        m_granny.ResetToDay(2);
+        m_prowler.LogBlockedLinks();
+        m_prowler.ResetToDay(2);
         float minY = 99.0f;
         float maxY = -99.0f;
         for (int i = 0; i < 9000; ++i) {
-            m_granny.Update(eng, 1.0f / 30.0f, Vector3{0.0f, 3.2f, 4.8f}, true, false, false);
-            Vector3 g = m_granny.GetPosition();
+            m_prowler.Update(eng, 1.0f / 30.0f, Vector3{0.0f, 3.2f, 4.8f}, true, false, false);
+            Vector3 g = m_prowler.GetPosition();
             minY = std::min(minY, g.y);
             maxY = std::max(maxY, g.y);
-            if (i % 300 == 0) TraceLog(LOG_WARNING, "CH3 AI: t=%d pos=(%.1f %.1f %.1f) state=%d", i / 30, g.x, g.y, g.z, static_cast<int>(m_granny.GetState()));
+            if (i % 300 == 0) TraceLog(LOG_WARNING, "CH3 AI: t=%d pos=(%.1f %.1f %.1f) state=%d", i / 30, g.x, g.y, g.z, static_cast<int>(m_prowler.GetState()));
         }
+        {
+            m_prowler.ResetToDay(1);
+            m_prowler.ForcePose(Vector3{0.0f, 3.2f, 3.5f}, 0.0f, EntityState::Patrol);
+            m_prowler.NotifySound(Vector3{-3.0f, 3.2f, 3.0f}, 12.0f, 1.0f);
+            int lastSpot = -2;
+            int lastState = -1;
+            for (int i = 0; i < 40 * 30; ++i) {
+                m_prowler.Update(eng, 1.0f / 30.0f, Vector3{0.0f, -3.0f, -4.8f}, true, false, false);
+                int sp = m_prowler.DebugCheckSpot();
+                int st = static_cast<int>(m_prowler.GetState());
+                if (sp != lastSpot || st != lastState) {
+                    Vector3 g = m_prowler.GetPosition();
+                    TraceLog(LOG_WARNING, "CH3 AI NOISE SIM: t=%.1f state=%d checkSpot=%d pos=(%.1f %.1f %.1f)", static_cast<float>(i) / 30.0f, st, sp, g.x, g.y, g.z);
+                    lastSpot = sp;
+                    lastState = st;
+                }
+            }
+            m_prowler.ResetToDay(1);
+            m_prowler.ForcePose(Vector3{0.0f, 0.0f, 4.5f}, -1.5708f, EntityState::Patrol);
+            Vector3 pp{0.0f, 0.0f, -5.2f};
+            for (int i = 0; i < 20 * 30; ++i) {
+                bool crawlPhase = i > 45;
+                if (crawlPhase) pp = Vector3{-5.2f, 3.2f, 3.0f};
+                m_prowler.SetPlayerCrawling(crawlPhase);
+                m_prowler.Update(eng, 1.0f / 30.0f, pp, false, false, true);
+                int alert = m_prowler.ConsumeAlert();
+                if (alert != 0) TraceLog(LOG_WARNING, "CH3 AI HOLE SIM: t=%.1f alert=%d state=%d", static_cast<float>(i) / 30.0f, alert, static_cast<int>(m_prowler.GetState()));
+            }
+            m_prowler.SetPlayerCrawling(false);
+        }
+        TraceLog(LOG_WARNING, "CH3 AI: teleports=%d", m_prowler.Teleports());
         TraceLog(LOG_WARNING, "CH3 AI: y range %.1f..%.1f", minY, maxY);
         eng.RequestQuit();
         return;
@@ -786,7 +898,7 @@ void HouseWorld3D::UpdateTour(engine::core::Engine& eng, float dt) {
         m_physics.TeleportCharacter(stop.feet);
         m_fps.SetLookAngles(stop.yawDeg * DEG2RAD, stop.pitchDeg * DEG2RAD);
         m_flashDir = m_fps.GetForward();
-        m_granny.ResetToDay(1);
+        m_prowler.ResetToDay(1);
         m_tourWalk = 0.0f;
     }
     ++m_tourFrames;
@@ -824,6 +936,10 @@ void HouseWorld3D::Update(engine::core::Engine& eng, float dt) {
     m_time += dt;
     m_frameDt = dt;
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
+    if (m_csTourIdx >= 0) {
+        UpdateCutsceneTour(eng, dt);
+        return;
+    }
     if (m_tourIndex >= 0) {
         UpdateTour(eng, dt);
         return;
@@ -864,13 +980,16 @@ void HouseWorld3D::Update(engine::core::Engine& eng, float dt) {
     if (m_inCutscene) {
         if (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ESCAPE)) m_cutscene.Stop();
         m_cutscene.Update(eng, dt, m_viewCam);
+        UpdateActors(dt);
         m_physics.UpdateCharacter(dt, Vector3{0.0f, 0.0f, 0.0f}, false, INVALID_BODY);
         UpdateFlashlight(dt);
         if (!m_cutscene.IsPlaying()) {
             m_inCutscene = false;
             std::string cname = m_cutscene.GetName();
             if (cname == "entity_knockout") {
-                if (m_escape.GetCurrentDay() >= 5) {
+                if (m_holdout) {
+                    RespawnHoldout(eng);
+                } else if (m_escape.GetCurrentDay() >= 5) {
                     PlayCutscene("game_over_day5");
                 } else {
                     m_escape.AdvanceDay();
@@ -878,8 +997,11 @@ void HouseWorld3D::Update(engine::core::Engine& eng, float dt) {
                 }
             } else if (cname == "game_over_day5") {
                 m_returnToMenu = true;
-            } else if (cname == "car_escape" || cname == "front_door_escape" || cname == "sewer_escape" || cname == "radio_ending") {
+            } else if (cname == "car_escape" || cname == "front_door_escape" || cname == "sewer_escape" || cname == "police_arrival") {
+                TraceLog(LOG_WARNING, "CH3: ending %s finished -> chapter complete", cname.c_str());
                 m_chapterComplete = true;
+            } else if (cname == "radio_ending") {
+                StartHoldout(eng);
             } else {
                 m_viewCam = m_fps.GetCamera();
             }
@@ -954,12 +1076,12 @@ void HouseWorld3D::Update(engine::core::Engine& eng, float dt) {
         Vector3 shootDir = Vector3Normalize(Vector3Subtract(m_viewCam.target, m_viewCam.position));
         if (m_weapon.Fire(eng, m_viewCam.position, shootDir, 25.0f, hitPos, hitEntity)) {
             TriggerNoise(eng, feet, 50.0f, 1.0f);
-            Vector3 chest = Vector3Add(m_granny.GetPosition(), Vector3{0.0f, 1.2f, 0.0f});
+            Vector3 chest = Vector3Add(m_prowler.GetPosition(), Vector3{0.0f, 1.2f, 0.0f});
             float dist = Vector3Distance(chest, m_viewCam.position);
             float dot = Vector3DotProduct(shootDir, Vector3Normalize(Vector3Subtract(chest, m_viewCam.position)));
-            if (m_granny.GetState() != EntityState::Stunned && dot > 0.9f && dist < 20.0f &&
+            if (m_prowler.GetState() != EntityState::Stunned && dot > 0.9f && dist < 20.0f &&
                 !m_physics.IsStaticOccluded(m_viewCam.position, chest)) {
-                m_granny.ApplyShotgunStun(eng);
+                m_prowler.ApplyShotgunStun(eng);
                 ShowNotification("Прямое попадание! Сущность повержена на 30 секунд!");
             }
         }
@@ -976,20 +1098,45 @@ void HouseWorld3D::Update(engine::core::Engine& eng, float dt) {
     if (m_invOpen) m_focusPrompt.clear();
     else CheckInteractions(eng);
 
-    m_granny.Update(eng, dt, m_physics.GetCharacterPosition(), m_isHiding, m_physics.IsCharacterCrouched(), m_flash.enabled);
+    {
+        int aiSpot = -1;
+        if (m_isHiding && m_hideProp >= 0) {
+            int n = 0;
+            for (int i = 0; i < static_cast<int>(m_props.size()) && i <= m_hideProp; ++i) {
+                if (m_props[i].kind != PropKind::Hide) continue;
+                if (i == m_hideProp) aiSpot = n;
+                ++n;
+            }
+        }
+        bool crawling = false;
+        if (!m_isHiding && m_physics.IsCharacterCrouched()) {
+            Vector3 feet = m_physics.GetCharacterPosition();
+            for (const InteractiveProp& p : m_props) {
+                if (p.kind != PropKind::Vent) continue;
+                if (std::abs(feet.x - p.center.x) < 1.2f && std::abs(feet.z - p.center.z) < 1.5f && std::abs(feet.y - (p.center.y - 0.6f)) < 1.2f) crawling = true;
+            }
+        }
+        m_prowler.SetPlayerHideSpot(aiSpot);
+        m_prowler.SetPlayerCrawling(crawling);
+    }
+    m_prowler.Update(eng, dt, m_physics.GetCharacterPosition(), m_isHiding, m_physics.IsCharacterCrouched(), m_flash.enabled);
     UpdateFear(eng, dt);
-    int alert = m_granny.ConsumeAlert();
+    int alert = m_prowler.ConsumeAlert();
     if (alert != 0) {
-        static const char* lines[6] = {"", "Ага! Попался!", "Нужно проверить, где был звук...", "Видимо, показалось...", "Где же ты?..", "Куда же ты делся? Пойду поищу тут..."};
+        static const char* lines[8] = {"", "Ага! Попался!", "Нужно проверить, где был звук...", "Видимо, показалось...", "Где же ты?..", "Куда же ты делся? Пойду поищу тут...", "Вот ты где!", "Я тебя ещё поймаю..."};
         m_subText = lines[alert];
         m_subTimer = 3.2f;
-        m_subRed = alert == 1 || alert == 4 || alert == 5;
+        m_subRed = alert == 1 || alert == 4 || alert == 5 || alert == 6;
         if (alert == 1) {
             m_alertText = "ОН ВАС ЗАМЕТИЛ! БЕГИТЕ!";
             m_alertTimer = 3.0f;
             m_alertRed = true;
         } else if (alert == 2) {
             m_alertText = "МАНЬЯК УСЛЫШАЛ ШУМ И ИДЕТ ПРОВЕРЯТЬ!";
+            m_alertTimer = 3.0f;
+            m_alertRed = false;
+        } else if (alert == 7) {
+            m_alertText = "Маньяк: «Я тебя ещё поймаю...»";
             m_alertTimer = 3.0f;
             m_alertRed = false;
         } else if (alert == 3) {
@@ -1000,13 +1147,13 @@ void HouseWorld3D::Update(engine::core::Engine& eng, float dt) {
     }
     if (m_subTimer > 0.0f) m_subTimer -= dt;
     if (m_alertTimer > 0.0f) m_alertTimer -= dt;
-    if (m_isHiding && m_granny.IsForceCatching()) {
+    if (m_isHiding && m_prowler.IsForceCatching()) {
         m_alertText = "ОН ВИДЕЛ, КУДА ВЫ СПРЯТАЛИСЬ!";
         m_alertTimer = 1.0f;
         m_alertRed = true;
     }
-    if (m_granny.DidCatchPlayer()) {
-        m_granny.ClearCaughtFlag();
+    if (m_prowler.DidCatchPlayer()) {
+        m_prowler.ClearCaughtFlag();
         m_isHiding = false;
         m_hideProp = -1;
         PlayCutscene("entity_knockout");
@@ -1014,11 +1161,106 @@ void HouseWorld3D::Update(engine::core::Engine& eng, float dt) {
 
     m_weapon.Update(dt);
 
+    if (m_holdout) {
+        m_holdoutTimer -= dt;
+        static int lastSec = -1;
+        int sec = static_cast<int>(m_holdoutTimer);
+        if (sec != lastSec && sec % 5 == 0) {
+            lastSec = sec;
+            Vector3 g = m_prowler.GetPosition();
+            TraceLog(LOG_WARNING, "CH3 HOLDOUT: %d s left, prowler state=%d pos=(%.1f %.1f %.1f)", sec, static_cast<int>(m_prowler.GetState()), g.x, g.y, g.z);
+        }
+        if (m_holdoutTimer <= 0.0f) {
+            m_holdout = false;
+            m_isHiding = false;
+            m_hideProp = -1;
+            m_prowler.SetHunt(false);
+            TraceLog(LOG_WARNING, "CH3: holdout finished, playing police_arrival");
+            PlayCutscene("police_arrival");
+        }
+    }
+
     if (m_notificationTimer > 0.0f) m_notificationTimer -= dt;
     if (m_dayTitleTimer > 0.0f) {
         m_dayTitleTimer -= dt;
         if (m_dayTitleTimer < 1.0f) m_dayTitleAlpha = std::max(0.0f, m_dayTitleTimer);
     }
+}
+
+void HouseWorld3D::HandleCutsceneEvent(const CutsceneEvent& ev) {
+    if (ev.type == "actor_spawn") {
+        CutActor a;
+        a.id = ev.param;
+        a.kind = ev.text == "maniac" ? 1 : (ev.text == "lera" ? 2 : 0);
+        a.pos = a.from = a.to = ev.coords;
+        m_actors.push_back(a);
+    } else if (ev.type == "actor_move") {
+        for (CutActor& a : m_actors) {
+            if (a.id != ev.param) continue;
+            a.from = a.pos;
+            a.to = ev.coords;
+            a.moveT = 0.0f;
+            a.moveDur = std::max(0.05f, ev.duration);
+        }
+    } else if (ev.type == "actor_kill") {
+        for (CutActor& a : m_actors) {
+            if (a.id == ev.param) {
+                a.dead = true;
+                a.deadT = 0.0f;
+                a.moveDur = 0.0f;
+            }
+        }
+    } else if (ev.type == "actor_clear") {
+        m_actors.clear();
+    }
+}
+
+void HouseWorld3D::UpdateActors(float dt) {
+    for (CutActor& a : m_actors) {
+        if (a.dead) {
+            a.deadT += dt;
+        } else if (a.moveDur > 0.0f) {
+            a.moveT += dt;
+            float t = std::min(1.0f, a.moveT / a.moveDur);
+            a.pos = Vector3Lerp(a.from, a.to, t);
+            float dx = a.to.x - a.from.x;
+            float dz = a.to.z - a.from.z;
+            if (dx * dx + dz * dz > 0.0001f) a.yaw = std::atan2(dz, dx);
+            a.walkPhase += dt * 9.0f;
+            if (t >= 1.0f) a.moveDur = 0.0f;
+        }
+        if (a.kind == 1) {
+            m_prowler.ForcePose(a.pos, a.yaw, EntityState::Chase);
+        }
+    }
+}
+
+void HouseWorld3D::StartHoldout(engine::core::Engine& eng) {
+    (void)eng;
+    m_holdout = true;
+    m_holdoutTimer = 300.0f;
+    m_inCutscene = false;
+    m_isHiding = false;
+    m_hideProp = -1;
+    m_actors.clear();
+    m_prowler.ResetToDay(m_escape.GetCurrentDay());
+    m_prowler.SetHunt(true);
+    m_viewCam = m_fps.GetCamera();
+    ShowNotification("Вызов принят! Полиция уже едет, продержитесь 5 минут. Но маньяк идёт на шум — прячьтесь и бегите!", 7.0f);
+}
+
+void HouseWorld3D::RespawnHoldout(engine::core::Engine& eng) {
+    (void)eng;
+    m_isHiding = false;
+    m_hideProp = -1;
+    m_moveVelocity = {0.0f, 0.0f, 0.0f};
+    m_physics.TeleportCharacter(m_level.PlayerStart());
+    m_fps.SetLookAngles(m_level.PlayerStartYaw(), -0.32f);
+    m_fps.Update(0.0f, m_physics.GetCharacterPosition(), engine::camera3d::CameraMotion{});
+    m_viewCam = m_fps.GetCamera();
+    m_prowler.ResetToDay(m_escape.GetCurrentDay());
+    m_prowler.SetHunt(true);
+    ShowNotification("Вы очнулись в спальне. Таймер идёт — продержитесь до приезда полиции!", 5.0f);
 }
 
 void HouseWorld3D::UpdateInventory(engine::core::Engine& eng) {
@@ -1223,6 +1465,9 @@ void HouseWorld3D::FixedUpdate(engine::core::Engine&, float fixedDt) {
 
 bool HouseWorld3D::BatchVisible(const std::string& tag) const {
     if (tag.empty()) return true;
+    if (m_inCutscene && m_cutscene.GetName() == "police_arrival" && m_cutscene.GetCurrentTime() > 4.2f &&
+        (tag == "front_door" || tag.rfind("plank", 0) == 0 || tag == "padlock"))
+        return false;
     const FrontDoorLocks& door = m_escape.GetDoorLocks();
     if (tag.rfind("plank", 0) == 0) return (tag[5] - '0') >= door.planksRemoved;
     if (tag == "padlock") return !door.padlockOpen;
@@ -1232,7 +1477,7 @@ bool HouseWorld3D::BatchVisible(const std::string& tag) const {
         size_t idx = static_cast<size_t>(std::atoi(tag.c_str() + 4));
         return idx < m_lampOn.size() ? m_lampOn[idx] != 0 : true;
     }
-    if (tag == "gate") return !(m_inCutscene && m_cutscene.GetName() == "car_escape" && m_cutscene.GetCurrentTime() > 2.2f);
+    if (tag == "gate") return !(m_inCutscene && m_cutscene.GetName() == "car_escape" && m_cutscene.GetCurrentTime() > 3.0f);
     if (tag == "front_door") return !(m_inCutscene && m_cutscene.GetName() == "front_door_escape" && m_cutscene.GetCurrentTime() > 1.6f);
     return true;
 }
@@ -1275,8 +1520,8 @@ void HouseWorld3D::DrawEntity(const Shader* overrideShader) {
     if (overrideShader != nullptr || m_phantomTex.id == 0) return;
     const Camera3D& cam = m_viewCam;
     SceneEnvironment env = BuildEnvironment();
-    Vector3 feet = m_granny.GetPosition();
-    EntityState state = m_granny.GetState();
+    Vector3 feet = m_prowler.GetPosition();
+    EntityState state = m_prowler.GetState();
     bool stunned = state == EntityState::Stunned;
     bool chasing = state == EntityState::Chase;
 
@@ -1287,7 +1532,7 @@ void HouseWorld3D::DrawEntity(const Shader* overrideShader) {
     float rise = 1.0f;
     float alpha = 1.0f;
     if (stunned) {
-        float left = m_granny.GetStunTimer();
+        float left = m_prowler.GetStunTimer();
         rise = 0.25f;
         alpha = std::clamp(left / 4.0f, 0.0f, 0.55f);
     }
@@ -1458,10 +1703,23 @@ void HouseWorld3D::Render3D(engine::core::Engine& eng) {
         in.flashOn = m_flash.enabled;
         in.flashPos = m_flash.position;
         in.flashDir = m_flash.direction;
-        in.grannyPos = m_granny.GetPosition();
-        in.grannyStunned = m_granny.GetState() == EntityState::Stunned;
-        in.grannyChasing = m_granny.GetState() == EntityState::Chase;
-        in.grannyStunLeft = m_granny.GetStunTimer();
+        in.prowlerPos = m_prowler.GetPosition();
+        in.prowlerYaw = m_prowler.GetYaw();
+        in.hideProwler = m_inCutscene && m_cutscene.GetName() != "police_arrival" && m_cutscene.GetName() != "entity_knockout" && m_cutscene.GetName() != "game_over_day5";
+        for (const CutActor& a : m_actors) {
+            if (a.kind == 1) continue;
+            HouseHdActor ha;
+            ha.pos = Vector3{a.pos.x, a.pos.y + (a.dead ? 0.0f : std::fabs(std::sin(a.walkPhase)) * 0.05f), a.pos.z};
+            ha.kind = a.kind;
+            ha.dead = a.dead;
+            ha.deadT = a.deadT;
+            in.actors.push_back(ha);
+        }
+        in.rtRoom = m_viewCam.position.x > 1.55f && m_viewCam.position.x < 6.1f && m_viewCam.position.z > -6.1f && m_viewCam.position.z < 1.0f &&
+                    m_viewCam.position.y > 3.0f && m_viewCam.position.y < 6.3f;
+        in.prowlerStunned = m_prowler.GetState() == EntityState::Stunned;
+        in.prowlerChasing = m_prowler.GetState() == EntityState::Chase;
+        in.prowlerStunLeft = m_prowler.GetStunTimer();
         in.day = m_escape.GetCurrentDay();
         in.fear = m_fear;
         in.heartbeat = m_heartPulse;
@@ -1485,8 +1743,8 @@ void HouseWorld3D::Render3D(engine::core::Engine& eng) {
                           static_cast<unsigned char>(env.fogColor.z * 255.0f), 255});
 
     std::vector<DynamicLight> lights;
-    if (m_granny.GetState() != EntityState::Stunned) {
-        Vector3 head = Vector3Add(m_granny.GetPosition(), Vector3{0.0f, 1.75f, 0.0f});
+    if (m_prowler.GetState() != EntityState::Stunned) {
+        Vector3 head = Vector3Add(m_prowler.GetPosition(), Vector3{0.0f, 1.75f, 0.0f});
         float pulse = 0.75f + 0.25f * std::sin(m_time * 6.0f);
         lights.push_back(DynamicLight{head, Vector3{0.55f * pulse, 0.04f, 0.03f}, 2.6f});
     }
@@ -1506,6 +1764,17 @@ void HouseWorld3D::RenderHUD(engine::core::Engine& eng) {
     if (Ch3Graphics::Get().showFps) {
         std::string fpsText = std::to_string(GetFPS()) + " FPS";
         DrawTextEx(font, fpsText.c_str(), {16.0f, 12.0f}, 18.0f, 1.0f, ColorAlpha(Color{150, 255, 150, 255}, 0.9f));
+    }
+
+    if (m_holdout && !m_inCutscene) {
+        int secs = static_cast<int>(std::ceil(std::max(0.0f, m_holdoutTimer)));
+        char buf[96];
+        std::snprintf(buf, sizeof(buf), "ПОЛИЦИЯ ПРИБУДЕТ ЧЕРЕЗ  %d:%02d", secs / 60, secs % 60);
+        float fs = 26.0f;
+        Vector2 ts = MeasureTextEx(font, buf, fs, 1.0f);
+        float bx = (screenW - ts.x) * 0.5f;
+        DrawRectangleRounded({bx - 18.0f, 14.0f, ts.x + 36.0f, ts.y + 16.0f}, 0.3f, 4, ColorAlpha(BLACK, 0.7f));
+        DrawTextEx(font, buf, {bx, 22.0f}, fs, 1.0f, secs <= 30 ? Color{255, 90, 70, 255} : Color{255, 205, 110, 255});
     }
 
     if (m_isHiding) {
@@ -1609,9 +1878,9 @@ void HouseWorld3D::RenderHUD(engine::core::Engine& eng) {
         DrawTextEx(font, line.c_str(), {pos.x + 1.0f, pos.y + 1.0f}, 26.0f, 1.0f, ColorAlpha(BLACK, a));
         DrawTextEx(font, line.c_str(), pos, 26.0f, 1.0f, ColorAlpha(m_subRed ? Color{255, 120, 110, 255} : Color{235, 225, 200, 255}, a));
     }
-    if (m_granny.GetState() == EntityState::Investigate && !m_isHiding) {
+    if (m_prowler.GetState() == EntityState::Investigate && !m_isHiding) {
         Vector3 feet = m_physics.GetCharacterPosition();
-        Vector3 to = Vector3Subtract(m_granny.GetTargetPos(), feet);
+        Vector3 to = Vector3Subtract(m_prowler.GetTargetPos(), feet);
         float yaw = m_fps.GetYaw();
         Vector3 fwd{std::sin(yaw), 0.0f, -std::cos(yaw)};
         Vector3 right{std::cos(yaw), 0.0f, std::sin(yaw)};

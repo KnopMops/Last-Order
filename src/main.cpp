@@ -48,6 +48,8 @@ int main(int argc, char** argv) {
         if (arg == "--ch3-hd-tour") game.RequestChapter3(true, 1);
         if (arg == "--ch3-dx12-tour") game.RequestChapter3(true, 2);
         if (arg == "--ch3-dx12") game.RequestChapter3(false, 2);
+        if (arg == "--ch3-holdout") game.RequestChapter3Holdout(2);
+        if (arg == "--ch3-cutscene-tour") game.RequestChapter3CutsceneTour(2);
     }
 #endif
     engine.Run(game, smokeTest);

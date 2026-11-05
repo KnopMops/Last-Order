@@ -5,7 +5,7 @@
 #include "engine/core/Engine.h"
 #include "game/chapter3/Cutscene3D.h"
 #include "game/chapter3/EscapeManager.h"
-#include "game/chapter3/GrannyAI.h"
+#include "game/chapter3/ProwlerAI.h"
 #include "game/chapter3/HouseHd.h"
 #include "game/chapter3/HouseLevel.h"
 #include "game/chapter3/ItemRandomizer.h"
@@ -35,6 +35,20 @@ struct DroppedItemWorld {
     float rotY = 0.0f;
 };
 
+struct CutActor {
+    std::string id;
+    int kind = 0;
+    Vector3 pos{};
+    Vector3 from{};
+    Vector3 to{};
+    float moveT = 0.0f;
+    float moveDur = 0.0f;
+    float yaw = 0.0f;
+    float walkPhase = 0.0f;
+    bool dead = false;
+    float deadT = 0.0f;
+};
+
 struct InteractiveProp {
     std::string id;
     std::string name;
@@ -60,6 +74,8 @@ public:
     bool WantsChapterComplete() const { return m_chapterComplete; }
 #if defined(LO_ENABLE_DEBUG) && LO_ENABLE_DEBUG
     void StartTour();
+    void StartCutsceneTour();
+    void StartHoldoutTest();
 #endif
 
 private:
@@ -72,6 +88,12 @@ private:
         float walkSeconds = 0.0f;
     };
     void UpdateTour(engine::core::Engine& eng, float dt);
+    void UpdateCutsceneTour(engine::core::Engine& eng, float dt);
+    std::vector<std::string> m_csTourList;
+    int m_csTourIdx = -1;
+    bool m_csStarted = false;
+    int m_csShots = 0;
+    Image m_csSheet{};
     std::vector<TourStop> m_tour;
     int m_tourIndex = -1;
     int m_tourFrames = 0;
@@ -80,6 +102,10 @@ private:
     int m_tourTotalFrames = 0;
 #endif
 
+    void HandleCutsceneEvent(const CutsceneEvent& ev);
+    void UpdateActors(float dt);
+    void StartHoldout(engine::core::Engine& eng);
+    void RespawnHoldout(engine::core::Engine& eng);
     void SetupProps();
     void BuildEntityMeshes();
     void UnloadEntityMeshes();
@@ -109,6 +135,10 @@ private:
     engine::render3d::SceneEnvironment BuildEnvironment() const;
     void RenderHUD(engine::core::Engine& eng);
 
+    std::vector<CutActor> m_actors;
+    bool m_holdout = false;
+    float m_holdoutTimer = 0.0f;
+    bool m_radioDone = false;
     bool m_ready = false;
     bool m_hd = false;
     HouseHd m_hdBridge;
@@ -170,7 +200,7 @@ private:
 
     ItemRandomizer m_randomizer;
     WeaponAssembly m_weapon;
-    GrannyAI m_granny;
+    ProwlerAI m_prowler;
     EscapeManager m_escape;
     CutsceneEngine m_cutscene;
 

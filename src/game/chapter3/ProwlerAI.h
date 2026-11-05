@@ -25,7 +25,7 @@ struct HouseWaypoint {
     bool patrol = false;
 };
 
-class GrannyAI {
+class ProwlerAI {
 public:
     using OcclusionQuery = std::function<bool(Vector3, Vector3)>;
 
@@ -33,7 +33,15 @@ public:
     void SetOcclusionQuery(OcclusionQuery q) { m_occluded = std::move(q); }
     void ResetToDay(int dayNumber);
     void Update(engine::core::Engine& eng, float dt, Vector3 playerPos, bool playerHidden, bool playerCrouched, bool playerLit);
+    void LogBlockedLinks() const;
+    int Teleports() const { return m_teleports; }
+    int DebugCheckSpot() const { return m_checkSpot; }
     void NotifySound(Vector3 soundPos, float radius, float volume);
+    void SetHideSpots(std::vector<Vector3> spots);
+    void SetPlayerHideSpot(int idx) { m_playerSpot = idx; }
+    void SetPlayerCrawling(bool crawling) { m_crawling = crawling; }
+    void SetHunt(bool hunt) { m_hunt = hunt; m_huntTimer = 4.0f; }
+    void ForcePose(Vector3 pos, float yaw, EntityState state) { m_position = pos; m_yaw = yaw; m_state = state; }
     void ApplyShotgunStun(engine::core::Engine& eng);
 
     EntityState GetState() const { return m_state; }
@@ -84,6 +92,24 @@ private:
     Vector3 m_searchOrigin{};
     Vector3 m_searchPoint{};
 
+    std::vector<Vector3> m_hideSpots;
+    std::vector<float> m_spotCooldown;
+    float m_aggro = 0.0f;
+    bool m_holeEscape = false;
+    float m_crawlChase = 0.0f;
+    float m_giveUpCooldown = 0.0f;
+    std::vector<int> m_checkQueue;
+    bool m_hunt = false;
+    float m_huntTimer = 0.0f;
+    int m_teleports = 0;
+    int m_playerSpot = -1;
+    bool m_crawling = false;
+    float m_trackTimer = 0.0f;
+    int m_checkSpot = -1;
+    int m_checkPhase = 0;
+    float m_checkTimer = 0.0f;
+    bool m_searchFirst = false;
+
     int m_patrolTarget = 0;
     std::vector<HouseWaypoint> m_waypoints;
     std::vector<int> m_path;
@@ -103,6 +129,11 @@ private:
     bool NavigateTo(Vector3 goal, float speed, float dt);
     void PickPatrolTarget();
     void PickSearchPoint();
+    bool PickHideSpot(float maxDist, float chance);
+    void BuildSpotQueue(Vector3 origin, float maxDist);
+    void GiveUpChase(Vector3 playerPos);
+    bool AtSpot(int spot) const;
+    bool ServiceSpotCheck(engine::core::Engine& eng, float dt, float speed);
 };
 
 }

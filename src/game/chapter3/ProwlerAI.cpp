@@ -1,4 +1,4 @@
-#include "game/chapter3/GrannyAI.h"
+#include "game/chapter3/ProwlerAI.h"
 #include "raymath.h"
 #include <algorithm>
 #include <cmath>
@@ -9,21 +9,22 @@ namespace game::chapter3 {
 
 namespace {
 constexpr float EYE = 1.5f;
-constexpr float CHASE_SPEED = 2.5f;
-constexpr float INVESTIGATE_SPEED = 1.5f;
+constexpr float CHASE_SPEED = 3.9f;
+constexpr float INVESTIGATE_SPEED = 3.3f;
+constexpr float SEARCH_SPEED = 1.5f;
 }
 
-void GrannyAI::Init() {
+void ProwlerAI::Init() {
     SetupWaypoints();
     ResetToDay(1);
 }
 
-void GrannyAI::Link(int a, int b) {
+void ProwlerAI::Link(int a, int b) {
     m_waypoints[a].neighbors.push_back(b);
     m_waypoints[b].neighbors.push_back(a);
 }
 
-void GrannyAI::SetupWaypoints() {
+void ProwlerAI::SetupWaypoints() {
     m_waypoints.clear();
     auto add = [this](const char* name, Vector3 p, int floor, bool patrol) {
         HouseWaypoint w;
@@ -75,6 +76,8 @@ void GrannyAI::SetupWaypoints() {
     add("Attic", {0.8f, 6.4f, 0.3f}, 3, true);
     add("AtticRadio", {3.0f, 6.4f, -4.4f}, 3, true);
     add("AtticSouth", {-1.5f, 6.4f, 4.6f}, 3, true);
+    add("HallPantry", {-0.6f, 0.0f, -2.5f}, 1, false);
+    add("PantryStairs", {-4.3f, 0.0f, 1.0f}, 1, false);
 
     Link(0, 1);
     Link(1, 2);
@@ -85,9 +88,12 @@ void GrannyAI::SetupWaypoints() {
     Link(6, 7);
     Link(7, 8);
     Link(8, 9);
-    Link(1, 10);
+    Link(1, 41);
+    Link(41, 2);
+    Link(41, 10);
     Link(10, 11);
-    Link(11, 12);
+    Link(11, 42);
+    Link(42, 12);
     Link(12, 13);
     Link(13, 14);
     Link(14, 15);
@@ -122,7 +128,34 @@ void GrannyAI::SetupWaypoints() {
     Link(37, 40);
 }
 
-void GrannyAI::ResetToDay(int dayNumber) {
+void ProwlerAI::LogBlockedLinks() const {
+    if (!m_occluded) return;
+    for (const HouseWaypoint& a : m_waypoints) {
+        for (int n : a.neighbors) {
+            if (n < a.id) continue;
+            const HouseWaypoint& b = m_waypoints[n];
+            if (std::abs(a.pos.y - b.pos.y) > 0.5f) continue;
+            for (float h : {0.45f, 1.0f, 1.5f}) {
+                Vector3 pa{a.pos.x, a.pos.y + h, a.pos.z};
+                Vector3 pb{b.pos.x, b.pos.y + h, b.pos.z};
+                if (m_occluded(pa, pb)) {
+                    float lo = 0.0f;
+                    float hi = 1.0f;
+                    for (int it = 0; it < 12; ++it) {
+                        float mid = (lo + hi) * 0.5f;
+                        if (m_occluded(pa, Vector3Lerp(pa, pb, mid))) hi = mid;
+                        else lo = mid;
+                    }
+                    Vector3 hit = Vector3Lerp(pa, pb, hi);
+                    TraceLog(LOG_WARNING, "CH3 AI: link %s -> %s blocked at h=%.2f near (%.2f %.2f %.2f)", a.name.c_str(), b.name.c_str(), h, hit.x, hit.y, hit.z);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void ProwlerAI::ResetToDay(int dayNumber) {
     m_day = dayNumber;
     m_state = EntityState::Patrol;
     int start = (dayNumber % 2 == 0) ? 14 : 6;
@@ -138,7 +171,16 @@ void GrannyAI::ResetToDay(int dayNumber) {
     m_seesPlayer = false;
     m_path.clear();
     m_pathIndex = 0;
-    m_speed = 1.8f + static_cast<float>(dayNumber - 1) * 0.1f;
+    m_speed = 1.1f + static_cast<float>(dayNumber - 1) * 0.06f;
+    m_checkSpot = -1;
+    m_checkPhase = 0;
+    m_trackTimer = 0.0f;
+    m_holeEscape = false;
+    m_crawlChase = 0.0f;
+    m_giveUpCooldown = 0.0f;
+    m_checkQueue.clear();
+    m_playerSpot = -1;
+    std::fill(m_spotCooldown.begin(), m_spotCooldown.end(), 0.0f);
     m_prevHidden = false;
     m_forceCatch = false;
     m_alert = 0;
@@ -149,7 +191,113 @@ void GrannyAI::ResetToDay(int dayNumber) {
     PickPatrolTarget();
 }
 
-void GrannyAI::PickPatrolTarget() {
+void ProwlerAI::SetHideSpots(std::vector<Vector3> spots) {
+    m_hideSpots = std::move(spots);
+    m_spotCooldown.assign(m_hideSpots.size(), 0.0f);
+}
+
+bool ProwlerAI::PickHideSpot(float maxDist, float chance) {
+    if (m_hunt) chance = std::max(chance, 0.8f);
+    if (m_hideSpots.empty() || static_cast<float>(std::rand() % 1000) / 1000.0f > chance) return false;
+    std::vector<int> cands;
+    for (size_t i = 0; i < m_hideSpots.size(); ++i) {
+        if (m_spotCooldown[i] > 0.0f) continue;
+        if (std::abs(m_hideSpots[i].y - m_position.y) > 1.5f) continue;
+        if (Vector3Distance(m_hideSpots[i], m_position) > maxDist) continue;
+        cands.push_back(static_cast<int>(i));
+    }
+    if (cands.empty()) return false;
+    m_checkSpot = cands[static_cast<size_t>(std::rand()) % cands.size()];
+    m_checkPhase = 1;
+    return true;
+}
+
+void ProwlerAI::BuildSpotQueue(Vector3 origin, float maxDist) {
+    m_checkQueue.clear();
+    std::vector<std::pair<float, int>> found;
+    for (size_t i = 0; i < m_hideSpots.size(); ++i) {
+        if (m_spotCooldown[i] > 0.0f) continue;
+        if (std::abs(m_hideSpots[i].y - origin.y) > 1.5f) continue;
+        float d = Vector3Distance(m_hideSpots[i], origin);
+        if (d > maxDist) continue;
+        found.emplace_back(d, static_cast<int>(i));
+    }
+    std::sort(found.begin(), found.end());
+    for (const auto& f : found) m_checkQueue.push_back(f.second);
+}
+
+void ProwlerAI::GiveUpChase(Vector3 playerPos) {
+    m_alert = 7;
+    m_state = EntityState::Patrol;
+    m_giveUpCooldown = 12.0f;
+    m_holeEscape = false;
+    m_crawlChase = 0.0f;
+    m_trackTimer = 0.0f;
+    m_suspicion = 0.0f;
+    m_lostSaid = true;
+    m_forceCatch = false;
+    m_idleTimer = 0.6f;
+    m_aggro = 1.0f;
+    m_path.clear();
+    m_checkQueue.clear();
+    m_checkSpot = -1;
+    m_checkPhase = 0;
+    std::vector<int> far;
+    for (const auto& w : m_waypoints) {
+        if (w.patrol && Vector3Distance(w.pos, playerPos) > 10.0f && Vector3Distance(w.pos, m_position) > 2.0f) far.push_back(w.id);
+    }
+    if (!far.empty()) m_patrolTarget = far[static_cast<size_t>(std::rand()) % far.size()];
+    else PickPatrolTarget();
+}
+
+bool ProwlerAI::AtSpot(int spot) const {
+    if (spot < 0 || spot >= static_cast<int>(m_hideSpots.size())) return false;
+    const Vector3& s = m_hideSpots[spot];
+    float dx = s.x - m_position.x;
+    float dz = s.z - m_position.z;
+    return std::abs(s.y - m_position.y) < 1.5f && std::sqrt(dx * dx + dz * dz) < 1.8f;
+}
+
+bool ProwlerAI::ServiceSpotCheck(engine::core::Engine& eng, float dt, float speed) {
+    if (m_checkSpot < 0 || m_checkPhase == 0) return false;
+    const Vector3 sp = m_hideSpots[m_checkSpot];
+    if (m_checkPhase == 1) {
+        if (!AtSpot(m_checkSpot)) {
+            NavigateTo(sp, speed, dt);
+            return true;
+        }
+        m_checkPhase = 2;
+        m_checkTimer = 1.5f;
+        m_path.clear();
+        eng.Audio().PlaySfx("audio/sfx/sfx_door_creak_open.wav", 0.6f);
+    }
+    float targetYaw = std::atan2(sp.z - m_position.z, sp.x - m_position.x);
+    m_yaw += std::remainder(targetYaw - m_yaw, 2.0f * PI) * std::min(1.0f, dt * 6.0f);
+    m_checkTimer -= dt;
+    if (m_checkTimer <= 0.0f) {
+        int spot = m_checkSpot;
+        m_spotCooldown[spot] = m_hunt ? 10.0f : 35.0f;
+        m_checkSpot = -1;
+        m_checkPhase = 0;
+        if (m_playerSpot == spot) {
+            m_caughtPlayer = true;
+            m_state = EntityState::Knockout;
+            m_alert = 6;
+        } else if (m_state == EntityState::Patrol) {
+            m_idleTimer = 0.6f;
+            PickPatrolTarget();
+        } else if (m_state == EntityState::Search) {
+            m_searchIdle = 0.8f;
+            PickSearchPoint();
+        }
+    }
+    return true;
+}
+
+void ProwlerAI::PickPatrolTarget() {
+    m_checkSpot = -1;
+    m_checkPhase = 0;
+    if (PickHideSpot(14.0f, 0.3f)) return;
     std::vector<int> candidates;
     for (const auto& w : m_waypoints) {
         if (w.patrol && Vector3Distance(w.pos, m_position) > 2.0f) candidates.push_back(w.id);
@@ -158,12 +306,12 @@ void GrannyAI::PickPatrolTarget() {
     m_patrolTarget = candidates[static_cast<size_t>(std::rand()) % candidates.size()];
 }
 
-bool GrannyAI::HasLineOfSight(Vector3 from, Vector3 to) const {
+bool ProwlerAI::HasLineOfSight(Vector3 from, Vector3 to) const {
     if (!m_occluded) return true;
     return !m_occluded(Vector3{from.x, from.y + EYE, from.z}, Vector3{to.x, to.y + EYE, to.z});
 }
 
-int GrannyAI::FindNearestWaypoint(Vector3 pos, bool requireSight) const {
+int ProwlerAI::FindNearestWaypoint(Vector3 pos, bool requireSight) const {
     int best = -1;
     float bestScore = 1e9f;
     for (size_t i = 0; i < m_waypoints.size(); ++i) {
@@ -180,7 +328,7 @@ int GrannyAI::FindNearestWaypoint(Vector3 pos, bool requireSight) const {
     return std::max(best, 0);
 }
 
-std::vector<int> GrannyAI::PlanPath(int startNode, int endNode) const {
+std::vector<int> ProwlerAI::PlanPath(int startNode, int endNode) const {
     if (startNode == endNode) return {startNode};
     std::vector<int> prev(m_waypoints.size(), -1);
     std::vector<bool> visited(m_waypoints.size(), false);
@@ -210,7 +358,7 @@ std::vector<int> GrannyAI::PlanPath(int startNode, int endNode) const {
     return path;
 }
 
-bool GrannyAI::StepTowards(Vector3 goal, float speed, float dt) {
+bool ProwlerAI::StepTowards(Vector3 goal, float speed, float dt) {
     Vector3 d = Vector3Subtract(goal, m_position);
     float len = Vector3Length(d);
     if (len < 0.3f) return true;
@@ -218,7 +366,8 @@ bool GrannyAI::StepTowards(Vector3 goal, float speed, float dt) {
     float flat = std::sqrt(d.x * d.x + d.z * d.z);
     Vector3 move = Vector3Scale(d, step / len);
 
-    if (m_occluded && flat > 0.01f) {
+    const bool onStairs = std::abs(goal.y - m_position.y) > 0.35f;
+    if (m_occluded && flat > 0.01f && !onStairs) {
         Vector3 dir{d.x / flat, 0.0f, d.z / flat};
         static const float angles[] = {0.0f, 0.6f, -0.6f, 1.2f, -1.2f, 1.9f, -1.9f};
         bool moved = false;
@@ -245,6 +394,8 @@ bool GrannyAI::StepTowards(Vector3 goal, float speed, float dt) {
             m_stuckTimer += dt;
             if (m_stuckTimer > 1.2f) {
                 int nearest = FindNearestWaypoint(m_position, true);
+                TraceLog(LOG_WARNING, "CH3 AI: stuck teleport at (%.1f %.1f %.1f) -> %s", m_position.x, m_position.y, m_position.z, m_waypoints[nearest].name.c_str());
+                ++m_teleports;
                 m_position = m_waypoints[nearest].pos;
                 m_stuckTimer = 0.0f;
                 m_path.clear();
@@ -270,7 +421,7 @@ bool GrannyAI::StepTowards(Vector3 goal, float speed, float dt) {
     return len - step < 0.3f;
 }
 
-bool GrannyAI::NavigateTo(Vector3 goal, float speed, float dt) {
+bool ProwlerAI::NavigateTo(Vector3 goal, float speed, float dt) {
     bool pathActive = m_pathIndex < m_path.size();
     if (!pathActive && std::abs(goal.y - m_position.y) < 0.6f && HasLineOfSight(m_position, goal)) {
         m_path.clear();
@@ -298,11 +449,11 @@ bool GrannyAI::NavigateTo(Vector3 goal, float speed, float dt) {
     return StepTowards(goal, speed, dt);
 }
 
-void GrannyAI::NotifySound(Vector3 soundPos, float radius, float volume) {
+void ProwlerAI::NotifySound(Vector3 soundPos, float radius, float volume) {
     if (m_state == EntityState::Stunned || m_state == EntityState::Chase || m_state == EntityState::Knockout) return;
     float dist = Vector3Distance(m_position, soundPos);
     float dy = std::abs(soundPos.y - m_position.y);
-    float effective = dy > 1.5f ? radius * 0.6f : radius;
+    float effective = (dy > 1.5f ? radius * 0.6f : radius) * (1.0f + 0.8f * m_aggro);
     if (dist <= effective && volume > 0.0f) {
         if (m_state != EntityState::Investigate) m_alert = 2;
         m_targetPos = soundPos;
@@ -312,7 +463,7 @@ void GrannyAI::NotifySound(Vector3 soundPos, float radius, float volume) {
     }
 }
 
-void GrannyAI::ApplyShotgunStun(engine::core::Engine& eng) {
+void ProwlerAI::ApplyShotgunStun(engine::core::Engine& eng) {
     m_state = EntityState::Stunned;
     m_stunTimer = 30.0f;
     m_path.clear();
@@ -320,7 +471,24 @@ void GrannyAI::ApplyShotgunStun(engine::core::Engine& eng) {
     eng.Audio().PlaySfx("audio/sfx/sfx_ch3_entity_stun.wav", 1.0f);
 }
 
-void GrannyAI::PickSearchPoint() {
+void ProwlerAI::PickSearchPoint() {
+    m_checkSpot = -1;
+    m_checkPhase = 0;
+    while (!m_checkQueue.empty()) {
+        int next = m_checkQueue.front();
+        m_checkQueue.erase(m_checkQueue.begin());
+        if (m_spotCooldown[next] > 0.0f) continue;
+        m_checkSpot = next;
+        m_checkPhase = 1;
+        m_searchFirst = false;
+        return;
+    }
+    Vector3 savedPos = m_position;
+    m_position = m_searchOrigin;
+    bool picked = PickHideSpot(10.0f, m_searchFirst ? 0.85f : 0.45f);
+    m_position = savedPos;
+    m_searchFirst = false;
+    if (picked) return;
     std::vector<int> candidates;
     for (const auto& w : m_waypoints) {
         if (std::abs(w.pos.y - m_searchOrigin.y) < 1.2f && Vector3Distance(w.pos, m_searchOrigin) < 7.5f) candidates.push_back(w.id);
@@ -332,7 +500,7 @@ void GrannyAI::PickSearchPoint() {
     m_searchPoint = m_waypoints[candidates[static_cast<size_t>(std::rand()) % candidates.size()]].pos;
 }
 
-void GrannyAI::Update(engine::core::Engine& eng, float dt, Vector3 playerPos, bool playerHidden, bool playerCrouched, bool playerLit) {
+void ProwlerAI::Update(engine::core::Engine& eng, float dt, Vector3 playerPos, bool playerHidden, bool playerCrouched, bool playerLit) {
     m_distToPlayer = Vector3Distance(m_position, playerPos);
 
     if (m_state == EntityState::Stunned) {
@@ -348,6 +516,24 @@ void GrannyAI::Update(engine::core::Engine& eng, float dt, Vector3 playerPos, bo
         return;
     }
     if (m_state == EntityState::Knockout) return;
+    for (float& c : m_spotCooldown) c = std::max(0.0f, c - dt);
+    m_aggro = std::max(0.0f, m_aggro - dt / 150.0f);
+
+    if (m_hunt && (m_state == EntityState::Patrol || m_state == EntityState::Search)) {
+        m_huntTimer -= dt;
+        if (m_huntTimer <= 0.0f) {
+            m_huntTimer = 9.0f + static_cast<float>(std::rand() % 5);
+            float ox = (static_cast<float>(std::rand() % 100) / 100.0f - 0.5f) * 5.0f;
+            float oz = (static_cast<float>(std::rand() % 100) / 100.0f - 0.5f) * 5.0f;
+            m_targetPos = Vector3{playerPos.x + ox, playerPos.y, playerPos.z + oz};
+            m_state = EntityState::Investigate;
+            m_investigateTimer = 3.0f;
+            m_repathTimer = 0.0f;
+            m_checkSpot = -1;
+            m_checkPhase = 0;
+            m_path.clear();
+        }
+    }
 
     if (Vector3Distance(m_position, m_progressPos) > 0.7f) {
         m_progressPos = m_position;
@@ -358,6 +544,8 @@ void GrannyAI::Update(engine::core::Engine& eng, float dt, Vector3 playerPos, bo
             m_progressTimer = 0.0f;
             int nearest = FindNearestWaypoint(m_position, true);
             if (m_pathIndex < m_path.size()) nearest = m_path[m_pathIndex];
+            TraceLog(LOG_WARNING, "CH3 AI: progress teleport at (%.1f %.1f %.1f) -> %s", m_position.x, m_position.y, m_position.z, m_waypoints[nearest].name.c_str());
+            ++m_teleports;
             m_position = m_waypoints[nearest].pos;
             m_progressPos = m_position;
             m_path.clear();
@@ -378,14 +566,18 @@ void GrannyAI::Update(engine::core::Engine& eng, float dt, Vector3 playerPos, bo
     m_lastPlayerPos = playerPos;
 
     bool visible = false;
-    if (!playerHidden && dy < 1.6f && flatDist < 18.0f) {
+    if (!playerHidden && dy < 1.6f && flatDist < 28.0f) {
         Vector3 forward{std::cos(m_yaw), 0.0f, std::sin(m_yaw)};
         float dot = flatDist > 0.001f ? Vector3DotProduct(forward, Vector3Scale(toPlayer, 1.0f / flatDist)) : 1.0f;
-        bool inCone = dot > 0.5f || flatDist < 1.8f;
+        bool inCone = dot > 0.3f || flatDist < 2.2f;
         if (inCone && HasLineOfSight(m_position, playerPos)) visible = true;
     }
+    if (m_giveUpCooldown > 0.0f) {
+        m_giveUpCooldown -= dt;
+        visible = false;
+    }
 
-    float detectRange = playerCrouched ? 5.0f : 11.0f;
+    float detectRange = (playerCrouched ? 8.0f : 17.0f) * (1.0f + 0.35f * m_aggro);
     if (!playerLit) detectRange *= 0.65f;
     bool tracking = m_state == EntityState::Chase;
     if (visible && (tracking || flatDist < detectRange)) {
@@ -423,6 +615,9 @@ void GrannyAI::Update(engine::core::Engine& eng, float dt, Vector3 playerPos, bo
             m_alert = 1;
         }
         m_state = EntityState::Chase;
+        m_aggro = 1.0f;
+        m_holeEscape = false;
+        m_crawlChase = 0.0f;
         m_targetPos = playerPos;
         m_lastSeenPos = playerPos;
         m_lastSeenVel = playerVel;
@@ -437,8 +632,8 @@ void GrannyAI::Update(engine::core::Engine& eng, float dt, Vector3 playerPos, bo
 
     if (m_state == EntityState::Chase) {
         if (m_forceCatch) {
-            m_targetPos = playerPos;
-            if (m_distToPlayer <= 1.5f && dy < 1.2f) {
+            m_targetPos = (m_playerSpot >= 0 && m_playerSpot < static_cast<int>(m_hideSpots.size())) ? m_hideSpots[m_playerSpot] : playerPos;
+            if ((m_distToPlayer <= 1.5f && dy < 1.2f) || AtSpot(m_playerSpot)) {
                 m_caughtPlayer = true;
                 m_state = EntityState::Knockout;
                 m_forceCatch = false;
@@ -446,24 +641,39 @@ void GrannyAI::Update(engine::core::Engine& eng, float dt, Vector3 playerPos, bo
             }
         } else if (!m_seesPlayer) {
             m_lostTimer += dt;
-            if (!m_lostSaid && m_lostTimer > 0.9f) {
+            if (m_crawling) m_holeEscape = true;
+            if (m_holeEscape) {
+                m_crawlChase += dt;
+                m_trackTimer = 1.0f;
+                if (m_crawlChase > 3.5f) {
+                    GiveUpChase(playerPos);
+                    return;
+                }
+            }
+            if (m_trackTimer > 0.0f) {
+                m_trackTimer -= dt;
+                m_targetPos = playerPos;
+                m_lostTimer = std::min(m_lostTimer, 0.5f);
+            } else if (!m_lostSaid && m_lostTimer > 0.9f) {
                 m_lostSaid = true;
                 m_alert = 4;
                 m_targetPos = Vector3Add(m_lastSeenPos, Vector3Scale(m_lastSeenVel, 1.6f));
                 m_repathTimer = 0.0f;
             }
         }
-        bool reached = NavigateTo(m_targetPos, CHASE_SPEED, dt);
-        if (!m_seesPlayer && reached && !m_forceCatch) {
+        bool reached = NavigateTo(m_targetPos, CHASE_SPEED * (1.0f + 0.1f * m_aggro), dt);
+        if (!m_seesPlayer && reached && !m_forceCatch && m_trackTimer <= 0.0f) {
+            m_searchFirst = true;
             m_state = EntityState::Search;
             m_alert = 5;
             m_searchTimer = 9.0f;
             m_searchOrigin = m_targetPos;
             m_searchIdle = 0.8f;
+            BuildSpotQueue(m_searchOrigin, 7.5f);
             PickSearchPoint();
         }
     } else if (m_state == EntityState::Investigate) {
-        if (NavigateTo(m_targetPos, INVESTIGATE_SPEED, dt)) {
+        if (NavigateTo(m_targetPos, INVESTIGATE_SPEED * (1.0f + 0.3f * m_aggro), dt)) {
             m_yaw += 0.9f * dt;
             m_investigateTimer -= dt;
             if (m_investigateTimer <= 0.0f) {
@@ -472,36 +682,42 @@ void GrannyAI::Update(engine::core::Engine& eng, float dt, Vector3 playerPos, bo
                 m_searchTimer = 8.0f;
                 m_searchOrigin = m_targetPos;
                 m_searchIdle = 0.0f;
+                m_searchFirst = true;
+                BuildSpotQueue(m_searchOrigin, 7.5f);
                 PickSearchPoint();
             }
         }
     } else if (m_state == EntityState::Search) {
         m_searchTimer -= dt;
-        if (m_searchIdle > 0.0f) {
+        if ((m_checkPhase != 0 || !m_checkQueue.empty()) && m_searchTimer < 2.0f) m_searchTimer = 2.0f;
+        if (ServiceSpotCheck(eng, dt, (SEARCH_SPEED + 0.6f) * (1.0f + 0.3f * m_aggro))) {
+        } else if (m_searchIdle > 0.0f) {
             m_searchIdle -= dt;
             m_yaw += 1.2f * dt;
-        } else if (NavigateTo(m_searchPoint, INVESTIGATE_SPEED, dt)) {
+        } else if (NavigateTo(m_searchPoint, SEARCH_SPEED * (1.0f + 0.3f * m_aggro), dt)) {
             m_searchIdle = 1.2f;
             PickSearchPoint();
         }
         if (m_searchTimer <= 0.0f) {
+            m_checkQueue.clear();
             m_state = EntityState::Patrol;
             m_idleTimer = 1.0f;
             m_alert = 3;
             PickPatrolTarget();
         }
     } else if (m_state == EntityState::Patrol) {
-        if (m_idleTimer > 0.0f) {
+        if (ServiceSpotCheck(eng, dt, (m_speed + 0.2f) * (1.0f + 0.6f * m_aggro))) {
+        } else if (m_idleTimer > 0.0f) {
             m_idleTimer -= dt;
             m_yaw += 0.5f * dt;
-        } else if (NavigateTo(m_waypoints[m_patrolTarget].pos, m_speed, dt)) {
+        } else if (NavigateTo(m_waypoints[m_patrolTarget].pos, (m_hunt ? m_speed + 0.9f : m_speed) * (1.0f + 0.6f * m_aggro), dt)) {
             m_idleTimer = 1.5f + static_cast<float>(std::rand() % 20) * 0.1f;
             PickPatrolTarget();
         }
     }
     float floorFactor = dy > 1.5f ? 0.45f : 1.0f;
     m_stepTimer += dt;
-    float stepInterval = (m_state == EntityState::Chase) ? 0.32f : 0.65f;
+    float stepInterval = (m_state == EntityState::Chase) ? 0.28f : (m_state == EntityState::Investigate ? 0.32f : 0.8f);
     if (m_stepTimer >= stepInterval && m_idleTimer <= 0.0f) {
         m_stepTimer = 0.0f;
         if (m_distToPlayer < 24.0f) {

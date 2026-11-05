@@ -1,19 +1,19 @@
 {
   "name": "radio_ending",
-  "duration": 7.0,
+  "duration": 10.0,
   "camera_tracks": [
     { "time": 0.0, "pos": [2.2, 8.0, -3.3], "target": [3.0, 7.4, -5.6], "fov": 65 },
-    { "time": 2.5, "pos": [2.9, 7.8, -4.4], "target": [3.0, 7.4, -5.6], "fov": 55 },
-    { "time": 4.5, "pos": [2.0, 7.6, -2.5], "target": [2.6, 8.6, -4.5], "fov": 75 },
-    { "time": 7.0, "pos": [1.0, 7.8, 0.0], "target": [2.0, 9.5, -3.0], "fov": 80 }
+    { "time": 3.0, "pos": [2.9, 7.8, -4.4], "target": [3.0, 7.4, -5.6], "fov": 52 },
+    { "time": 6.5, "pos": [2.4, 7.7, -3.0], "target": [3.0, 7.4, -5.6], "fov": 62 },
+    { "time": 10.0, "pos": [1.6, 7.9, -2.4], "target": [3.0, 7.3, -5.6], "fov": 70 }
   ],
   "events": [
     { "time": 0.0, "type": "sfx", "param": "audio/sfx/sfx_radio_tune.wav", "volume": 0.9 },
-    { "time": 0.5, "type": "subtitle", "text": "Частота 94.5 FM зафиксирована. Каскад ламп накаляется...", "duration": 3.0 },
-    { "time": 3.0, "type": "sfx", "param": "audio/sfx/sfx_ch3_shotgun_blast.wav", "volume": 1.0 },
-    { "time": 3.2, "type": "shake", "duration": 2.5, "volume": 5.0 },
-    { "time": 3.5, "type": "subtitle", "text": "ЭМ-ИМПУЛЬС СЖИГАЕТ ЭФИР! СУЩНОСТЬ РАСТВОРЯЕТСЯ В ПЕПЕЛ!", "duration": 3.5 },
-    { "time": 5.8, "type": "fade_out", "duration": 1.2 }
+    { "time": 0.4, "type": "subtitle", "text": "Частота 94.5 FM зафиксирована. Лампы накаляются...", "duration": 2.6 },
+    { "time": 3.2, "type": "sfx", "param": "audio/sfx/sfx_radio_click.wav", "volume": 1.0 },
+    { "time": 3.4, "type": "subtitle", "text": "«Диспетчер: вызов принят. Наряд полиции выехал — продержитесь 5 минут!»", "duration": 3.4 },
+    { "time": 7.0, "type": "sfx", "param": "audio/sfx/sfx_stalker_breathe.wav", "volume": 1.0 },
+    { "time": 7.0, "type": "shake", "duration": 1.2, "volume": 3.0 },
+    { "time": 7.2, "type": "subtitle", "text": "Но передача разбудила ЕГО. Он идёт на сигнал. Прячьтесь и бегите!", "duration": 2.8 }
   ]
 }
-
