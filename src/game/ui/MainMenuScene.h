@@ -20,6 +20,7 @@ enum class MenuCommand {
     StartChapter2_Motel3D,
     StartChapter3_House3D,
     StartChapter35,
+    StartChapter4,
     OpenSettings,
     QuitGame
 };

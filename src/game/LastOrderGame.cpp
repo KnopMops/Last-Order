@@ -884,6 +884,33 @@ void LastOrderGame::EndChapter35(engine::core::Engine& eng) {
         if (it != vars.end()) j["chapter3_5"]["took_tapes"] = it->second.boolean;
         SaveProgress(j);
         SaveKeyMoment(eng, "Глава 3.5: Разъезд 86 пройден");
+        BeginChapter4(eng);
+        return;
+    }
+    eng.Renderer().SetHighRes3DMode(false);
+    eng.Renderer().SetSkip2DLightmap(false);
+    m_screen = GameScreen::MainMenu;
+    m_mainMenu.Init(eng);
+    EnableCursor();
+}
+
+void LastOrderGame::BeginChapter4(engine::core::Engine& eng) {
+    std::map<std::string, knopmops::runtime::Var> vars;
+    m_screen = GameScreen::CustomChapter;
+    eng.Renderer().SetHighRes3DMode(true);
+    eng.Renderer().SetSkip2DLightmap(true);
+    if (!m_custom.Init(eng, "chapter_4", vars)) EndChapter4(eng);
+}
+
+void LastOrderGame::EndChapter4(engine::core::Engine& eng) {
+    bool completed = m_custom.Completed();
+    m_custom.Shutdown(eng);
+    if (completed) {
+        eng.State().SetFlag("chapter4_completed");
+        auto j = LoadProgress();
+        j["chapter_4"]["completed"] = true;
+        SaveProgress(j);
+        SaveKeyMoment(eng, "Глава 4: Дом на сопке пройден");
     }
     eng.Renderer().SetHighRes3DMode(false);
     eng.Renderer().SetSkip2DLightmap(false);
@@ -893,6 +920,11 @@ void LastOrderGame::EndChapter35(engine::core::Engine& eng) {
 }
 
 void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
+    if (m_pendingChapter4) {
+        m_pendingChapter4 = false;
+        BeginChapter4(eng);
+        return;
+    }
     if (m_pendingCh35) {
         m_pendingCh35 = false;
         BeginChapter35(eng, m_pendingCh35Ending);
@@ -1015,7 +1047,10 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
                 m_house3D.Init(eng);
                 break;
             case ui::MenuCommand::StartChapter35:
-                BeginChapter35(eng, ""); // вариант старта берётся из сохранённой концовки Главы 3 (AppData)
+                BeginChapter35(eng, "");
+                break;
+            case ui::MenuCommand::StartChapter4:
+                BeginChapter4(eng);
                 break;
             case ui::MenuCommand::OpenSettings:
                 m_settingsUI.Open();
@@ -1067,7 +1102,8 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
             m_settingsUI.Update(eng);
             if (m_settingsUI.WantsQuitToMenu()) {
                 m_settingsUI.ClearQuitToMenu();
-                EndChapter35(eng);
+                if (m_custom.ChapterId() == "chapter_4") EndChapter4(eng);
+                else EndChapter35(eng);
                 return;
             }
             if (!m_settingsUI.IsOpen()) {
@@ -1082,7 +1118,10 @@ void LastOrderGame::OnFrameUpdate(engine::core::Engine& eng, float dt) {
             return;
         }
         m_custom.Update(eng, dt);
-        if (m_custom.WantsReturnToMenu()) EndChapter35(eng);
+        if (m_custom.WantsReturnToMenu()) {
+            if (m_custom.ChapterId() == "chapter_4") EndChapter4(eng);
+            else EndChapter35(eng);
+        }
         return;
     }
 

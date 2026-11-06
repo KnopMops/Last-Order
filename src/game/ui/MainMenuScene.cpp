@@ -152,7 +152,7 @@ MenuCommand MainMenuScene::Update(engine::core::Engine& eng, float dt) {
     int maxUnlocked = systems::SaveSystem::GetMaxUnlockedNight();
 
     int btnCount = 5;
-    if (m_state == MenuState::ChapterSelect) btnCount = 5;
+    if (m_state == MenuState::ChapterSelect) btnCount = 6;
     else if (m_state == MenuState::NightSelect) btnCount = 7;
     else if (m_state == MenuState::SaveSelect) btnCount = 4;
 
@@ -174,9 +174,9 @@ MenuCommand MainMenuScene::Update(engine::core::Engine& eng, float dt) {
     float btnW = 460.0f;
 
     if (m_state == MenuState::ChapterSelect) {
-        startY = 240.0f;
-        stepY = 72.0f;
-        btnH = 56.0f;
+        startY = 224.0f;
+        stepY = 62.0f;
+        btnH = 52.0f;
     } else if (m_state == MenuState::NightSelect) {
         startY = 224.0f;
         stepY = 58.0f;
@@ -236,6 +236,8 @@ MenuCommand MainMenuScene::Update(engine::core::Engine& eng, float dt) {
                 case 3:
                     return MenuCommand::StartChapter35;
                 case 4:
+                    return MenuCommand::StartChapter4;
+                case 5:
                     m_state = MenuState::Main;
                     m_selectedBtn = 0;
                     return MenuCommand::None;
@@ -435,22 +437,23 @@ void MainMenuScene::RenderUI(engine::core::Engine& eng) const {
         }
         DrawTextEx(font, "[ESC] Выход из игры    [ENTER / ЛКМ] Выбрать", Vector2{58.0f, 544.0f}, 17.0f, 1.0f, Color{196, 170, 150, 180});
     } else if (m_state == MenuState::ChapterSelect) {
-        DrawTextEx(font, "ВЫБОР ГЛАВЫ", Vector2{58, 196}, 21.0f, 1.0f, Color{244, 184, 96, 255});
+        DrawTextEx(font, "ВЫБОР ГЛАВЫ", Vector2{58, 184}, 21.0f, 1.0f, Color{244, 184, 96, 255});
 
-        const char* chTitles[5] = {
+        const char* chTitles[6] = {
             "Глава 1: Кафе «Тёплый угол» [5 Ночей]",
             "Глава 2: Мотель «Северное сияние» [3D]",
             "Глава 3: Дом смотрителя «Побег» [3D Horror]",
             "Глава 3.5: Разъезд 86 [3D]",
+            "Глава 4: Дом на сопке — Финал [RE7 Horror]",
             "Назад в главное меню"
         };
 
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 6; ++i) {
             bool sel = (m_selectedBtn == i);
             float bx = 58.0f;
-            float by = 240.0f + i * 72.0f;
-            float bw = 480.0f;
-            float bh = 56.0f;
+            float by = 224.0f + i * 62.0f;
+            float bw = 500.0f;
+            float bh = 52.0f;
 
             bool locked = false;
             Color bgCol = locked ? Color{26, 18, 18, 180} : (sel ? Color{107, 51, 34, 245} : Color{42, 23, 21, 215});
@@ -464,7 +467,7 @@ void MainMenuScene::RenderUI(engine::core::Engine& eng) const {
             }
 
             Color txtCol = locked ? Color{140, 120, 120, 180} : (sel ? Color{244, 184, 96, 255} : Color{232, 227, 217, 230});
-            DrawTextEx(font, chTitles[i], Vector2{bx + 22.0f, by + 16.0f}, 21.0f, 1.0f, txtCol);
+            DrawTextEx(font, chTitles[i], Vector2{bx + 22.0f, by + 14.0f}, 20.0f, 1.0f, txtCol);
         }
     } else if (m_state == MenuState::NightSelect) {
         DrawTextEx(font, isDebug ? "ГЛАВА 1: ВЫБОР СМЕНЫ [РЕЖИМ РАЗРАБОТЧИКА: ВСЕ НОЧИ ОТКРЫТЫ]" : "ГЛАВА 1: ВЫБОР СМЕНЫ",

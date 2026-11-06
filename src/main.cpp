@@ -54,6 +54,7 @@ int main(int argc, char** argv) {
 #endif
     for (int i = 1; i < argc; ++i) {
         if (std::string(argv[i]) == "--chapter35") game.RequestChapter35(i + 1 < argc && argv[i + 1][0] != '-' ? argv[i + 1] : "");
+        if (std::string(argv[i]) == "--chapter4") game.RequestChapter4();
     }
     engine.Run(game, smokeTest);
     engine.Shutdown();
