@@ -1175,10 +1175,39 @@ void PlaySession::Update(float dt, bool inputActive) {
                     TakeItem(id);
                     Notify("Батарейки заменены.");
                     PlaySfx("audio/sfx/sfx_flashlight_click.wav", 0.8f);
+                } else if (id == "item_first_aid") {
+                    TakeItem(id);
+                    HealPlayer(50.0f);
+                    Notify("Использован медпакет (+50 HP)");
+                    PlaySfx("audio/sfx/sfx_coffee_sip.wav", 0.85f);
                 } else {
                     m_script->Emit("item_used", {LuaArg(id)});
                 }
                 m_invCursor = 0;
+            }
+        }
+    }
+
+    if (m_damageFlash > 0.0f) m_damageFlash = std::max(0.0f, m_damageFlash - dt);
+    if (m_invulnTimer > 0.0f) m_invulnTimer = std::max(0.0f, m_invulnTimer - dt);
+    if (m_muzzleFlash > 0.0f) m_muzzleFlash = std::max(0.0f, m_muzzleFlash - dt);
+
+    if (inputActive && !overlayBlocks && m_end == EndState::Playing) {
+        if (m_healthEnabled && IsKeyPressed(KEY_H)) {
+            if (HasItem("item_first_aid")) {
+                TakeItem("item_first_aid");
+                HealPlayer(50.0f);
+                Notify("Использован медпакет (+50 HP)");
+                PlaySfx("audio/sfx/sfx_coffee_sip.wav", 0.85f);
+            } else {
+                Notify("Нет аптечки первой помощи!");
+            }
+        }
+        if (HasItem("item_toz34")) {
+            if (IsKeyPressed(KEY_R)) {
+                ReloadShotgun();
+            } else if (!m_player.locked && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                ShootShotgun();
             }
         }
     }
@@ -1483,6 +1512,111 @@ bool PlaySession::DebugAnswerCode(const std::string& code) {
     m_codeOverlay = CodeOverlay{};
     if (cb) cb(ok, code);
     return ok;
+}
+
+void PlaySession::EnableHealth(bool enabled, float maxHealth) {
+    m_healthEnabled = enabled;
+    m_playerMaxHealth = std::max(10.0f, maxHealth);
+    m_playerHealth = m_playerMaxHealth;
+}
+
+void PlaySession::DamagePlayer(float amount) {
+    if (!m_healthEnabled || m_invulnTimer > 0.0f || m_end != EndState::Playing) return;
+    m_playerHealth -= amount;
+    m_damageFlash = 0.7f;
+    m_invulnTimer = 1.0f;
+    m_shakeT = 0.25f;
+    PlaySfx("audio/sfx/sfx_heartbeat_dread.wav", 0.9f);
+    if (m_script) m_script->Emit("player_damaged", {LuaArg(amount), LuaArg(m_playerHealth)});
+    if (m_playerHealth <= 0.0f) {
+        m_playerHealth = 0.0f;
+        Lose("Ты погибла от полученных ран...");
+    }
+}
+
+void PlaySession::HealPlayer(float amount) {
+    if (!m_healthEnabled || m_end != EndState::Playing) return;
+    m_playerHealth = std::min(m_playerMaxHealth, m_playerHealth + amount);
+    if (m_script) m_script->Emit("player_healed", {LuaArg(amount), LuaArg(m_playerHealth)});
+}
+
+void PlaySession::SetPlayerHealth(float hp) {
+    m_playerHealth = std::clamp(hp, 0.0f, m_playerMaxHealth);
+}
+
+bool PlaySession::ShootShotgun() {
+    if (m_shotgunShells <= 0) {
+        PlaySfx("audio/sfx/sfx_door_locked_rattle.wav", 0.7f);
+        Notify("Ружье не заряжено! Нажмите [R]");
+        return false;
+    }
+    m_shotgunShells--;
+    m_shakeT = 0.35f;
+    m_muzzleFlash = 0.15f;
+    PlaySfx("audio/sfx/sfx_ch3_shotgun_blast.wav", 1.0f);
+    MakeNoise(m_player.pos, 32.0f);
+
+    float yr = m_player.yaw * DEG2RAD;
+    float pr = m_player.pitch * DEG2RAD;
+    Vector3 fwd{-std::sin(yr) * std::cos(pr), std::sin(pr), -std::cos(yr) * std::cos(pr)};
+    Vector3 eye{m_player.pos.x, m_player.pos.y + (m_player.crouching ? m_player.eyeHeight * 0.62f : m_player.eyeHeight), m_player.pos.z};
+
+    uint32_t hitObjId = 0;
+    float closestDist = 18.0f;
+    bool isHeadshot = false;
+
+    for (const auto& m : m_monsters) {
+        Vector3 mPos = m.pos;
+        Vector3 toM{mPos.x - eye.x, (mPos.y + 1.2f) - eye.y, mPos.z - eye.z};
+        float dist = std::sqrt(toM.x * toM.x + toM.y * toM.y + toM.z * toM.z);
+        if (dist > 0.001f && dist < closestDist) {
+            float dot = (toM.x * fwd.x + toM.y * fwd.y + toM.z * fwd.z) / dist;
+            if (dot > 0.82f) {
+                hitObjId = m.objId;
+                closestDist = dist;
+                float headHeight = mPos.y + 1.6f;
+                if (eye.y + fwd.y * dist >= headHeight - 0.35f) {
+                    isHeadshot = true;
+                }
+            }
+        }
+    }
+
+    if (hitObjId != 0) {
+        float damage = isHeadshot ? 85.0f : 45.0f;
+        PlaySfx("audio/sfx/sfx_ch3_entity_stun.wav", 0.95f);
+        if (isHeadshot) {
+            Notify("КРИТИЧЕСКИЙ УДАР В ГОЛОВУ! Чудовище пошатнулось!");
+        } else {
+            Notify("Попадание картечью!");
+        }
+        if (m_script) {
+            m_script->Emit("monster_hit", {LuaArg::Object(hitObjId), LuaArg(isHeadshot), LuaArg(damage)});
+        }
+    }
+
+    if (m_script) {
+        m_script->Emit("shotgun_fired", {LuaArg(m_shotgunShells)});
+    }
+    return true;
+}
+
+void PlaySession::ReloadShotgun() {
+    if (m_shotgunShells >= m_shotgunMax) {
+        Notify("Ружье уже полностью заряжено (2/2)");
+        return;
+    }
+    if (!HasItem("item_ammo_shotgun")) {
+        Notify("Нет патронов 12-го калибра!");
+        return;
+    }
+    TakeItem("item_ammo_shotgun");
+    m_shotgunShells = m_shotgunMax;
+    PlaySfx("audio/sfx/sfx_ch3_shotgun_assemble.wav", 0.9f);
+    Notify("ТОЗ-34 заряжен: 2 патрона в патроннике");
+    if (m_script) {
+        m_script->Emit("shotgun_reloaded", {LuaArg(m_shotgunShells)});
+    }
 }
 
 void PlaySession::FinishSearch(scene::GameObject& o) {
@@ -2086,13 +2220,21 @@ void PlaySession::UpdateMonsters(float dt) {
         // поимка
         if (!hidden && distP < 1.05f && m.mode == MonsterMode::Chase && std::fabs(m.pos.y - m_player.pos.y) < 1.5f) {
             m_script->Emit("player_caught", {LuaArg::Object(id)});
-            if (m_end == EndState::Playing) Lose("");
-            return;
+            if (m_healthEnabled) {
+                DamagePlayer(35.0f);
+            } else {
+                if (m_end == EndState::Playing) Lose("");
+                return;
+            }
         }
         if (hidden && m.mode == MonsterMode::Chase && distP < 1.2f) {
             m_script->Emit("player_caught", {LuaArg::Object(id)});
-            if (m_end == EndState::Playing) Lose("Тебя нашли в укрытии...");
-            return;
+            if (m_healthEnabled) {
+                DamagePlayer(55.0f);
+            } else {
+                if (m_end == EndState::Playing) Lose("Тебя нашли в укрытии...");
+                return;
+            }
         }
 
         float t = m.mode == MonsterMode::Chase ? 1.0f - distP / 16.0f : (m.mode == MonsterMode::Idle ? 0.0f : 0.5f * (1.0f - distP / 9.0f));
@@ -2416,6 +2558,15 @@ void PlaySession::RenderHUD(int w, int h) {
         DrawRectangleGradientH(w - bw, 0, bw, h, Color{120, 0, 0, 0}, Color{120, 0, 0, a});
     }
 
+    if (m_damageFlash > 0.001f) {
+        unsigned char a = (unsigned char)(std::clamp(m_damageFlash * 220.0f, 0.0f, 190.0f));
+        DrawRectangle(0, 0, w, h, Color{170, 15, 15, a});
+    }
+    if (m_muzzleFlash > 0.001f) {
+        unsigned char a = (unsigned char)(std::clamp(m_muzzleFlash * 900.0f, 0.0f, 210.0f));
+        DrawRectangle(0, 0, w, h, Color{255, 245, 210, a});
+    }
+
     // в укрытии: щель
     if (m_player.hiddenIn != 0) {
         float sx = w * 0.14f, sy = h * 0.36f, sw = w - 2 * sx, sh = h * 0.22f;
@@ -2547,6 +2698,81 @@ void PlaySession::RenderHUD(int w, int h) {
 
     // выносливость и батарея
     if (m_end == EndState::Playing) {
+        if (m_healthEnabled) {
+            float ratio = std::clamp(m_playerHealth / std::max(1.0f, m_playerMaxHealth), 0.0f, 1.0f);
+            Color ecgCol = (ratio > 0.60f) ? Color{80, 240, 110, 240} : ((ratio > 0.25f) ? Color{250, 190, 40, 240} : Color{245, 50, 50, 255});
+            const char* statusStr = (ratio > 0.60f) ? "FINE" : ((ratio > 0.25f) ? "CAUTION" : "DANGER");
+
+            float boxW = 190.0f;
+            float boxH = 56.0f;
+            float boxX = w * 0.03f;
+            float boxY = h * 0.79f;
+
+            DrawRectangleRounded(Rectangle{boxX, boxY, boxW, boxH}, 0.15f, 6, Color{10, 15, 12, 230});
+            DrawRectangleRoundedLinesEx(Rectangle{boxX, boxY, boxW, boxH}, 0.15f, 6, 2.0f, Color{45, 65, 55, 240});
+
+            DrawHudText("CODEX // ПУЛЬС", boxX + 10, boxY + 5, fs * 0.65f, Color{140, 175, 160, 220}, false);
+            DrawHudText(statusStr, boxX + boxW - 65, boxY + 5, fs * 0.70f, ecgCol, false);
+
+            float beatSpeed = (ratio > 0.60f) ? 3.5f : ((ratio > 0.25f) ? 6.0f : 10.0f);
+            float t = (float)m_time * beatSpeed;
+            float waveYBase = boxY + 28.0f;
+            float waveXStart = boxX + 10.0f;
+            float waveWidth = boxW - 20.0f;
+
+            Vector2 prevPt{waveXStart, waveYBase};
+            for (int i = 1; i <= 36; ++i) {
+                float frac = (float)i / 36.0f;
+                float px = waveXStart + frac * waveWidth;
+                float wavePhase = std::fmod(t + frac * 2.0f, 1.0f);
+                float yOffset = 0.0f;
+                if (wavePhase > 0.65f && wavePhase < 0.72f) yOffset = -9.0f;
+                else if (wavePhase >= 0.72f && wavePhase < 0.78f) yOffset = 6.0f;
+                else if (wavePhase >= 0.78f && wavePhase < 0.85f) yOffset = -2.5f;
+                Vector2 curPt{px, waveYBase + yOffset};
+                DrawLineEx(prevPt, curPt, 2.0f, ecgCol);
+                prevPt = curPt;
+            }
+
+            std::string hpStr = std::to_string((int)m_playerHealth) + " HP";
+            DrawHudText(hpStr, boxX + 10, boxY + boxH - 16, fs * 0.68f, ecgCol, false);
+            if (HasItem("item_first_aid")) {
+                DrawHudText("[H] Медпакет", boxX + 85, boxY + boxH - 16, fs * 0.68f, Color{220, 240, 200, 220}, false);
+            }
+        }
+
+        if (HasItem("item_toz34")) {
+            float sw = 180.0f;
+            float sh = 56.0f;
+            float sx = w * 0.97f - sw;
+            float sy = h * 0.79f;
+
+            DrawRectangleRounded(Rectangle{sx, sy, sw, sh}, 0.15f, 6, Color{15, 12, 10, 230});
+            DrawRectangleRoundedLinesEx(Rectangle{sx, sy, sw, sh}, 0.15f, 6, 2.0f, Color{70, 50, 40, 240});
+
+            DrawHudText("ТОЗ-34 (12/70)", sx + 10, sy + 5, fs * 0.70f, Color{240, 200, 140, 240}, false);
+
+            for (int b = 0; b < 2; ++b) {
+                float shellX = sx + 14.0f + b * 22.0f;
+                float shellY = sy + 22.0f;
+                bool loaded = b < m_shotgunShells;
+                if (loaded) {
+                    DrawRectangleRounded(Rectangle{shellX, shellY, 15.0f, 22.0f}, 0.3f, 4, Color{200, 40, 30, 255});
+                    DrawRectangle(shellX, shellY + 16.0f, 15.0f, 6.0f, Color{220, 180, 50, 255});
+                } else {
+                    DrawRectangleRoundedLinesEx(Rectangle{shellX, shellY, 15.0f, 22.0f}, 0.3f, 4, 1.5f, Color{90, 80, 75, 180});
+                }
+            }
+
+            std::string ammoCountStr = std::to_string(m_shotgunShells) + " / " + std::to_string(m_shotgunMax);
+            DrawHudText(ammoCountStr, sx + 64, sy + 24, fs * 0.85f, Color{250, 230, 200, 255}, false);
+
+            if (HasItem("item_ammo_shotgun")) {
+                DrawHudText("+ЗАПАС", sx + 115, sy + 26, fs * 0.65f, Color{130, 210, 120, 230}, false);
+            }
+            DrawHudText("[ЛКМ] Залп  [R] Перезарядка", sx + 10, sy + sh + 3, fs * 0.65f, Color{180, 175, 165, 200}, false);
+        }
+
         if (m_player.stamina < 0.98f) {
             float bw = w * 0.16f;
             DrawRectangle((int)(w * 0.03f), (int)(h * 0.93f), (int)bw, 6, Color{0, 0, 0, 140});

@@ -55,6 +55,8 @@ int KeyFromName(const char* name) {
     if (n == "DOWN") return KEY_DOWN;
     if (n == "LEFT") return KEY_LEFT;
     if (n == "RIGHT") return KEY_RIGHT;
+    if (n == "LMB" || n == "MOUSE_LEFT" || n == "M1") return 1000;
+    if (n == "RMB" || n == "MOUSE_RIGHT" || n == "M2") return 1001;
     return 0;
 }
 
@@ -498,12 +500,61 @@ struct LuaApi {
     }
     static int G_key_pressed(lua_State* L) {
         int k = KeyFromName(luaL_checkstring(L, 1));
-        lua_pushboolean(L, S(L)->m_inputActive && k != 0 && IsKeyPressed(k));
+        if (k == 1000) lua_pushboolean(L, S(L)->m_inputActive && IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
+        else if (k == 1001) lua_pushboolean(L, S(L)->m_inputActive && IsMouseButtonPressed(MOUSE_BUTTON_RIGHT));
+        else lua_pushboolean(L, S(L)->m_inputActive && k != 0 && IsKeyPressed(k));
         return 1;
     }
     static int G_key_down(lua_State* L) {
         int k = KeyFromName(luaL_checkstring(L, 1));
-        lua_pushboolean(L, S(L)->m_inputActive && k != 0 && IsKeyDown(k));
+        if (k == 1000) lua_pushboolean(L, S(L)->m_inputActive && IsMouseButtonDown(MOUSE_BUTTON_LEFT));
+        else if (k == 1001) lua_pushboolean(L, S(L)->m_inputActive && IsMouseButtonDown(MOUSE_BUTTON_RIGHT));
+        else lua_pushboolean(L, S(L)->m_inputActive && k != 0 && IsKeyDown(k));
+        return 1;
+    }
+    static int G_player_forward(lua_State* L) {
+        float yr = S(L)->m_player.yaw * DEG2RAD;
+        float pr = S(L)->m_player.pitch * DEG2RAD;
+        float fx = -std::sin(yr) * std::cos(pr);
+        float fy = std::sin(pr);
+        float fz = -std::cos(yr) * std::cos(pr);
+        lua_pushnumber(L, fx);
+        lua_pushnumber(L, fy);
+        lua_pushnumber(L, fz);
+        return 3;
+    }
+    static int G_enable_health(lua_State* L) {
+        bool en = lua_toboolean(L, 1);
+        float maxHp = (float)luaL_optnumber(L, 2, 100.0);
+        S(L)->EnableHealth(en, maxHp);
+        return 0;
+    }
+    static int G_damage_player(lua_State* L) {
+        S(L)->DamagePlayer((float)luaL_checknumber(L, 1));
+        return 0;
+    }
+    static int G_heal_player(lua_State* L) {
+        S(L)->HealPlayer((float)luaL_checknumber(L, 1));
+        return 0;
+    }
+    static int G_get_player_health(lua_State* L) {
+        lua_pushnumber(L, S(L)->GetPlayerHealth());
+        return 1;
+    }
+    static int G_set_player_health(lua_State* L) {
+        S(L)->SetPlayerHealth((float)luaL_checknumber(L, 1));
+        return 0;
+    }
+    static int G_shoot_shotgun(lua_State* L) {
+        lua_pushboolean(L, S(L)->ShootShotgun());
+        return 1;
+    }
+    static int G_reload_shotgun(lua_State* L) {
+        S(L)->ReloadShotgun();
+        return 0;
+    }
+    static int G_shotgun_loaded(lua_State* L) {
+        lua_pushinteger(L, S(L)->ShotgunLoaded());
         return 1;
     }
     static int G_ask_code(lua_State* L) {
@@ -669,6 +720,10 @@ void ScriptHost::RegisterApi() {
         {"cutscene_camera", LuaApi::G_cutscene_camera}, {"cutscene_camera_end", LuaApi::G_cutscene_camera_end},
         {"play_tv", LuaApi::G_play_tv}, {"stop_tv", LuaApi::G_stop_tv}, {"is_tv_playing", LuaApi::G_is_tv_playing},
         {"time", LuaApi::G_time}, {"distance", LuaApi::G_distance},
+        {"player_forward", LuaApi::G_player_forward},
+        {"enable_health", LuaApi::G_enable_health}, {"damage_player", LuaApi::G_damage_player}, {"heal_player", LuaApi::G_heal_player},
+        {"get_player_health", LuaApi::G_get_player_health}, {"set_player_health", LuaApi::G_set_player_health},
+        {"shoot_shotgun", LuaApi::G_shoot_shotgun}, {"reload_shotgun", LuaApi::G_reload_shotgun}, {"shotgun_loaded", LuaApi::G_shotgun_loaded},
         {"key_pressed", LuaApi::G_key_pressed}, {"key_down", LuaApi::G_key_down}, {"ask_code", LuaApi::G_ask_code},
         {"after", LuaApi::G_after}, {"every", LuaApi::G_every}, {"cancel", LuaApi::G_cancel},
         {"start", LuaApi::G_start}, {"wait", LuaApi::G_wait}, {"on", LuaApi::G_on},

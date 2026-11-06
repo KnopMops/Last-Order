@@ -1,0 +1,407 @@
+{
+  "format": 2,
+  "name": "mansion_sub",
+  "nextId": 25,
+  "environment": {
+    "ambient": 0.04,
+    "background": [
+      6,
+      8,
+      10,
+      255
+    ],
+    "fogEnd": 18.0
+  },
+  "objects": [
+    {
+      "id": 1,
+      "name": "Лера",
+      "tag": "player",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          -2.0,
+          -4.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "emissive": false
+      },
+      "camera": {
+        "fov": 70.0,
+        "near": 0.05,
+        "far": 80.0,
+        "main": true
+      },
+      "player": {
+        "walk": 2.2,
+        "sprint": 3.8,
+        "crouch": 1.2,
+        "eye": 1.55,
+        "height": 1.7,
+        "jump": 3.8,
+        "gravity": 18.0,
+        "sens": 0.11,
+        "flashlight": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "Решетка_Камеры",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          2.0,
+          -2.6,
+          1.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          2.2,
+          1.2
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          140,
+          150,
+          160,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.1,
+          2.2,
+          1.2
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "door": {
+        "angle": 90.0,
+        "speed": 2.0,
+        "locked": true,
+        "key": "item_lockpick",
+        "consumeKey": false,
+        "sound": "audio/sfx/sfx_door_creak_open.wav",
+        "startOpen": false
+      }
+    },
+    {
+      "id": 3,
+      "name": "Люк_Вентиляции",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          2.0,
+          -3.2,
+          -1.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.1,
+          0.9,
+          0.9
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          110,
+          120,
+          130,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.1,
+          0.9,
+          0.9
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "door": {
+        "angle": 90.0,
+        "speed": 3.0,
+        "locked": false,
+        "key": "",
+        "consumeKey": false,
+        "sound": "audio/sfx/sfx_ch3_crowbar_pry.wav",
+        "startOpen": false
+      }
+    },
+    {
+      "id": 4,
+      "name": "Подъемник_Леры",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          14.0,
+          -2.8,
+          4.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.6,
+          0.8,
+          0.5
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          130,
+          130,
+          140,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.6,
+          0.8,
+          0.5
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "script": {
+        "file": "dumbwaiter.lua",
+        "interactable": true,
+        "prompt": "Проверить бельевой лифт от Тамары",
+        "params": {}
+      }
+    },
+    {
+      "id": 5,
+      "name": "Столик_Отмычка",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          -3.5,
+          -3.5,
+          -2.5
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.8,
+          0.7,
+          0.5
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_concrete",
+        "tint": [
+          160,
+          160,
+          160,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.8,
+          0.7,
+          0.5
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "searchSlot": {
+        "name": "Стальная спица (Отмычка)",
+        "item": "item_lockpick",
+        "locked": false,
+        "tool": "",
+        "noise": 0.0,
+        "duration": 0.8,
+        "consumeTool": false,
+        "slotId": "lera_lockpick"
+      }
+    },
+    {
+      "id": 6,
+      "name": "Ящик_Морг",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          23.0,
+          -3.2,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.4,
+          0.8,
+          2.2
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          170,
+          180,
+          185,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          1.4,
+          0.8,
+          2.2
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "searchSlot": {
+        "name": "Ключ от мастерской / гаража",
+        "item": "item_garage_key",
+        "locked": false,
+        "tool": "",
+        "noise": 0.0,
+        "duration": 1.2,
+        "consumeTool": false,
+        "slotId": "morgue_garage_key"
+      }
+    },
+    {
+      "id": 7,
+      "name": "Аварийный_Свет",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          14.0,
+          -1.8,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.25,
+          0.25,
+          0.25
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          60,
+          40,
+          255
+        ],
+        "emissive": true
+      },
+      "light": {
+        "type": 0,
+        "color": [
+          240,
+          50,
+          30,
+          255
+        ],
+        "intensity": 0.85,
+        "radius": 8.0,
+        "flicker": true
+      }
+    }
+  ]
+}

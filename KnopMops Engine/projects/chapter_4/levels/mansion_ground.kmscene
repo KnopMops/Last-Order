@@ -1,0 +1,1125 @@
+{
+  "format": 2,
+  "name": "mansion_ground",
+  "nextId": 40,
+  "environment": {
+    "ambient": 0.09,
+    "background": [
+      12,
+      14,
+      20,
+      255
+    ],
+    "fogEnd": 30.0
+  },
+  "objects": [
+    {
+      "id": 1,
+      "name": "Тамара",
+      "tag": "player",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          -18.0,
+          0.0,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "None",
+        "texture": "",
+        "tint": [
+          255,
+          255,
+          255,
+          255
+        ],
+        "emissive": false
+      },
+      "camera": {
+        "fov": 70.0,
+        "near": 0.05,
+        "far": 120.0,
+        "main": true
+      },
+      "player": {
+        "walk": 2.4,
+        "sprint": 4.5,
+        "crouch": 1.3,
+        "eye": 1.65,
+        "height": 1.8,
+        "jump": 4.0,
+        "gravity": 18.0,
+        "sens": 0.11,
+        "flashlight": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "УАЗ_Милиция",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          -20.0,
+          0.8,
+          -2.5
+        ],
+        "rot": [
+          0.0,
+          20.0,
+          0.0
+        ],
+        "scale": [
+          3.6,
+          1.6,
+          1.8
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_car",
+        "tint": [
+          210,
+          220,
+          230,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          3.6,
+          1.6,
+          1.8
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      }
+    },
+    {
+      "id": 3,
+      "name": "Фонарь_Крыльцо",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          1.5,
+          2.8,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.25,
+          0.25,
+          0.25
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          240,
+          180,
+          255
+        ],
+        "emissive": true
+      },
+      "light": {
+        "type": 0,
+        "color": [
+          245,
+          210,
+          150,
+          255
+        ],
+        "intensity": 0.9,
+        "radius": 10.0,
+        "flicker": true
+      }
+    },
+    {
+      "id": 4,
+      "name": "Дверь_Входная",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          3.0,
+          1.5,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.15,
+          2.4,
+          1.6
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_door",
+        "tint": [
+          220,
+          200,
+          180,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.15,
+          2.4,
+          1.6
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "door": {
+        "angle": 90.0,
+        "speed": 2.5,
+        "locked": false,
+        "key": "",
+        "consumeKey": false,
+        "sound": "audio/sfx/sfx_door_creak_open.wav",
+        "startOpen": false
+      }
+    },
+    {
+      "id": 5,
+      "name": "Люстра_Холл",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          8.0,
+          3.4,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.8,
+          0.5,
+          0.8
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          220,
+          160,
+          255
+        ],
+        "emissive": true
+      },
+      "light": {
+        "type": 0,
+        "color": [
+          250,
+          200,
+          140,
+          255
+        ],
+        "intensity": 0.85,
+        "radius": 9.5,
+        "flicker": true
+      }
+    },
+    {
+      "id": 6,
+      "name": "Дверь_Столовая",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          13.0,
+          1.5,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.15,
+          2.4,
+          1.4
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_door",
+        "tint": [
+          200,
+          190,
+          180,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.15,
+          2.4,
+          1.4
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "door": {
+        "angle": 90.0,
+        "speed": 2.5,
+        "locked": false,
+        "key": "",
+        "consumeKey": false,
+        "sound": "audio/sfx/sfx_door_open.wav",
+        "startOpen": false
+      }
+    },
+    {
+      "id": 7,
+      "name": "Обеденный_Стол",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          18.0,
+          0.85,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          3.2,
+          0.8,
+          1.4
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_wall_wood",
+        "tint": [
+          140,
+          95,
+          60,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          3.2,
+          0.8,
+          1.4
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      }
+    },
+    {
+      "id": 8,
+      "name": "Манекен_Леры",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          18.0,
+          1.2,
+          1.3
+        ],
+        "rot": [
+          0.0,
+          180.0,
+          0.0
+        ],
+        "scale": [
+          0.6,
+          1.4,
+          0.6
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_fabric",
+        "tint": [
+          240,
+          210,
+          80,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.6,
+          1.4,
+          0.6
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "script": {
+        "file": "dinner_trap.lua",
+        "interactable": true,
+        "prompt": "Осмотреть фигуру в куртке Леры",
+        "params": {}
+      }
+    },
+    {
+      "id": 9,
+      "name": "Свет_Столовая",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          18.0,
+          3.4,
+          0.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.4,
+          0.2,
+          0.4
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          255,
+          180,
+          100,
+          255
+        ],
+        "emissive": true
+      },
+      "light": {
+        "type": 0,
+        "color": [
+          240,
+          170,
+          90,
+          255
+        ],
+        "intensity": 0.75,
+        "radius": 8.0,
+        "flicker": true
+      }
+    },
+    {
+      "id": 10,
+      "name": "Дверь_Сейфзона",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          7.0,
+          1.5,
+          5.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          0.15,
+          2.4,
+          1.2
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_door",
+        "tint": [
+          210,
+          210,
+          210,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          1.2,
+          2.4,
+          0.15
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "door": {
+        "angle": 90.0,
+        "speed": 3.0,
+        "locked": false,
+        "key": "",
+        "consumeKey": false,
+        "sound": "audio/sfx/sfx_door_close_latch.wav",
+        "startOpen": false
+      }
+    },
+    {
+      "id": 11,
+      "name": "Магнитофон_Сейфзона",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          7.0,
+          1.0,
+          9.8
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.8,
+          0.4,
+          0.5
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_radio",
+        "tint": [
+          190,
+          170,
+          130,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.8,
+          0.4,
+          0.5
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "script": {
+        "file": "safe_room.lua",
+        "interactable": true,
+        "prompt": "Включить диктофон (Точка сохранения рассудка)",
+        "params": {}
+      }
+    },
+    {
+      "id": 12,
+      "name": "Лампа_Сейфзона",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          7.0,
+          2.8,
+          8.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.3,
+          0.3,
+          0.3
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "",
+        "tint": [
+          140,
+          240,
+          180,
+          255
+        ],
+        "emissive": true
+      },
+      "light": {
+        "type": 0,
+        "color": [
+          170,
+          240,
+          190,
+          255
+        ],
+        "intensity": 0.95,
+        "radius": 7.5,
+        "flicker": false
+      }
+    },
+    {
+      "id": 13,
+      "name": "Trigger_SafeRoom",
+      "tag": "safe_zone",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          7.0,
+          1.6,
+          8.0
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          7.0,
+          3.0,
+          5.0
+        ]
+      },
+      "collider": {
+        "size": [
+          7.0,
+          3.0,
+          5.0
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": true
+      }
+    },
+    {
+      "id": 14,
+      "name": "Шкафчик_Припасы",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          4.0,
+          1.1,
+          9.8
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          0.8,
+          1.2,
+          0.6
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          180,
+          190,
+          195,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.8,
+          1.2,
+          0.6
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "searchSlot": {
+        "name": "Аптечка первой помощи",
+        "item": "item_first_aid",
+        "locked": false,
+        "tool": "",
+        "noise": 0.0,
+        "duration": 1.0,
+        "consumeTool": false,
+        "slotId": "safe_medkit"
+      }
+    },
+    {
+      "id": 15,
+      "name": "Полка_Патроны",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          9.8,
+          1.2,
+          8.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          0.6,
+          0.3,
+          0.5
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_cardboard",
+        "tint": [
+          190,
+          130,
+          80,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.6,
+          0.3,
+          0.5
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "searchSlot": {
+        "name": "Коробка картечи 12/70",
+        "item": "item_ammo_shotgun",
+        "locked": false,
+        "tool": "",
+        "noise": 0.0,
+        "duration": 0.8,
+        "consumeTool": false,
+        "slotId": "safe_ammo"
+      }
+    },
+    {
+      "id": 16,
+      "name": "Подъемник_Тамары",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          9.8,
+          1.3,
+          6.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          0.5,
+          0.7,
+          0.5
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          140,
+          140,
+          150,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.5,
+          0.7,
+          0.5
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "script": {
+        "file": "dumbwaiter.lua",
+        "interactable": true,
+        "prompt": "Открыть люк бельевого лифта в подвал",
+        "params": {}
+      }
+    },
+    {
+      "id": 17,
+      "name": "Дверь_Гаража",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          7.0,
+          1.5,
+          -5.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          0.15,
+          2.4,
+          1.3
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          160,
+          160,
+          170,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          1.3,
+          2.4,
+          0.15
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "door": {
+        "angle": 90.0,
+        "speed": 2.5,
+        "locked": true,
+        "key": "item_garage_key",
+        "consumeKey": false,
+        "sound": "audio/sfx/sfx_ch3_padlock_open.wav",
+        "startOpen": false
+      }
+    },
+    {
+      "id": 18,
+      "name": "Паровой_Вентиль",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          9.5,
+          1.4,
+          -9.0
+        ],
+        "rot": [
+          0.0,
+          90.0,
+          0.0
+        ],
+        "scale": [
+          0.4,
+          0.4,
+          0.4
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_metal",
+        "tint": [
+          200,
+          70,
+          60,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.4,
+          0.4,
+          0.4
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "script": {
+        "file": "garage_steam.lua",
+        "interactable": true,
+        "prompt": "Установить чугунный маховик на паровую трубу",
+        "params": {}
+      }
+    },
+    {
+      "id": 19,
+      "name": "Игнатов_Босс",
+      "tag": "monster",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          19.0,
+          0.4,
+          -3.0
+        ],
+        "rot": [
+          0.0,
+          180.0,
+          0.0
+        ],
+        "scale": [
+          0.8,
+          1.9,
+          0.8
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_wall_wood",
+        "tint": [
+          90,
+          30,
+          25,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          0.8,
+          1.9,
+          0.8
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "aiSpawn": {
+        "type": "Prowler",
+        "walk": 1.6,
+        "chase": 3.6,
+        "hearing": 12.0,
+        "visionDist": 16.0,
+        "visionAngle": 115.0,
+        "wait": 2.5,
+        "waypoints": [
+          [
+            18.0,
+            0.4,
+            -3.0
+          ],
+          [
+            18.0,
+            0.4,
+            3.0
+          ],
+          [
+            14.0,
+            0.4,
+            0.0
+          ],
+          [
+            9.0,
+            0.4,
+            0.0
+          ],
+          [
+            5.0,
+            0.4,
+            -2.0
+          ],
+          [
+            9.0,
+            0.4,
+            -8.0
+          ],
+          [
+            9.0,
+            0.4,
+            0.0
+          ]
+        ]
+      },
+      "script": {
+        "file": "ignatov_boss.lua",
+        "interactable": false,
+        "prompt": "",
+        "params": {}
+      }
+    },
+    {
+      "id": 20,
+      "name": "Шкаф_Холл",
+      "tag": "",
+      "active": true,
+      "parent": 0,
+      "transform": {
+        "pos": [
+          4.5,
+          1.2,
+          -4.2
+        ],
+        "rot": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.1,
+          2.2,
+          0.8
+        ]
+      },
+      "mesh": {
+        "enabled": true,
+        "shape": "Cube",
+        "texture": "motel_wall_wood",
+        "tint": [
+          110,
+          75,
+          45,
+          255
+        ],
+        "emissive": false
+      },
+      "collider": {
+        "size": [
+          1.1,
+          2.2,
+          0.8
+        ],
+        "offset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "trigger": false
+      },
+      "hidingSpot": {
+        "insideOffset": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "exitYaw": 0.0
+      }
+    }
+  ]
+}

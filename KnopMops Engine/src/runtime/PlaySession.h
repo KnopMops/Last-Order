@@ -181,6 +181,15 @@ public:
     int TvTape() const { return m_tvTape; }
     int TvFrame() const { return m_tvFrame; }
 
+    void EnableHealth(bool enabled, float maxHealth = 100.0f);
+    void DamagePlayer(float amount);
+    void HealPlayer(float amount);
+    float GetPlayerHealth() const { return m_playerHealth; }
+    void SetPlayerHealth(float hp);
+    bool ShootShotgun();
+    void ReloadShotgun();
+    int ShotgunLoaded() const { return m_shotgunShells; }
+
     // Для автотестов: имитация нажатия E на объекте по имени и ввода кода.
     bool DebugUse(const std::string& objectName);
     bool DebugAnswerCode(const std::string& code);
@@ -371,6 +380,15 @@ private:
     float m_tvGlitch = 0.0f;
     RenderTexture2D m_tvTarget{};
     void RenderTv3DScene(float dt);
+
+    float m_playerHealth = 100.0f;
+    float m_playerMaxHealth = 100.0f;
+    bool m_healthEnabled = false;
+    float m_damageFlash = 0.0f;
+    float m_invulnTimer = 0.0f;
+    int m_shotgunShells = 2;
+    int m_shotgunMax = 2;
+    float m_muzzleFlash = 0.0f;
 };
 
 }
