@@ -13,13 +13,15 @@ void TextureManager::Init(const std::string& assetsPath) {
 }
 
 void TextureManager::AddDirectory(const std::string& dir) {
-    if (!fs::exists(dir)) {
+    std::error_code ec;
+    if (!fs::exists(dir, ec) || !fs::is_directory(dir, ec)) {
         core::Log::Warn("Texture directory not found: " + dir);
         return;
     }
 
     size_t before = m_items.size();
-    for (const auto& entry : fs::directory_iterator(dir)) {
+    for (const auto& entry : fs::directory_iterator(dir, ec)) {
+        if (ec) break;
         if (!entry.is_regular_file() || entry.path().extension() != ".png") continue;
         std::string stem = entry.path().stem().string();
         if (m_cache.count(stem)) continue;
